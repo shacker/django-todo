@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block page_heading %}GTD (Getting Things Done){% endblock %}
+{% block extrahead %}
+<!-- CSS and JavaScript for django-todo -->
+<link rel="stylesheet" type="text/css" href="/media/todo/css/styles.css" />   
+
+<script src="{{MEDIA_URL}}js/ui.datepicker.js" type="text/javascript"></script>
+<script src="{{MEDIA_URL}}todo/js/jquery.tablednd_0_5.js" type="text/javascript"></script> 
+<link type="text/css" href="{{MEDIA_URL}}js/jquery-ui-1.7.1.custom.css" rel="Stylesheet" />
+
+<script type="text/javascript" charset="utf-8">
+    // thedate.x comes from the edit_task view. If this is a new entry, 
+    // thedate won't be present and datepicker will fall back on the default (today).
+    $(document).ready(function(){
+        $('#id_due_date').datepicker({defaultDate: new Date({{thedate.year}}, {{thedate.month}} - 1, {{thedate.day}}),});
+     });
+
+</script>
+
+{% endblock extrahead %}
