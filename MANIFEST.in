@@ -1,3 +1,3 @@
 include README
-recursive-include media *
-recursive-include templates *
+recursive-include todo/media *
+recursive-include todo/templates *
