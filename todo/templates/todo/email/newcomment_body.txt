@@ -1,0 +1,16 @@
+A new task comment has been added.
+
+Task: {{ task.title }}
+Commenter: {{ user.first_name }} {{ user.last_name }}
+
+Comment:
+{% autoescape off %}
+{{ body }}
+{% endautoescape %}
+
+Task details/comments:
+https://{{ site }}{% url todo-task_detail task.id %}
+
+List {{ task.list.name }}:
+https://{{ site }}{% url todo-incomplete_tasks task.list.id task.list.slug %}
+

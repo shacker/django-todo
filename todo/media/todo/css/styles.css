@@ -1,0 +1,106 @@
+/*Distributed*/
+
+ul.messages li {
+    color:green;
+    font-weight:bold;
+}
+
+.overdue {
+    color:#9A2441;
+    font-weight:bold;
+}
+
+/* Lighter font for completed items */
+#completed li {
+    color: gray;
+}
+
+a.todo {
+    text-decoration:none;
+    color:#474747;
+}
+
+a.showlink {
+    text-decoration:underline;
+}
+
+#tasktable a {
+    font-weight:bold;
+    font-family:"Arial";
+    text-decoration:none;
+    color:#474747;    
+}
+
+
+label {
+    display: block;
+    font-weight: bold;
+}
+
+input {
+ color: #3A3A3A;
+ font-family:Verdana;
+ font-size:14px;
+}
+
+input[type='text'] {
+   width:300px;
+}
+
+input#id_priority {
+    width:30px;
+}
+
+.todo-button {
+    border: 1px solid #9B9B9B;
+    background: #E0E0E0;
+    padding-bottom:2px;
+    font-weight:bold;
+}
+
+hr {
+    color:#E5E5E5;
+}
+
+#slideToggle {
+    color:#4A8251;
+}
+
+.todo-break {
+    margin-top: 30px;
+    border-top: 1px dotted gray;
+}
+
+table.nocolor, table.nocolor tr, table.nocolor td {
+    background-color: ;
+}
+
+table#tasktable td, table#tasktable th {
+    padding: 5px;
+/*    font-size:0.9em;*/
+}
+
+table#tasktable th {
+    text-align: left;
+/*  background-color: #9BCAE4; */
+    background-color: #046380;
+    color: #fff;
+}
+
+table#tasktable tr.row1 {
+    background-color: #AEF0BB;
+}
+
+table#tasktable tr.row2 {
+    background-color: #B6F3D5;
+}
+
+.minor {
+    font-style:italic;
+    font-size:0.8em;
+}
+
+.task_note, .task_comments {
+    width: 70%;
+    overflow: visible;
+}

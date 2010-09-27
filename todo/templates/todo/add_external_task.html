@@ -1,0 +1,83 @@
+{% extends "todo/base.html" %}
+{% block page_heading %}{% endblock %}
+{% block title %}File Ticket{% endblock %}
+
+{% block content %}
+
+
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+
+
+<h2>{{ task }}</h2>
+
+<form action="" method="POST">
+{% csrf_token %}	
+
+
+{% if task.note %}
+<div class="task_note"><strong>Note:</strong> {{ task.note|safe|urlize|linebreaks }}</div>    
+{% endif %}
+
+<div id="TaskEdit">
+<h3>File Trouble Ticket</h3>
+<p>Trouble with a computer or other technical system at the J-School? <br />
+Use this form to report the difficulty - we'll get right back to you. </p>
+
+{% if form.errors %}
+
+    {% for error in form.errors %}        
+    <ul class="errorlist">
+        <li><strong>The {{ error|escape }} field is required.</strong></li>
+    </ul>
+    {% endfor %}
+<br />
+
+{% endif %}
+
+
+<table>
+    {{ form.management_form }}
+    {{ form.id }}
+
+<tr>    
+    <td>Summary:</td>
+
+    <td>{{ form.title }} <br />
+    Include the workstation number in your summary, e.g. <br />
+    "Radio Lab # 4: Purple smoke pouring out the back."
+     </td>
+</tr>
+
+
+<tr>    
+    <td valign="top">Note:</td>
+
+    <td valign="top">{{ form.note }}<br />
+    Please describe the problem.   </td>
+</tr>
+
+<tr>    
+    <td>Priority:</td>
+    
+    <td>{{ form.priority }} <br />
+    Enter a number between 1 and 5, <br />
+    where 5 is highest ("Computer is on fire = True").
+     </td>
+</tr>
+    
+</table>   
+<p><input type="submit" class="todo-button" name="add_task" value="Submit"></p>
+</div>
+
+
+</form>
+
+ 
+{% endblock %}

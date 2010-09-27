@@ -1,0 +1,120 @@
+{% extends "todo/base.html" %}
+
+{% block title %}Task: {{ task.title }}{% endblock %}
+
+{% block content %}
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+    // Initially hide the TaskEdit form
+    $('#TaskEdit').hide();
+    
+    // toggle slide to show the Add Task form when link clicked
+    $('#slideToggle').click(function(){
+        $(this).siblings('#TaskEdit').slideToggle();
+    });
+});
+</script>
+
+
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+
+{% ifequal auth_ok 1 %}
+
+<h2>{{ task }}</h2>
+
+<form action="" method="POST">
+{% csrf_token %}	
+<p id="slideToggle" ><strong>&rarr; Click to edit details &larr;</strong></p>
+
+<p><strong>In list:</strong> <a href="{% url todo-incomplete_tasks task.list.id task.list.slug %}" class="showlink">{{ task.list }}</a><br />
+<strong>Assigned to:</strong> {{ task.assigned_to.first_name }} {{ task.assigned_to.last_name }}<br />
+<strong>Created by:</strong> {{ task.created_by.first_name }} {{ task.created_by.last_name }}<br />
+<strong>Due date:</strong>  {{ task.due_date }}<br />
+<strong>Completed:</strong> {{ form.completed }}<br />
+</p>
+
+
+{% if task.note %}
+<div class="task_note"><strong>Note:</strong> {{ task.note|safe|urlize|linebreaks }}</div>    
+{% endif %}
+
+<div id="TaskEdit">
+<h3>Edit Task</h3>
+
+<table>
+    {{ form.management_form }}
+
+    
+    {{ form.id }}
+<tr>    
+    <td>Task:</td>
+    <td>{{ form.title }}  </td>
+</tr>
+
+<tr>    
+    <td>List:</td>
+    <td>{{ form.list }}  </td>
+</tr>
+
+
+<tr>    
+    <td>Due:</td>
+    <td>{{ form.due_date }}  </td>
+</tr>
+
+
+
+
+<tr>    
+    <td>Assigned to:</td>
+    <td>{{ form.assigned_to }}  </td>
+</tr>
+
+<tr>    
+    <td valign="top">Note:</td>
+    <td>{{ form.note }}  </td>
+</tr>
+
+<tr>    
+    <td>Priority:</td>
+    <td>{{ form.priority }}  </td>
+</tr>
+    
+</table>   
+<p><input type="submit" class="todo-button" name="edit_task" value="Edit task"></p>
+</div>
+
+
+<hr />
+
+
+<h3>Add comment</h3>
+
+    <textarea name="comment-body" rows="8" cols="40"></textarea>
+    <p><input class="todo-button"type="submit" value="Submit"></p>
+
+</form>
+
+<h3>Comments on this task</h3>    
+
+<div class="task_comments">
+{% for comment in comment_list %}
+    <p><strong>{{ comment.author.first_name }} {{ comment.author.last_name }}, {{ comment.date|date:"F d Y P" }}</strong> </p>
+    {{ comment.body|safe|urlize|linebreaks }}
+{% empty %}
+<p>No Comments</p>
+{% endfor %}
+</div>
+
+{% endifequal %}
+	
+{% endblock %}

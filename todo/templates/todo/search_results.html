@@ -1,0 +1,37 @@
+{% extends "todo/base.html" %}
+
+{% block title %}Search results{% endblock %}
+{% block body_id %}post_search{% endblock %}
+
+
+{% block content_title %}
+  <h2 class="page_title">Search</h2>
+{% endblock %}
+
+
+{% block content %}
+
+  {% if message %}
+  <p class="message">{{ message }}</p>
+  {% endif %}
+  
+  {% if found_items %}
+  <h2>{{found_items.count}} search results for term: "{{ query_string }}"</h2>
+  <div class="post_list">
+
+    {% for f in found_items %}
+    <p><strong><a href="{% url todo-task_detail f.id %}">{{ f.title }}</a></strong><br />
+        
+        <span class="minor">
+        On list: <a href="{% url todo-incomplete_tasks f.list.id f.list.slug %}">{{ f.list }}</a><br />
+        Assigned to: {{ f.assigned_to }} (created by: {{ f.created_by }})<br />
+        Complete: {{ f.completed|yesno:"Yes,No" }}
+        </span>        
+    </p>
+    {% endfor %}
+  </div>
+  {% else %}
+ <h2> No results to show, sorry.</h2>
+  
+  {% endif %}
+{% endblock %}
