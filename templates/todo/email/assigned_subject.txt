@@ -1,1 +1,0 @@
-GTD: New task - {% autoescape off %}Note: {{ task.title }}{% endautoescape %}
