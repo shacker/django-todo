@@ -12,7 +12,7 @@ function order_tasks(data) {
     // to save the re-ordered data into the database.
 
     $.post("{% url todo-reorder_tasks %}", data, "json");
-    return False;
+    return false;
 };
 
 $(document).ready(function() {
