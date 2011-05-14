@@ -14,6 +14,7 @@ from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.db.models import Q
+from django.contrib import messages
 
 import datetime
 
@@ -28,10 +29,10 @@ def list_lists(request):
     Homepage view - list of lists a user can view, and ability to add a list.
     """
     
-    # Make sure belongs to at least one group.
+    # Make sure user belongs to at least one group.
     group_count = request.user.groups.all().count()
     if group_count == 0:
-        request.user.message_set.create(message="You do not yet belong to any groups. Ask your administrator to add you to one.")
+        messages.error(request, "You do not yet belong to any groups. Ask your administrator to add you to one.")                        
         
 
     # Only show lists to the user that belong to groups they are members of.
@@ -108,7 +109,7 @@ def view_list(request,list_id=0,list_slug=None,view_completed=0):
         if list.group in request.user.groups.all() or request.user.is_staff or list_slug == "mine" :
             auth_ok = 1   # User is authorized for this view
         else: # User does not belong to the group this list is attached to
-            request.user.message_set.create(message="You do not have permission to view/edit this list.")
+            messages.error(request, "You do not have permission to view/edit this list.")                                    
 
         
     # First check for items in the mark_done POST array. If present, change
@@ -117,38 +118,38 @@ def view_list(request,list_id=0,list_slug=None,view_completed=0):
         done_items = request.POST.getlist('mark_done')
         # Iterate through array of done items and update its representation in the model
         for thisitem in done_items:
-        	p = Item.objects.get(id=thisitem)
-        	p.completed = 1
-        	p.completed_date = datetime.datetime.now()
-        	p.save()
-	        request.user.message_set.create(message="Item \"%s\" marked complete." % p.title )
+            p = Item.objects.get(id=thisitem)
+            p.completed = 1
+            p.completed_date = datetime.datetime.now()
+            p.save()
+            messages.success(request, "Item \"%s\" marked complete." % p.title)                                             
 
 
-	# Undo: Set completed items back to incomplete
+    # Undo: Set completed items back to incomplete
     if request.POST.getlist('undo_completed_task'):
         undone_items = request.POST.getlist('undo_completed_task')
         for thisitem in undone_items:
-        	p = Item.objects.get(id=thisitem)
-        	p.completed = 0
-        	p.save()
-	        request.user.message_set.create(message="Previously completed task \"%s\" marked incomplete." % p.title)	        
+            p = Item.objects.get(id=thisitem)
+            p.completed = 0
+            p.save()
+            messages.success(request, "Previously completed task \"%s\" marked incomplete." % p.title)
 
 
     # And delete any requested items
     if request.POST.getlist('del_task'):
         deleted_items = request.POST.getlist('del_task')
         for thisitem in deleted_items:
-        	p = Item.objects.get(id=thisitem)
-        	p.delete()
-	        request.user.message_set.create(message="Item \"%s\" deleted." % p.title )
+            p = Item.objects.get(id=thisitem)
+            p.delete()
+            messages.success(request, "Item \"%s\" deleted." % p.title)         
 
     # And delete any *already completed* items
     if request.POST.getlist('del_completed_task'):
         deleted_items = request.POST.getlist('del_completed_task')
         for thisitem in deleted_items:
-        	p = Item.objects.get(id=thisitem)
-        	p.delete()
-	        request.user.message_set.create(message="Deleted previously completed item \"%s\"."  % p.title)
+            p = Item.objects.get(id=thisitem)
+            p.delete()
+            messages.success(request, "Deleted previously completed item \"%s\"."  % p.title)                       
 
 
     thedate = datetime.datetime.now()
@@ -198,9 +199,11 @@ def view_list(request,list_id=0,list_slug=None,view_completed=0):
                     try:
                         send_mail(email_subject, email_body, new_task.created_by.email, [new_task.assigned_to.email], fail_silently=False)
                     except:
-                        request.user.message_set.create(message="Task saved but mail not sent. Contact your administrator." )
+                        messages.error(request, "Task saved but mail not sent. Contact your administrator.")
+                        
 
-            request.user.message_set.create(message="New task \"%s\" has been added." % new_task.title )
+            messages.success(request, "New task \"%s\" has been added." % new_task.title)                       
+            
             return HttpResponseRedirect(request.path)
 
     else:
@@ -264,12 +267,14 @@ def view_task(request,task_id):
                      # Send message
                      try:
                         send_mail(email_subject, email_body, task.created_by.email, recip_list, fail_silently=False)
-                        request.user.message_set.create(message="Comment sent to thread participants.")
+                        messages.success(request, "Comment sent to thread participants.")                       
+                        
                      except:
-                        request.user.message_set.create(message="Comment saved but mail not sent. Contact your administrator." )
+                        messages.error(request, "Comment saved but mail not sent. Contact your administrator.")
                     
                  
-                 request.user.message_set.create(message="The task has been edited.")
+                 messages.success(request, "The task has been edited.")
+                 
                  return HttpResponseRedirect(reverse('todo-incomplete_tasks', args=[task.list.id, task.list.slug]))
                  
         else:
@@ -281,7 +286,8 @@ def view_task(request,task_id):
             
 
     else:
-        request.user.message_set.create(message="You do not have permission to view/edit this task.")
+        messages.info(request, "You do not have permission to view/edit this task.")
+        
 
     return render_to_response('todo/view_task.html', locals(), context_instance=RequestContext(request))
 
@@ -336,9 +342,10 @@ def external_add(request):
                 try:
                     send_mail(email_subject, email_body, item.created_by.email, [item.assigned_to.email], fail_silently=False)
                 except:
-                    request.user.message_set.create(message="Task saved but mail not sent. Contact your administrator." )                
+                    messages.error(request, "Task saved but mail not sent. Contact your administrator." )                    
 
-                request.user.message_set.create(message="Your trouble ticket has been submitted. We'll get back to you soon.")
+                messages.success(request, "Your trouble ticket has been submitted. We'll get back to you soon." )                    
+                
                 return HttpResponseRedirect(reverse('intranet_home'))
             
         
@@ -360,10 +367,11 @@ def add_list(request):
         if form.is_valid():
             try:
                 form.save()
-                request.user.message_set.create(message="A new list has been added.")
+                messages.success(request, "A new list has been added." )                                    
                 return HttpResponseRedirect(request.path)
             except IntegrityError:
-                request.user.message_set.create(message="There was a problem saving the new list. Most likely a list with the same name in the same group already exists.")
+                messages.error(request, "There was a problem saving the new list. Most likely a list with the same name in the same group already exists." )
+                
             
     else:
         form = AddListForm(request.user)
