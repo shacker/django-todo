@@ -45,7 +45,7 @@ class List(models.Model):
 class Item(models.Model):
     title = models.CharField(max_length=140)
     list = models.ForeignKey(List)
-    created_date = models.DateField()    
+    created_date = models.DateField(auto_now=True, auto_now_add=True)
     due_date = models.DateField(blank=True,null=True,)
     completed = models.BooleanField()
     completed_date = models.DateField(blank=True,null=True)
@@ -65,10 +65,6 @@ class Item(models.Model):
         
     # Auto-set the item creation / completed date
     def save(self):
-        # Set datetime on initial item save 
-        if not self.id:
-            self.created_date = datetime.datetime.now()
-            
         # If Item is being marked complete, set the completed_date
         if self.completed :
             self.completed_date = datetime.datetime.now()
