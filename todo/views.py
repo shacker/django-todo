@@ -15,6 +15,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.db.models import Q
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
 
 import datetime
 
@@ -292,7 +293,7 @@ def view_task(request,task_id):
     return render_to_response('todo/view_task.html', locals(), context_instance=RequestContext(request))
 
 
-
+@csrf_exempt
 @login_required
 def reorder_tasks(request):
     """
