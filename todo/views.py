@@ -2,6 +2,7 @@ from django import forms
 from django.shortcuts import render_to_response
 from todo.models import Item, List, Comment
 from todo.forms import AddListForm, AddItemForm, EditItemForm, AddExternalItemForm, SearchForm
+from todo import settings
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.contrib import auth
@@ -11,7 +12,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import user_passes_test
 from django.db import IntegrityError
 from django.db.models import Q
 from django.contrib import messages
@@ -23,7 +24,19 @@ import datetime
 current_site = Site.objects.get_current() 
 
 
-@login_required
+def check_user_allowed(user):
+
+    """
+    test for user_passes_test decorator
+    """
+    if settings.STAFF_ONLY:
+        return user.is_authenticated() and user.is_staff
+    else:
+        return user.is_authenticated()
+
+
+
+@user_passes_test(check_user_allowed)
 def list_lists(request):
 
     """
@@ -55,7 +68,7 @@ def list_lists(request):
     return render_to_response('todo/list_lists.html', locals(), context_instance=RequestContext(request))  
     
 
-@login_required
+@user_passes_test(check_user_allowed)
 def del_list(request,list_id,list_slug):
 
     """
@@ -90,7 +103,7 @@ def del_list(request,list_id,list_slug):
     return render_to_response('todo/del_list.html', locals(), context_instance=RequestContext(request))
 
 
-@login_required
+@user_passes_test(check_user_allowed)
 def view_list(request,list_id=0,list_slug=None,view_completed=0):
     
     """
@@ -220,7 +233,7 @@ def view_list(request,list_id=0,list_slug=None,view_completed=0):
     return render_to_response('todo/view_list.html', locals(), context_instance=RequestContext(request))
 
 
-@login_required
+@user_passes_test(check_user_allowed)
 def view_task(request,task_id):
 
     """
@@ -294,7 +307,7 @@ def view_task(request,task_id):
 
 
 @csrf_exempt
-@login_required
+@user_passes_test(check_user_allowed)
 def reorder_tasks(request):
     """
     Handle task re-ordering (priorities) from JQuery drag/drop in view_list.html
@@ -318,7 +331,7 @@ def reorder_tasks(request):
     return HttpResponse(status=201)
         
     
-@login_required
+@user_passes_test(check_user_allowed)
 def external_add(request):
     """
     Allow users who don't have access to the rest of the ticket system to file a ticket in a specific list.
@@ -357,7 +370,7 @@ def external_add(request):
 
 
 
-@login_required
+@user_passes_test(check_user_allowed)
 def add_list(request):
     """
     Allow users to add a new todo list to the group they're in.
@@ -382,7 +395,7 @@ def add_list(request):
 
   
 
-@login_required
+@user_passes_test(check_user_allowed)
 def search(request):
     """
     Search for tasks
@@ -416,9 +429,3 @@ def search(request):
                           { 'query_string': query_string, 'found_items': found_items },
                           context_instance=RequestContext(request))
 
-
-
-
-
-
-    
