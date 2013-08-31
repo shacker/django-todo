@@ -12,7 +12,7 @@
 
        <p> {{ list.name }} is gone.</p>
    
-        <a href="{% url todo-lists %}">Return to lists</a>   
+        <a href="{% url 'todo-lists' %}">Return to lists</a>   
 
     {% else %}
 
@@ -36,7 +36,7 @@
         </form>
 
 
-        <a href="{% url todo-incomplete_tasks list.id list_slug %}">Return to list: {{ list.name }}</a>
+        <a href="{% url 'todo-incomplete_tasks' list.id list_slug %}">Return to list: {{ list.name }}</a>
 
     {% endif %}
 

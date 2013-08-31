@@ -20,10 +20,10 @@
   <div class="post_list">
 
     {% for f in found_items %}
-    <p><strong><a href="{% url todo-task_detail f.id %}">{{ f.title }}</a></strong><br />
+    <p><strong><a href="{% url 'todo-task_detail' f.id %}">{{ f.title }}</a></strong><br />
         
         <span class="minor">
-        On list: <a href="{% url todo-incomplete_tasks f.list.id f.list.slug %}">{{ f.list }}</a><br />
+        On list: <a href="{% url 'todo-incomplete_tasks' f.list.id f.list.slug %}">{{ f.list }}</a><br />
         Assigned to: {{ f.assigned_to }} (created by: {{ f.created_by }})<br />
         Complete: {{ f.completed|yesno:"Yes,No" }}
         </span>        
