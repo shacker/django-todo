@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
  
 setup(
     name='django-todo',
-    version='1.2',
+    version='1.3',
     description='A multi-user, multi-group task management and assignment system for Django.',
     author='Scot Hacker',
     author_email='shacker@birdhouse.org',
