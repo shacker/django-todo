@@ -1,3 +1,4 @@
+{% load url from future %}
 Dear {{ task.assigned_to.first_name }} -
 
 A new task on the list {{ task.list.name }} has been assigned to you by {{ task.created_by.first_name }} {{ task.created_by.last_name }}:

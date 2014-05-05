@@ -1,3 +1,4 @@
+{% load url from future %}
 A new task comment has been added.
 
 Task: {{ task.title }}
