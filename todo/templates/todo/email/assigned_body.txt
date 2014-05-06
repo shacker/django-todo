@@ -1,3 +1,4 @@
+{% load url from future %}
 Dear {{ task.assigned_to.first_name }} -
 
 A new task on the list {{ task.list.name }} has been assigned to you by {{ task.created_by.first_name }} {{ task.created_by.last_name }}:
@@ -14,7 +15,7 @@ Note: {{ task.note }}
 
 
 Task details/comments:
-http://{{ site }}{% url todo-task_detail task.id %}
+http://{{ site }}{% url 'todo-task_detail' task.id %}
 
 List {{ task.list.name }}:
-http://{{ site }}{% url todo-incomplete_tasks task.list.id task.list.slug %}
+http://{{ site }}{% url 'todo-incomplete_tasks' task.list.id task.list.slug %}
