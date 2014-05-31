@@ -42,7 +42,7 @@ class Item(models.Model):
     due_date = models.DateField(blank=True, null=True, )
     completed = models.BooleanField()
     completed_date = models.DateField(blank=True, null=True)
-    created_by = models.ForeignKey(User, related_name='created_by')
+    created_by = models.ForeignKey(User, related_name='todo_created_by')
     assigned_to = models.ForeignKey(User, related_name='todo_assigned_to')
     note = models.TextField(blank=True, null=True)
     priority = models.PositiveIntegerField(max_length=3)
