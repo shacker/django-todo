@@ -17,7 +17,5 @@ For documentation, see the django-todo wiki pages:
 - `Requirements and installation
   <http://github.com/shacker/django-todo/wiki/Requirements-and-Installation>`_
 
-This is version 1.3
-
 - `Version history
   <http://github.com/shacker/django-todo/wiki/Version-history>`_
