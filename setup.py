@@ -1,12 +1,16 @@
+# !/usr/bin/env python
+#
 from setuptools import setup, find_packages
- 
+import todo
+
 setup(
     name='django-todo',
-    version='1.3',
+    version=todo.__version__,
     description='A multi-user, multi-group task management and assignment system for Django.',
-    author='Scot Hacker',
-    author_email='shacker@birdhouse.org',
-    url='http://github.com/shacker/django-todo',
+    author=todo.__author__,
+    author_email=todo.__email__,
+    url=todo.__url__,
+    license=todo.__license__,
     packages=find_packages(),
     classifiers=[
         'Development Status :: 4 - Beta',
