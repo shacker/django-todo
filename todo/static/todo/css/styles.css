@@ -31,7 +31,6 @@ a.showlink {
     color:#474747;    
 }
 
-
 label {
     display: block;
     font-weight: bold;
@@ -72,7 +71,7 @@ hr {
 }
 
 table.nocolor, table.nocolor tr, table.nocolor td {
-    background-color: ;
+    background-color: transparent;
 }
 
 table#tasktable td, table#tasktable th {
