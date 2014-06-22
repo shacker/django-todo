@@ -37,6 +37,8 @@ def list_lists(request):
     """
     Homepage view - list of lists a user can view, and ability to add a list.
     """
+    thedate = datetime.datetime.now()
+
     # Make sure user belongs to at least one group.
     group_count = request.user.groups.all().count()
     if group_count == 0:
