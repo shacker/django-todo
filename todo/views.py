@@ -365,7 +365,7 @@ def add_list(request):
                                "Most likely a list with the same name in the same group already exists.")
     else:
         if request.user.groups.all().count() == 1:
-          form = AddListForm(request.user, initial = {"group": request.user.groups.all()[0]})
+            form = AddListForm(request.user, initial = {"group": request.user.groups.all()[0]})
         else:
             form = AddListForm(request.user)
 
