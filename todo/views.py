@@ -364,7 +364,10 @@ def add_list(request):
                                "There was a problem saving the new list. "
                                "Most likely a list with the same name in the same group already exists.")
     else:
-        form = AddListForm(request.user)
+        if request.user.groups.all().count() == 1:
+          form = AddListForm(request.user, initial = {"group": request.user.groups.all()[0]})
+        else:
+            form = AddListForm(request.user)
 
     return render_to_response('todo/add_list.html', locals(), context_instance=RequestContext(request))
 
