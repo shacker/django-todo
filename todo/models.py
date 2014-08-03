@@ -50,7 +50,7 @@ class Item(models.Model):
     # Model method: Has due date for an instance of this object passed?
     def overdue_status(self):
         "Returns whether the item's due date has passed or not."
-        if datetime.date.today() > self.due_date:
+        if self.due_date and datetime.date.today() > self.due_date:
             return 1
 
     def __unicode__(self):
