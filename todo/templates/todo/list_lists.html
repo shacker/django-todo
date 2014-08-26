@@ -15,7 +15,7 @@
     {% endif %}
 
    <h1>To-do Lists</h1>
-   
+
    <p>{{ item_count }} items in {{ list_count }} lists</p>
 
    	{% regroup list_list by group as section_list %}
@@ -30,12 +30,12 @@
 
     {% endfor %}
 
-    
+
 
     <div class="todo-break">
     &nbsp;
     </div>
 
     <p><a href="{% url 'todo-add_list' %}">Create new todo list</a></p>
-	
+
 {% endblock %}

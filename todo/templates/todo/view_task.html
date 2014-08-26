@@ -10,7 +10,7 @@
 $(document).ready(function() {
     // Initially hide the TaskEdit form
     $('#TaskEdit').hide();
-    
+
     // toggle slide to show the Add Task form when link clicked
     $('#slideToggle').click(function(){
         $(this).siblings('#TaskEdit').slideToggle();
@@ -33,7 +33,7 @@ $(document).ready(function() {
 <h2>{{ task }}</h2>
 
 <form action="" method="POST">
-{% csrf_token %}	
+{% csrf_token %}
 <p id="slideToggle" ><strong>&rarr; Click to edit details &larr;</strong></p>
 
 <p><strong>In list:</strong> <a href="{% url 'todo-incomplete_tasks' task.list.id task.list.slug %}" class="showlink">{{ task.list }}</a><br />
@@ -45,7 +45,7 @@ $(document).ready(function() {
 
 
 {% if task.note %}
-<div class="task_note"><strong>Note:</strong> {{ task.note|safe|urlize|linebreaks }}</div>    
+<div class="task_note"><strong>Note:</strong> {{ task.note|safe|urlize|linebreaks }}</div>
 {% endif %}
 
 <div id="TaskEdit">
@@ -54,18 +54,18 @@ $(document).ready(function() {
 <table>
     {{ form.management_form }}
     {{ form.id }}
-<tr>    
+<tr>
     <td>Title:</td>
     <td>{{ form.title }}  </td>
 </tr>
 
-<tr>    
+<tr>
     <td>List:</td>
     <td>{{ form.list }}  </td>
 </tr>
 
 
-<tr>    
+<tr>
     <td>Due:</td>
     <td>{{ form.due_date }}  </td>
 </tr>
@@ -73,22 +73,22 @@ $(document).ready(function() {
 
 
 
-<tr>    
+<tr>
     <td>Assigned to:</td>
     <td>{{ form.assigned_to }}  </td>
 </tr>
 
-<tr>    
+<tr>
     <td valign="top">Note:</td>
     <td>{{ form.note }}  </td>
 </tr>
 
-<tr>    
+<tr>
     <td>Priority:</td>
     <td>{{ form.priority }}  </td>
 </tr>
-    
-</table>   
+
+</table>
 <p><input type="submit" class="todo-button" name="edit_task" value="Edit task"></p>
 </div>
 
@@ -103,7 +103,7 @@ $(document).ready(function() {
 
 </form>
 
-<h3>Comments on this task</h3>    
+<h3>Comments on this task</h3>
 
 <div class="task_comments">
 {% for comment in comment_list %}
@@ -115,5 +115,5 @@ $(document).ready(function() {
 </div>
 
 {% endifequal %}
-	
+
 {% endblock %}
