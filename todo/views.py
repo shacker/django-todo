@@ -215,6 +215,8 @@ def view_list(request, list_id=0, list_slug=None, view_completed=0):
     if request.user.is_staff:
         can_del = 1
 
+    group_count = request.user.groups.all().count()
+
     return render_to_response('todo/view_list.html', locals(), context_instance=RequestContext(request))
 
 

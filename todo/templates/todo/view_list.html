@@ -43,7 +43,9 @@ $(document).ready(function() {
     {% else %}
     {% ifequal auth_ok 1 %}
        <h1>Tasks filed under "{{ list.name }}"</h1>
-       <p>This list belongs to group {{ list.group }}</p>
+       {% if group_count > 1 %}
+         <p>This list belongs to group {{ list.group }}</p>
+       {% endif %}
     {% endifequal %}
     {% endifequal %}
 
