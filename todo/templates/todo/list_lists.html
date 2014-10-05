@@ -15,13 +15,13 @@
     {% endif %}
 
    <h1>To-do Lists</h1>
-
    <p>{{ item_count }} items in {{ list_count }} lists</p>
 
    	{% regroup list_list by group as section_list %}
-
     {% for group in section_list %}
+      {% if section_list|length > 1 %} 
         <h3>{{ group.grouper }}</h3>
+      {% endif %}
         <ul>
             {% for item in group.list %}
    	            <li><a class="todo" href="{% url 'todo-incomplete_tasks' item.id item.slug %}">{{ item.name }} </a> ({{ item.incomplete_tasks.count }}/{{ item.item_set.count }})</li>
