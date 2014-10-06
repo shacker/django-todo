@@ -2,7 +2,7 @@ from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.models import User, Group
 from todo.models import Item, List
-
+from django.utils.html import conditional_escape, format_html
 
 class AddListForm(ModelForm):
     # The picklist showing allowable groups to which a new list can be added
@@ -15,7 +15,6 @@ class AddListForm(ModelForm):
     class Meta:
         model = List
 
-
 class AddItemForm(ModelForm):
     # The picklist showing the users to which a new task can be assigned
     # must find other members of the groups the current list belongs to.
@@ -24,6 +23,10 @@ class AddItemForm(ModelForm):
         # print dir(self.fields['list'])
         # print self.fields['list'].initial
         self.fields['assigned_to'].queryset = User.objects.filter(groups__in=[task_list.group])
+        self.fields['assigned_to'].label_from_instance = lambda obj: "%s %s (%s)" % (obj.first_name, 
+                                                         obj.last_name, obj.username)
+
+    # assigned_to = forms.CharField(widget = AssignWidget)
 
     due_date = forms.DateField(
         required=False,
