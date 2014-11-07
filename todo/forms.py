@@ -37,6 +37,11 @@ class AddItemForm(ModelForm):
         widget=forms.widgets.TextInput(attrs={'size': 35})
     )
 
+    # note = forms.CharField(
+    #     widget=forms.TextArea(attrs={'size': 35})
+    # )
+    note = forms.CharField(widget=forms.Textarea())
+
     class Meta:
         model = Item
 

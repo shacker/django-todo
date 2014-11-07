@@ -8,7 +8,7 @@ import datetime
 class List(models.Model):
     name = models.CharField(max_length=60)
     slug = models.SlugField(max_length=60, editable=False)
-    # slug = models.SlugField(max_length=60)    
+    # slug = models.SlugField(max_length=60)
     group = models.ForeignKey(Group)
 
     def save(self, *args, **kwargs):

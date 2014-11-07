@@ -5,16 +5,7 @@
 
 {% block content %}
 
-
-    {% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-        <li>{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-
-   <h1>To-do Lists</h1>
+   <h1>Todo Lists</h1>
 
    <p>{{ item_count }} items in {{ list_count }} lists</p>
 
@@ -27,14 +18,7 @@
    	            <li><a class="todo" href="{% url 'todo-incomplete_tasks' item.id item.slug %}">{{ item.name }} </a> ({{ item.incomplete_tasks.count }}/{{ item.item_set.count }})</li>
             {% endfor %}
         </ul>
-
     {% endfor %}
-
-
-
-    <div class="todo-break">
-    &nbsp;
-    </div>
 
     <p><a href="{% url 'todo-add_list' %}">Create new todo list</a></p>
 

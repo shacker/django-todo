@@ -78,7 +78,8 @@ $(document).ready(function() {
 	           <td><label for="id_notify">Notify*:</label> <input type="checkbox" checked="checked" name="notify" value="1" id="notify"></td>
  	       </tr>
 	       <tr>
-	           <td colspan="5"><label for="id_note">Note:</label> {{ form.note }}
+	           <td><label for="id_note">Note:</label>
+                    {{ form.note }}
 	               <p class="minor">*Email notifications will only be sent if task is assigned to someone besides yourself.</p>
 	           </td>
  	       </tr>
