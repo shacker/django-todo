@@ -14,6 +14,7 @@ class AddListForm(ModelForm):
 
     class Meta:
         model = List
+        exclude = []
 
 
 class AddItemForm(ModelForm):
@@ -44,6 +45,7 @@ class AddItemForm(ModelForm):
 
     class Meta:
         model = Item
+        exclude = []
 
 
 class EditItemForm(ModelForm):
