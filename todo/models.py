@@ -40,7 +40,7 @@ class Item(models.Model):
     list = models.ForeignKey(List)
     created_date = models.DateField(auto_now=True, auto_now_add=True)
     due_date = models.DateField(blank=True, null=True, )
-    completed = models.BooleanField()
+    completed = models.BooleanField(default=None)
     completed_date = models.DateField(blank=True, null=True)
     created_by = models.ForeignKey(User, related_name='todo_created_by')
     assigned_to = models.ForeignKey(User, related_name='todo_assigned_to')
