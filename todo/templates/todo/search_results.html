@@ -12,10 +12,6 @@
 
 {% block content %}
 
-  {% if message %}
-  <p class="message">{{ message }}</p>
-  {% endif %}
-
   {% if found_items %}
   <h2>{{found_items.count}} search results for term: "{{ query_string }}"</h2>
   <div class="post_list">

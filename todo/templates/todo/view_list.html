@@ -5,61 +5,52 @@
 
 {% block content %}
 
-<script type="text/javascript">
+    <script type="text/javascript">
 
-function order_tasks(data) {
-    // The JQuery plugin tableDnD provides a serialize() function which provides the re-ordered
-    // data in a list. We pass that list as an object called "data" to a Django view
-    // to save the re-ordered data into the database.
+    function order_tasks(data) {
+        // The JQuery plugin tableDnD provides a serialize() function which provides the re-ordered
+        // data in a list. We pass that list as an object called "data" to a Django view
+        // to save the re-ordered data into the database.
 
-    $.post("{% url 'todo-reorder_tasks' %}", data, "json");
-    return false;
-};
+        $.post("{% url 'todo-reorder_tasks' %}", data, "json");
+        return false;
+    };
 
-$(document).ready(function() {
-    // Initialise the task table for drag/drop re-ordering
-    $("#tasktable").tableDnD();
+    $(document).ready(function() {
+        // Initialise the task table for drag/drop re-ordering
+        $("#tasktable").tableDnD();
 
-    $('#tasktable').tableDnD({
-        onDrop: function(table, row) {
-            order_tasks($.tableDnD.serialize());
-        }
+        $('#tasktable').tableDnD({
+            onDrop: function(table, row) {
+                order_tasks($.tableDnD.serialize());
+            }
+        });
+
+        // Initially hide the Add Task form
+        $('#AddTask').hide();
+
+        // toggle slide to show the Add Task form when link clicked
+        $('#slideToggle').click(function(){
+            $(this).siblings('#AddTask').slideToggle();
+        });
     });
 
-    // Initially hide the Add Task form
-    $('#AddTask').hide();
-
-    // toggle slide to show the Add Task form when link clicked
-    $('#slideToggle').click(function(){
-        $(this).siblings('#AddTask').slideToggle();
-    });
-});
-
-</script>
+    </script>
 
 
     {% ifequal list_slug "mine" %}
         <h1>Tasks assigned to {{ request.user }}</h1>
     {% else %}
+        {% ifequal auth_ok 1 %}
+           <h1>Tasks filed under "{{ list.name }}"</h1>
+           <p>This list belongs to group {{ list.group }}</p>
+        {% endifequal %}
+    {% endifequal %}
+
+
     {% ifequal auth_ok 1 %}
-       <h1>Tasks filed under "{{ list.name }}"</h1>
-       <p>This list belongs to group {{ list.group }}</p>
-    {% endifequal %}
-    {% endifequal %}
-
-
-   {% if messages %}
-   <ul class="messages">
-       {% for message in messages %}
-       <li>{{ message }}</li>
-       {% endfor %}
-   </ul>
-   {% endif %}
-
-
-   {% ifequal auth_ok 1 %}
-   <form action="" method="POST">
-	{% csrf_token %}
+        <form action="" method="POST">
+        {% csrf_token %}
 
    {# Only show task adder if viewing a proper list #}
    {% ifnotequal list_slug "mine" %}
