@@ -109,7 +109,7 @@
             <th>Del</th>
         </tr>
 		{% for task in task_list %}
-	        <tr class="{% cycle 'row1' 'row2' %}" id="{{ task.id }}">
+	        <tr id="{{ task.id }}">
 	            <td><input type="checkbox" name="mark_done" value="{{ task.id }}" id="mark_done_{{ task.id }}">   </td>
 	            <td><a href="{% url 'todo-task_detail' task.id %}">{{ task.title|truncatewords:20 }}</a></td>
 	            <td>{{ task.created_date|date:"m/d/Y" }}</td>
@@ -156,7 +156,7 @@
 
 
 		{% for task in completed_list %}
-	        <tr class="{% cycle 'row1' 'row2' %}">
+	        <tr>
 	            <td><input type="checkbox" name="undo_completed_task" value="{{ task.id }}" id="id_undo_completed_task{{ task.id }}">   </td>
 	            <td><a href="{% url 'todo-task_detail' task.id %}">{{ task.title|truncatewords:20 }}</a></td>
 	            <td>{{ task.created_date|date:"m/d/Y" }}</td>
