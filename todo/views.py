@@ -15,6 +15,8 @@ from django.db import IntegrityError
 from django.db.models import Q
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+
 
 import datetime
 
@@ -310,7 +312,7 @@ def reorder_tasks(request):
     return HttpResponse(status=201)
 
 
-@user_passes_test(check_user_allowed)
+@login_required
 def external_add(request):
     """
     Allow users who don't have access to the rest of the ticket system to file a ticket in a specific list.
@@ -324,9 +326,9 @@ def external_add(request):
         if form.is_valid():
             # Don't commit the save until we've added in the fields we need to set
             item = form.save(commit=False)
-            item.list_id = 20  # Hate hard-coding in IDs like this.
+            item.list_id = settings.DEFAULT_LIST_ID
             item.created_by = request.user
-            item.assigned_to = User.objects.get(username='roy_baril')
+            item.assigned_to = User.objects.get(username=settings.DEFAULT_ASSIGNEE)
             item.save()
 
             # Send email
@@ -340,7 +342,7 @@ def external_add(request):
 
             messages.success(request, "Your trouble ticket has been submitted. We'll get back to you soon.")
 
-            return HttpResponseRedirect(reverse('intranet_home'))
+            return HttpResponseRedirect(reverse(settings.PUBLIC_SUBMIT_REDIRECT))
     else:
         form = AddExternalItemForm()
 
