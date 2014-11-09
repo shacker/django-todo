@@ -1,5 +1,5 @@
 """django todo"""
-__version__ = '1.4.dev'
+__version__ = '1.4'
 
 __author__ = 'Scot Hacker'
 __email__ = 'shacker@birdhouse.org'
