@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User, Group
 from django.template.defaultfilters import slugify
+from django.core.urlresolvers import reverse
 
 import datetime
 
@@ -55,6 +56,10 @@ class Item(models.Model):
 
     def __unicode__(self):
         return self.title
+
+    def get_absolute_url(self):
+        return reverse('todo-task_detail',
+            kwargs={'task_id': self.id,})
 
     # Auto-set the item creation / completed date
     def save(self):
