@@ -9,6 +9,7 @@ urlpatterns = patterns(
     url(r'^(?P<list_id>\d{1,4})/(?P<list_slug>[\w-]+)/completed$', 'todo.views.view_list', {'view_completed': 1},
         name='todo-completed_tasks'),
     url(r'^add_list/$', 'todo.views.add_list', name="todo-add_list"),
+    url(r'^search-post/$', 'todo.views.search_post', name="todo-search-post"),
     url(r'^search/$', 'todo.views.search', name="todo-search"),
     url(r'^$', 'todo.views.list_lists', name="todo-lists"),
 

@@ -1,6 +1,6 @@
 from django.shortcuts import render_to_response
 from todo.models import Item, List, Comment
-from todo.forms import AddListForm, AddItemForm, EditItemForm, AddExternalItemForm
+from todo.forms import AddListForm, AddItemForm, EditItemForm, AddExternalItemForm, SearchForm
 from todo import settings
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
@@ -40,6 +40,7 @@ def list_lists(request):
     Homepage view - list of lists a user can view, and ability to add a list.
     """
     thedate = datetime.datetime.now()
+    searchform = SearchForm(auto_id=False)
 
     # Make sure user belongs to at least one group.
     group_count = request.user.groups.all().count()
@@ -374,6 +375,20 @@ def add_list(request):
     return render_to_response('todo/add_list.html', locals(), context_instance=RequestContext(request))
 
 
+
+@user_passes_test(check_user_allowed)
+def search_post(request):
+    """
+    Redirect POST'd search param to query GET string
+    """
+    if request.POST:
+        q = request.POST.get('q')
+        url = reverse('todo-search') + "?q=" + q
+        print(url)
+        return HttpResponseRedirect(url)
+
+
+
 @user_passes_test(check_user_allowed)
 def search(request):
     """
@@ -396,7 +411,7 @@ def search(request):
             # In that case we still need found_items in a queryset so it can be "excluded" below.
             found_items = Item.objects.all()
 
-        if request.GET['inc_complete'] == "0":
+        if 'inc_complete'  in request.GET:
             found_items = found_items.exclude(completed=True)
 
     else:

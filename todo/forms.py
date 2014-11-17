@@ -76,7 +76,7 @@ class AddExternalItemForm(ModelForm):
         exclude = ('list', 'created_date', 'due_date', 'created_by', 'assigned_to',)
 
 
-class SearchForm(ModelForm):
+class SearchForm(forms.Form):
     """Search."""
 
     q = forms.CharField(
