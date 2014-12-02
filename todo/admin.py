@@ -9,6 +9,10 @@ class ItemAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('author', 'date', 'snippet')
+
+
 admin.site.register(List)
-admin.site.register(Comment)
+admin.site.register(Comment, CommentAdmin)
 admin.site.register(Item, ItemAdmin)

@@ -1,15 +1,17 @@
+from __future__ import unicode_literals
+import datetime
+
 from django.db import models
 from django.contrib.auth.models import User, Group
 from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
+from django.utils.encoding import python_2_unicode_compatible
 
-import datetime
 
-
+@python_2_unicode_compatible
 class List(models.Model):
     name = models.CharField(max_length=60)
     slug = models.SlugField(max_length=60, editable=False)
-    # slug = models.SlugField(max_length=60)
     group = models.ForeignKey(Group)
 
     def save(self, *args, **kwargs):
@@ -18,7 +20,7 @@ class List(models.Model):
 
         super(List, self).save(*args, **kwargs)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     # Custom manager lets us do things like Item.completed_tasks.all()
@@ -36,6 +38,7 @@ class List(models.Model):
         unique_together = ("group", "slug")
 
 
+@python_2_unicode_compatible
 class Item(models.Model):
     title = models.CharField(max_length=140)
     list = models.ForeignKey(List)
@@ -54,7 +57,7 @@ class Item(models.Model):
         if self.due_date and datetime.date.today() > self.due_date:
             return 1
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     def get_absolute_url(self):
@@ -73,6 +76,7 @@ class Item(models.Model):
         ordering = ["priority"]
 
 
+@python_2_unicode_compatible
 class Comment(models.Model):
     """
     Not using Django's built-in comments because we want to be able to save
@@ -83,8 +87,11 @@ class Comment(models.Model):
     date = models.DateTimeField(default=datetime.datetime.now)
     body = models.TextField(blank=True)
 
-    def __unicode__(self):
-        return '%s - %s' % (
-            self.author,
-            self.date,
-        )
+    def snippet(self):
+        # Define here rather than in __str__ so we can use it in the admin list_display
+        return "{author} - {snippet}...".format(author=self.author, snippet=self.body[:35])
+
+    def __str__(self):
+        return self.snippet
+
+
