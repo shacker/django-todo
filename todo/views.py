@@ -384,9 +384,7 @@ def search_post(request):
     if request.POST:
         q = request.POST.get('q')
         url = reverse('todo-search') + "?q=" + q
-        print(url)
         return HttpResponseRedirect(url)
-
 
 
 @user_passes_test(check_user_allowed)
