@@ -2,6 +2,7 @@ from django.conf.urls import patterns, url
 
 urlpatterns = patterns(
     '',
+    url(r'^$', 'todo.views.list_lists', name="todo-lists"),
     url(r'^mine/$', 'todo.views.view_list', {'list_slug': 'mine'}, name="todo-mine"),
     url(r'^(?P<list_id>\d{1,4})/(?P<list_slug>[\w-]+)/delete$', 'todo.views.del_list', name="todo-del_list"),
     url(r'^task/(?P<task_id>\d{1,6})$', 'todo.views.view_task', name='todo-task_detail'),
@@ -11,7 +12,6 @@ urlpatterns = patterns(
     url(r'^add_list/$', 'todo.views.add_list', name="todo-add_list"),
     url(r'^search-post/$', 'todo.views.search_post', name="todo-search-post"),
     url(r'^search/$', 'todo.views.search', name="todo-search"),
-    url(r'^$', 'todo.views.list_lists', name="todo-lists"),
 
     # View reorder_tasks is only called by JQuery for drag/drop task ordering
     url(r'^reorder_tasks/$', 'todo.views.reorder_tasks', name="todo-reorder_tasks"),
