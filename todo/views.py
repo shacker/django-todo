@@ -319,7 +319,7 @@ def external_add(request):
     Allow users who don't have access to the rest of the ticket system to file a ticket in a specific list.
     This is useful if, for example, a core web team are in a group that can file todos for each other,
     but you also want students to be able to post trouble tickets to a list just for the sysadmin. This
-    way we don't have to put all students into a group that gives them access to the whole ticket system.
+    way we don't have to put all users into a group that gives them access to the whole ticket system.
     """
     if request.POST:
         form = AddExternalItemForm(request.POST)
