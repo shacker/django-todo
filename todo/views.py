@@ -166,15 +166,15 @@ def view_list(request, list_id=0, list_slug=None, view_completed=0):
     elif list_slug == "recent-add":
         # We'll assume this only includes uncompleted items to avoid confusion.
         # Only show items in lists that are in groups that the current user is also in.
-        task_list = Item.objects.filter(list__group__in=(request.user.groups.all()), completed=0).order_by(
-            '-created_date')[:50]
-        # completed_list = Item.objects.filter(assigned_to=request.user, completed=1)   
+        task_list = Item.objects.filter(list__group__in=(request.user.groups.all()),
+                                        completed=0).order_by('-created_date')[:50]
+        # completed_list = Item.objects.filter(assigned_to=request.user, completed=1)
 
     elif list_slug == "recent-complete":
         # Only show items in lists that are in groups that the current user is also in.
-        task_list = Item.objects.filter(list__group__in=request.user.groups.all(), completed=1).order_by(
-            '-completed_date')[:50]
-        # completed_list = Item.objects.filter(assigned_to=request.user, completed=1)             
+        task_list = Item.objects.filter(list__group__in=request.user.groups.all(),
+                                        completed=1).order_by('-completed_date')[:50]
+        # completed_list = Item.objects.filter(assigned_to=request.user, completed=1)
 
     else:
         task_list = Item.objects.filter(list=list.id, completed=0)
@@ -209,7 +209,8 @@ def view_list(request, list_id=0, list_slug=None, view_completed=0):
 
             return HttpResponseRedirect(request.path)
     else:
-        if list_slug != "mine" and list_slug != "recent-add" and list_slug != "recent-complete":  # We don't allow adding a task on the "mine" view
+        # We don't allow adding a task on the "mine" view
+        if list_slug != "mine" and list_slug != "recent-add" and list_slug != "recent-complete":
             form = AddItemForm(list, initial={
                 'assigned_to': request.user.id,
                 'priority': 999,
@@ -308,8 +309,8 @@ def reorder_tasks(request):
         newitem.save()
         i = i + 1
 
-    # All views must return an httpresponse of some kind ... without this we get 
-    # error 500s in the log even though things look peachy in the browser.    
+    # All views must return an httpresponse of some kind ... without this we get
+    # error 500s in the log even though things look peachy in the browser.
     return HttpResponse(status=201)
 
 
@@ -368,12 +369,11 @@ def add_list(request):
                                "Most likely a list with the same name in the same group already exists.")
     else:
         if request.user.groups.all().count() == 1:
-            form = AddListForm(request.user, initial = {"group": request.user.groups.all()[0]})
+            form = AddListForm(request.user, initial={"group": request.user.groups.all()[0]})
         else:
             form = AddListForm(request.user)
 
     return render_to_response('todo/add_list.html', locals(), context_instance=RequestContext(request))
-
 
 
 @user_passes_test(check_user_allowed)
@@ -409,7 +409,7 @@ def search(request):
             # In that case we still need found_items in a queryset so it can be "excluded" below.
             found_items = Item.objects.all()
 
-        if 'inc_complete'  in request.GET:
+        if 'inc_complete' in request.GET:
             found_items = found_items.exclude(completed=True)
 
     else:

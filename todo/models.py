@@ -61,8 +61,7 @@ class Item(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return reverse('todo-task_detail',
-            kwargs={'task_id': self.id,})
+        return reverse('todo-task_detail', kwargs={'task_id': self.id, })
 
     # Auto-set the item creation / completed date
     def save(self):
@@ -70,7 +69,6 @@ class Item(models.Model):
         if self.completed:
             self.completed_date = datetime.datetime.now()
         super(Item, self).save()
-
 
     class Meta:
         ordering = ["priority"]
@@ -93,5 +91,3 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.snippet
-
-
