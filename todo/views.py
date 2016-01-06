@@ -344,7 +344,7 @@ def external_add(request):
 
             messages.success(request, "Your trouble ticket has been submitted. We'll get back to you soon.")
 
-            return HttpResponseRedirect(reverse(settings.PUBLIC_SUBMIT_REDIRECT))
+            return HttpResponseRedirect(settings.PUBLIC_SUBMIT_REDIRECT)
     else:
         form = AddExternalItemForm()
 
