@@ -52,7 +52,7 @@ def list_lists(request):
     if request.user.is_superuser:
         list_list = List.objects.all().order_by('group', 'name')
     else:
-        list_list = List.objects.filter(group__in=request.user.groups.all).order_by('group', 'name')
+        list_list = List.objects.filter(group__in=request.user.groups.all()).order_by('group', 'name')
 
     # Count everything
     list_count = list_list.count()
