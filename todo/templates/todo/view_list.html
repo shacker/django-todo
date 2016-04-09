@@ -90,11 +90,9 @@
                         <th>Assigned</th>
                         <th>Note</th>
                         <th>Comm</th>
-
                         {% ifequal list_slug "mine" %}
-                        <th>List</th>
+                            <th>List</th>
                          {% endifequal %}
-
                         <th>Del</th>
                     </tr>
             		{% for task in task_list %}
@@ -108,7 +106,7 @@
             	            {% if task.overdue_status %}</span>{% endif %}
             	            </td>
             	            <td>{{ task.created_by }}</td>
-            	            <td>{{ task.assigned_to }}</td>
+            	            <td>{% if task.assigned_to %}{{ task.assigned_to }}{% else %}Anyone{% endif %}</td>
             	            <td style="text-align:center;">{% if task.note %}&asymp;{% endif %} </td>
             	            <td style="text-align:center;">{% ifnotequal task.comment_set.all.count 0  %}{{ task.comment_set.all.count }}{% endifnotequal %}
 
