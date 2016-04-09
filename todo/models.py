@@ -23,9 +23,6 @@ class List(models.Model):
     def __str__(self):
         return self.name
 
-    # Custom manager lets us do things like Item.completed_tasks.all()
-    objects = models.Manager()
-
     def incomplete_tasks(self):
         # Count all incomplete tasks on the current list instance
         return Item.objects.filter(list=self, completed=0)
@@ -47,11 +44,11 @@ class Item(models.Model):
     completed = models.BooleanField(default=None)
     completed_date = models.DateField(blank=True, null=True)
     created_by = models.ForeignKey(User, related_name='todo_created_by')
-    assigned_to = models.ForeignKey(User, related_name='todo_assigned_to')
+    assigned_to = models.ForeignKey(User, blank=True, null=True, related_name='todo_assigned_to')
     note = models.TextField(blank=True, null=True)
     priority = models.PositiveIntegerField()
 
-    # Model method: Has due date for an instance of this object passed?
+    # Has due date for an instance of this object passed?
     def overdue_status(self):
         "Returns whether the item's due date has passed or not."
         if self.due_date and datetime.date.today() > self.due_date:
