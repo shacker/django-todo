@@ -42,37 +42,36 @@
                 <h3>Edit Task</h3>
 
                 <table>
-                    {{ form.management_form }}
-                    {{ form.id }}
-                <tr>
-                    <td>Title:</td>
-                    <td>{{ form.title }}  </td>
-                </tr>
 
-                <tr>
-                    <td>List:</td>
-                    <td>{{ form.list }}  </td>
-                </tr>
+                    <tr>
+                        <td>Title:</td>
+                        <td>{{ form.title }}  </td>
+                    </tr>
 
-                <tr>
-                    <td>Due:</td>
-                    <td>{{ form.due_date }}  </td>
-                </tr>
+                    <tr>
+                        <td>List:</td>
+                        <td>{{ form.list }}  </td>
+                    </tr>
 
-                <tr>
-                    <td>Assigned to:</td>
-                    <td>{{ form.assigned_to }}  </td>
-                </tr>
+                    <tr>
+                        <td>Due:</td>
+                        <td>{{ form.due_date }}  </td>
+                    </tr>
 
-                <tr>
-                    <td valign="top">Note:</td>
-                    <td>{{ form.note }}  </td>
-                </tr>
+                    <tr>
+                        <td>Assigned to:</td>
+                        <td>{{ form.assigned_to }}  </td>
+                    </tr>
 
-                <tr>
-                    <td>Priority:</td>
-                    <td>{{ form.priority }}  </td>
-                </tr>
+                    <tr>
+                        <td valign="top">Note:</td>
+                        <td>{{ form.note }}  </td>
+                    </tr>
+
+                    <tr>
+                        <td>Priority:</td>
+                        <td>{{ form.priority }}  </td>
+                    </tr>
 
                 </table>
                 <p><input type="submit" class="todo-button" name="edit_task" value="Edit task"></p>
