@@ -4,15 +4,12 @@
 {% block extrahead %}
 	<!-- CSS and JavaScript for django-todo -->
 	<link rel="stylesheet" type="text/css" href="{% static 'todo/css/styles.css' %}" />
-
 	<script src="{% static 'todo/js/jquery.tablednd_0_5.js' %}" type="text/javascript"></script>
-
 	<script type="text/javascript" charset="utf-8">
 	    // thedate.x comes from the edit_task view. If this is a new entry,
 	    // thedate won't be present and datepicker will fall back on the default (today).
 	    $(document).ready(function(){
 	        $('#id_due_date').datepicker({defaultDate: new Date({{thedate.year}}, {{thedate.month}} - 1, {{thedate.day}}),});
 	     });
-
 	</script>
 {% endblock extrahead %}
