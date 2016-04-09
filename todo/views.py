@@ -9,7 +9,7 @@ from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import get_object_or_404, render_to_response
+from django.shortcuts import get_object_or_404, render
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
@@ -59,7 +59,7 @@ def list_lists(request):
     else:
         item_count = Item.objects.filter(completed=0).filter(list__group__in=request.user.groups.all()).count()
 
-    return render_to_response('todo/list_lists.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'todo/list_lists.html', locals())
 
 
 @user_passes_test(check_user_allowed)
@@ -79,7 +79,7 @@ def del_list(request, list_id, list_slug):
         item_count_undone = Item.objects.filter(list=list.id, completed=0).count()
         item_count_total = Item.objects.filter(list=list.id).count()
 
-    return render_to_response('todo/del_list.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'todo/del_list.html', locals())
 
 
 @user_passes_test(check_user_allowed)
@@ -197,7 +197,7 @@ def view_list(request, list_id=0, list_slug=None, view_completed=False):
                 'priority': 999,
             })
 
-    return render_to_response('todo/view_list.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'todo/view_list.html', locals())
 
 
 @user_passes_test(check_user_allowed)
@@ -263,7 +263,7 @@ def view_task(request, task_id):
     else:
         messages.info(request, "You do not have permission to view/edit this task.")
 
-    return render_to_response('todo/view_task.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'todo/view_task.html', locals())
 
 
 @csrf_exempt
@@ -321,7 +321,7 @@ def external_add(request):
     else:
         form = AddExternalItemForm()
 
-    return render_to_response('todo/add_external_task.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'todo/add_external_task.html', locals())
 
 
 @user_passes_test(check_user_allowed)
@@ -347,7 +347,7 @@ def add_list(request):
         else:
             form = AddListForm(request.user)
 
-    return render_to_response('todo/add_list.html', locals(), context_instance=RequestContext(request))
+    return render(request, 'todo/add_list.html', locals())
 
 
 @user_passes_test(check_user_allowed)
@@ -390,7 +390,7 @@ def search(request):
         query_string = None
         found_items = None
 
-    return render_to_response(
+    return render(request,
         'todo/search_results.html',
         {'query_string': query_string, 'found_items': found_items},
         context_instance=RequestContext(request))
