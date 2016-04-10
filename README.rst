@@ -34,6 +34,10 @@ No prerequisites are required, all test dependencies will be installed
 automatically by ``tox`` in virtual environments created on the fly.
 Unfortunately, you'll have to install ``virtualenv`` for this to work, though.
 
+To remove all build files and folders including Python byte code you can run::
+
+    $ python setup.py clean
+
 
 .. |latest-version| image:: https://img.shields.io/pypi/v/django-todo.svg
    :alt: Latest version on PyPI
