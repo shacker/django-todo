@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.contrib.auth.models import User
 
 
 STAFF_ONLY = getattr(settings, 'TODO_STAFF_ONLY', False)
