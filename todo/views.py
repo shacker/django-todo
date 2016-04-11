@@ -91,7 +91,7 @@ def view_list(request, list_id=0, list_slug=None, view_completed=False):
     # Make sure the accessing user has permission to view this list.
     # Always authorize the "mine" view. Admins can view/edit all lists.
     if list_slug == "mine" or list_slug == "recent-add" or list_slug == "recent-complete":
-        auth_ok = 1
+        auth_ok = True
     else:
         list = get_object_or_404(List, slug=list_slug)
         listid = list.id
@@ -106,7 +106,7 @@ def view_list(request, list_id=0, list_slug=None, view_completed=False):
         done_items = request.POST.getlist('mark_done')
         for item in done_items:
             i = Item.objects.get(id=item)
-            i.completed = 1
+            i.completed = True
             i.completed_date = datetime.datetime.now()
             i.save()
             messages.success(request, "Item \"{i}\" marked complete.".format(i=i.title))
