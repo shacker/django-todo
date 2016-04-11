@@ -1,0 +1,5 @@
+language: python
+install:
+  - pip install virtualenv
+script:
+  - python setup.py test
