@@ -41,8 +41,7 @@ def list_lists(request):
     searchform = SearchForm(auto_id=False)
 
     # Make sure user belongs to at least one group.
-    group_count = request.user.groups.all().count()
-    if group_count == 0:
+    if request.user.groups.all().count() == 0:
         messages.error(request, "You do not yet belong to any groups. Ask your administrator to add you to one.")
 
     # Superusers see all lists
@@ -70,9 +69,8 @@ def del_list(request, list_id, list_slug):
     list = get_object_or_404(List, slug=list_slug)
 
     if request.method == 'POST':
-        del_list = List.objects.get(id=list.id)
+        List.objects.get(id=list.id).delete()
         messages.success(request, "{list_name} is gone.".format(list_name=del_list.name))
-        del_list.delete()  # Delete after creating message, or message fails.
         return HttpResponseRedirect(reverse('todo-lists'))
     else:
         item_count_done = Item.objects.filter(list=list.id, completed=1).count()
@@ -124,16 +122,14 @@ def view_list(request, list_id=0, list_slug=None, view_completed=False):
     if request.POST.getlist('del_task'):
         deleted_items = request.POST.getlist('del_task')
         for item in deleted_items:
-            i = Item.objects.get(id=item)
-            i.delete()
+            Item.objects.get(id=item).delete()
             messages.success(request, "Item \"{i}\" deleted.".format(i=i.title))
 
     # Delete any already-completed items
     if request.POST.getlist('del_completed_task'):
         deleted_items = request.POST.getlist('del_completed_task')
         for item in deleted_items:
-            i = Item.objects.get(id=item)
-            i.delete()
+            Item.objects.get(id=item).delete()
             messages.success(request, "Deleted previously completed item \"{i}\".".format(i=i.title))
 
     thedate = datetime.datetime.now()
