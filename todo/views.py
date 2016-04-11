@@ -389,7 +389,9 @@ def search(request):
         query_string = None
         found_items = None
 
-    return render(request, 'todo/search_results.html', {
-                      'query_string': query_string,
-                      'found_items': found_items
-                  }, context_instance=RequestContext(request))
+    return render(
+        request,
+        'todo/search_results.html', {
+            'query_string': query_string,
+            'found_items': found_items
+        }, context_instance=RequestContext(request))
