@@ -38,7 +38,6 @@ To remove all build files and folders including Python byte code you can run::
 
     $ python setup.py clean
 
-
 .. |latest-version| image:: https://img.shields.io/pypi/v/django-todo.svg
    :alt: Latest version on PyPI
    :target: https://pypi.python.org/pypi/django-todo
