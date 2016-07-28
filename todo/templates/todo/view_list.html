@@ -118,7 +118,7 @@
             	</table>
 
                 <p><input type="submit" name="mark_tasks_done" value="Continue..."  class="todo-button"></p>
-                <p><a  class="todo" href="{% url 'todo-completed_tasks' list_id list_slug %}">View completed tasks</a></p>
+                <p><a  class="todo" href="{% url 'todo-completed_tasks' list.id list_slug %}">View completed tasks</a></p>
 
             {% else %}
 
@@ -153,12 +153,12 @@
             	</table>
             	<p><input type="submit" name="deldonetasks" value="Continue..."  class="todo-button"></p>
             	</form>
-                <p><a class="todo" href="{% url 'todo-incomplete_tasks' list_id list_slug %}">View incomplete tasks</a></p>
+                <p><a class="todo" href="{% url 'todo-incomplete_tasks' list.id list_slug %}">View incomplete tasks</a></p>
             {% endif %}
 
     	{% if user.is_staff %}
         	{% if list_slug != "mine" %}
-        	   <p><a class="todo" href="{% url 'todo-del_list' list_id list_slug %}">Delete this list</a></p>
+        	   <p><a class="todo" href="{% url 'todo-del_list' list.id list_slug %}">Delete this list</a></p>
         	{% endif %}
     	{% endif %}
 

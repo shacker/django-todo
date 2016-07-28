@@ -91,7 +91,7 @@ def view_list(request, list_id=0, list_slug=None, view_completed=False):
     if list_slug == "mine" or list_slug == "recent-add" or list_slug == "recent-complete":
         auth_ok = True
     else:
-        list = get_object_or_404(List, slug=list_slug)
+        list = get_object_or_404(List, id=list_id)
         listid = list.id
 
         if list.group in request.user.groups.all() or request.user.is_staff or list_slug == "mine":
@@ -120,10 +120,10 @@ def view_list(request, list_id=0, list_slug=None, view_completed=False):
 
     # And delete any requested items
     if request.POST.getlist('del_task'):
-        deleted_items = request.POST.getlist('del_task')
-        for item in deleted_items:
-            Item.objects.get(id=item).delete()
+        for item_id in request.POST.getlist('del_task'):
+            i = Item.objects.get(id=item_id)
             messages.success(request, "Item \"{i}\" deleted.".format(i=i.title))
+            i.delete()
 
     # Delete any already-completed items
     if request.POST.getlist('del_completed_task'):
