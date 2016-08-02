@@ -3,7 +3,6 @@ import datetime
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
-from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
@@ -13,10 +12,12 @@ from django.shortcuts import get_object_or_404, render
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.sites.models import Site
 
 from todo import settings
 from todo.forms import AddListForm, AddItemForm, EditItemForm, AddExternalItemForm, SearchForm
 from todo.models import Item, List, Comment
+from todo.utils import mark_done, undo_completed_task, del_tasks, send_notify_mail
 
 # Need for links in email templates
 current_site = Site.objects.get_current()
@@ -24,7 +25,7 @@ current_site = Site.objects.get_current()
 
 def check_user_allowed(user):
     """
-    test for user_passes_test decorator
+    Conditions for user_passes_test decorator.
     """
     if settings.STAFF_ONLY:
         return user.is_authenticated() and user.is_staff
@@ -92,57 +93,27 @@ def view_list(request, list_id=0, list_slug=None, view_completed=False):
         auth_ok = True
     else:
         list = get_object_or_404(List, id=list_id)
-        listid = list.id
-
         if list.group in request.user.groups.all() or request.user.is_staff or list_slug == "mine":
-            auth_ok = True  # User is authorized for this view
+            auth_ok = True
         else:  # User does not belong to the group this list is attached to
             messages.error(request, "You do not have permission to view/edit this list.")
 
-    # Check for items in the mark_done POST array. If present, change status to complete.
-    if request.POST.getlist('mark_done'):
-        done_items = request.POST.getlist('mark_done')
-        for item in done_items:
-            i = Item.objects.get(id=item)
-            i.completed = True
-            i.completed_date = datetime.datetime.now()
-            i.save()
-            messages.success(request, "Item \"{i}\" marked complete.".format(i=i.title))
-
-    # Undo: Set completed items back to incomplete
-    if request.POST.getlist('undo_completed_task'):
-        undone_items = request.POST.getlist('undo_completed_task')
-        for item in undone_items:
-            i = Item.objects.get(id=item)
-            i.completed = False
-            i.save()
-            messages.success(request, "Previously completed task \"{i}\" marked incomplete.".format(i=i.title))
-
-    # And delete any requested items
-    if request.POST.getlist('del_task'):
-        for item_id in request.POST.getlist('del_task'):
-            i = Item.objects.get(id=item_id)
-            messages.success(request, "Item \"{i}\" deleted.".format(i=i.title))
-            i.delete()
-
-    # Delete any already-completed items
-    if request.POST.getlist('del_completed_task'):
-        deleted_items = request.POST.getlist('del_completed_task')
-        for item in deleted_items:
-            Item.objects.get(id=item).delete()
-            messages.success(request, "Deleted previously completed item \"{i}\".".format(i=i.title))
+    # Process all possible list interactions on each submit
+    mark_done(request, request.POST.getlist('mark_done'))
+    del_tasks(request, request.POST.getlist('del_tasks'))
+    undo_completed_task(request, request.POST.getlist('undo_completed_task'))
 
     thedate = datetime.datetime.now()
     created_date = "%s-%s-%s" % (thedate.year, thedate.month, thedate.day)
 
-    # Get list of items with this list ID, or filter on items assigned to me, or recently added/completed
+    # Get set of items with this list ID, or filter on items assigned to me, or recently added/completed
     if list_slug == "mine":
         task_list = Item.objects.filter(assigned_to=request.user, completed=False)
         completed_list = Item.objects.filter(assigned_to=request.user, completed=True)
 
     elif list_slug == "recent-add":
         # Only show items in lists that are in groups that the current user is also in.
-        # Assume this only includes uncompleted items to avoid confusion.
+        # Assume this only includes uncompleted items.
         task_list = Item.objects.filter(
             list__group__in=(request.user.groups.all()),
             completed=False).order_by('-created_date')[:50]
@@ -167,23 +138,10 @@ def view_list(request, list_id=0, list_slug=None, view_completed=False):
             new_task = form.save()
 
             # Send email alert only if Notify checkbox is checked AND assignee is not same as the submitter
-            if "notify" in request.POST:
-                if new_task.assigned_to != request.user:
-
-                    # Send email
-                    email_subject = render_to_string("todo/email/assigned_subject.txt", {'task': new_task})
-                    email_body = render_to_string(
-                        "todo/email/assigned_body.txt",
-                        {'task': new_task, 'site': current_site, })
-                    try:
-                        send_mail(
-                            email_subject, email_body, new_task.created_by.email,
-                            [new_task.assigned_to.email], fail_silently=False)
-                    except:
-                        messages.error(request, "Task saved but mail not sent. Contact your administrator.")
+            if "notify" in request.POST and new_task.assigned_to != request.user:
+                send_notify_mail(request, new_task)
 
             messages.success(request, "New task \"{t}\" has been added.".format(t=new_task.title))
-
             return HttpResponseRedirect(request.path)
     else:
         # Don't allow adding new tasks on some views
