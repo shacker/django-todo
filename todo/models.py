@@ -9,6 +9,7 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.conf import settings
 
 
+
 @python_2_unicode_compatible
 class List(models.Model):
     name = models.CharField(max_length=60)

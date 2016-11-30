@@ -2,6 +2,8 @@ from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.models import Group
 from todo.models import Item, List
+from django.contrib.auth import get_user_model
+
 
 
 class AddListForm(ModelForm):

@@ -112,13 +112,13 @@
             	            {% if list_slug == "mine" %}
                                 <td><a href="{% url 'todo-incomplete_tasks' task.list.id task.list.slug %}">{{ task.list }}</a></td>
                             {% endif %}
-            	            <td><input type="checkbox" name="del_task" value="{{ task.id }}" id="del_task_{{ task.id }}">   </td>
+            	            <td><input type="checkbox" name="del_tasks" value="{{ task.id }}" id="del_task_{{ task.id }}">   </td>
                         </tr>
             	    {% endfor %}
             	</table>
 
                 <p><input type="submit" name="mark_tasks_done" value="Continue..."  class="todo-button"></p>
-                <p><a  class="todo" href="{% url 'todo-completed_tasks' list.id list_slug %}">View completed tasks</a></p>
+                <p><a  class="todo" href="{% url 'todo-completed_tasks' list_id list_slug %}">View completed tasks</a></p>
 
             {% else %}
 
@@ -153,7 +153,7 @@
             	</table>
             	<p><input type="submit" name="deldonetasks" value="Continue..."  class="todo-button"></p>
             	</form>
-                <p><a class="todo" href="{% url 'todo-incomplete_tasks' list.id list_slug %}">View incomplete tasks</a></p>
+                <p><a class="todo" href="{% url 'todo-incomplete_tasks' list_id list_slug %}">View incomplete tasks</a></p>
             {% endif %}
 
     	{% if user.is_staff %}
