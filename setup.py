@@ -72,6 +72,7 @@ def read_file(*pathname):
     with open(join(dirname(abspath(__file__)), *pathname)) as f:
         return f.read()
 
+
 setup(
     name='django-todo',
     version=package.__version__,

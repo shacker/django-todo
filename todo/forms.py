@@ -5,7 +5,6 @@ from todo.models import Item, List
 from django.contrib.auth import get_user_model
 
 
-
 class AddListForm(ModelForm):
     # The picklist showing allowable groups to which a new list can be added
     # determines which groups the user belongs to. This queries the form object
