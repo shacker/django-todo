@@ -2,10 +2,12 @@ from __future__ import unicode_literals
 import datetime
 
 from django.db import models
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group
 from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
 from django.utils.encoding import python_2_unicode_compatible
+from django.conf import settings
+
 
 
 @python_2_unicode_compatible
@@ -43,8 +45,8 @@ class Item(models.Model):
     due_date = models.DateField(blank=True, null=True, )
     completed = models.BooleanField(default=None)
     completed_date = models.DateField(blank=True, null=True)
-    created_by = models.ForeignKey(User, related_name='todo_created_by')
-    assigned_to = models.ForeignKey(User, blank=True, null=True, related_name='todo_assigned_to')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='todo_created_by')
+    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, related_name='todo_assigned_to')
     note = models.TextField(blank=True, null=True)
     priority = models.PositiveIntegerField()
 
@@ -77,7 +79,7 @@ class Comment(models.Model):
     Not using Django's built-in comments because we want to be able to save
     a comment and change task details at the same time. Rolling our own since it's easy.
     """
-    author = models.ForeignKey(User)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL)
     task = models.ForeignKey(Item)
     date = models.DateTimeField(default=datetime.datetime.now)
     body = models.TextField(blank=True)

@@ -1,7 +1,9 @@
 from django import forms
 from django.forms import ModelForm
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group
 from todo.models import Item, List
+from django.contrib.auth import get_user_model
+
 
 
 class AddListForm(ModelForm):
@@ -24,7 +26,7 @@ class AddItemForm(ModelForm):
         super(AddItemForm, self).__init__(*args, **kwargs)
         # print dir(self.fields['list'])
         # print self.fields['list'].initial
-        self.fields['assigned_to'].queryset = User.objects.filter(groups__in=[task_list.group])
+        self.fields['assigned_to'].queryset = get_user_model().objects.filter(groups__in=[task_list.group])
         self.fields['assigned_to'].label_from_instance = \
             lambda obj: "%s (%s)" % (obj.get_full_name(), obj.username)
 
@@ -49,7 +51,7 @@ class EditItemForm(ModelForm):
     # must find other members of the groups the current list belongs to.
     def __init__(self, *args, **kwargs):
         super(EditItemForm, self).__init__(*args, **kwargs)
-        self.fields['assigned_to'].queryset = User.objects.filter(groups__in=[self.instance.list.group])
+        self.fields['assigned_to'].queryset = get_user_model().objects.filter(groups__in=[self.instance.list.group])
 
     class Meta:
         model = Item
