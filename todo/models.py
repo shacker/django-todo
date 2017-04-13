@@ -3,23 +3,17 @@ import datetime
 
 from django.db import models
 from django.contrib.auth.models import Group
-from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
 from django.utils.encoding import python_2_unicode_compatible
 from django.conf import settings
+from autoslug import AutoSlugField
 
 
 @python_2_unicode_compatible
 class List(models.Model):
     name = models.CharField(max_length=60)
-    slug = models.SlugField(max_length=60, editable=False)
+    slug = AutoSlugField(populate_from='name', editable=False, always_update=True)
     group = models.ForeignKey(Group)
-
-    def save(self, *args, **kwargs):
-        if not self.id:
-            self.slug = slugify(self.name)
-
-        super(List, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.name

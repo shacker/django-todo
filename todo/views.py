@@ -71,7 +71,7 @@ def del_list(request, list_id, list_slug):
 
     if request.method == 'POST':
         List.objects.get(id=list.id).delete()
-        messages.success(request, "{list_name} is gone.".format(list_name=del_list.name))
+        messages.success(request, "{list_name} is gone.".format(list_name=list.name))
         return HttpResponseRedirect(reverse('todo-lists'))
     else:
         item_count_done = Item.objects.filter(list=list.id, completed=1).count()

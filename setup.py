@@ -99,6 +99,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     tests_require=['tox'],
+    install_requires=['django-autoslug', 'unidecode', ],
     cmdclass={
         'clean': Clean,
         'test': Tox,
