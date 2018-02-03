@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('date', models.DateTimeField(default=datetime.datetime.now)),
                 ('body', models.TextField(blank=True)),
-                ('author', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('author', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -37,8 +37,8 @@ class Migration(migrations.Migration):
                 ('completed_date', models.DateField(null=True, blank=True)),
                 ('note', models.TextField(null=True, blank=True)),
                 ('priority', models.PositiveIntegerField(max_length=3)),
-                ('assigned_to', models.ForeignKey(related_name='todo_assigned_to', to=settings.AUTH_USER_MODEL)),
-                ('created_by', models.ForeignKey(related_name='todo_created_by', to=settings.AUTH_USER_MODEL)),
+                ('assigned_to', models.ForeignKey(related_name='todo_assigned_to', to=settings.AUTH_USER_MODEL,  on_delete=models.CASCADE)),
+                ('created_by', models.ForeignKey(related_name='todo_created_by', to=settings.AUTH_USER_MODEL,  on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ['priority'],
@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('name', models.CharField(max_length=60)),
                 ('slug', models.SlugField(max_length=60, editable=False)),
-                ('group', models.ForeignKey(to='auth.Group')),
+                ('group', models.ForeignKey(to='auth.Group', on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ['name'],
@@ -66,13 +66,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='item',
             name='list',
-            field=models.ForeignKey(to='todo.List'),
+            field=models.ForeignKey(to='todo.List', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='comment',
             name='task',
-            field=models.ForeignKey(to='todo.Item'),
+            field=models.ForeignKey(to='todo.Item', on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

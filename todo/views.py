@@ -1,26 +1,22 @@
 import datetime
 
+from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.auth.models import User
-from django.contrib import messages
+from django.contrib.sites.models import Site
 from django.core.mail import send_mail
-from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.db.models import Q
-from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import get_object_or_404, render
-from django.template import RequestContext
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, render, redirect
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.sites.models import Site
 
 from todo import settings
 from todo.forms import AddListForm, AddItemForm, EditItemForm, AddExternalItemForm, SearchForm
 from todo.models import Item, List, Comment
 from todo.utils import mark_done, undo_completed_task, del_tasks, send_notify_mail
-
-# Need for links in email templates
-current_site = Site.objects.get_current()
 
 
 def check_user_allowed(user):
@@ -28,16 +24,16 @@ def check_user_allowed(user):
     Conditions for user_passes_test decorator.
     """
     if settings.STAFF_ONLY:
-        return user.is_authenticated() and user.is_staff
+        return user.is_authenticated and user.is_staff
     else:
-        return user.is_authenticated()
+        return user.is_authenticated
 
 
 @user_passes_test(check_user_allowed)
 def list_lists(request):
+    """Homepage view - list of lists a user can view, and ability to add a list.
     """
-    Homepage view - list of lists a user can view, and ability to add a list.
-    """
+
     thedate = datetime.datetime.now()
     searchform = SearchForm(auto_id=False)
 
@@ -64,15 +60,14 @@ def list_lists(request):
 
 @user_passes_test(check_user_allowed)
 def del_list(request, list_id, list_slug):
-    """
-    Delete an entire list. Danger Will Robinson! Only staff members should be allowed to access this view.
+    """Delete an entire list. Danger Will Robinson! Only staff members should be allowed to access this view.
     """
     list = get_object_or_404(List, slug=list_slug)
 
     if request.method == 'POST':
         List.objects.get(id=list.id).delete()
         messages.success(request, "{list_name} is gone.".format(list_name=list.name))
-        return HttpResponseRedirect(reverse('todo-lists'))
+        return redirect('todo:lists')
     else:
         item_count_done = Item.objects.filter(list=list.id, completed=1).count()
         item_count_undone = Item.objects.filter(list=list.id, completed=0).count()
@@ -83,8 +78,7 @@ def del_list(request, list_id, list_slug):
 
 @user_passes_test(check_user_allowed)
 def view_list(request, list_id=0, list_slug=None, view_completed=False):
-    """
-    Display and manage items in a list.
+    """Display and manage items in a list.
     """
 
     # Make sure the accessing user has permission to view this list.
@@ -142,7 +136,7 @@ def view_list(request, list_id=0, list_slug=None, view_completed=False):
                 send_notify_mail(request, new_task)
 
             messages.success(request, "New task \"{t}\" has been added.".format(t=new_task.title))
-            return HttpResponseRedirect(request.path)
+            return redirect(request.path)
     else:
         # Don't allow adding new tasks on some views
         if list_slug != "mine" and list_slug != "recent-add" and list_slug != "recent-complete":
@@ -156,8 +150,7 @@ def view_list(request, list_id=0, list_slug=None, view_completed=False):
 
 @user_passes_test(check_user_allowed)
 def view_task(request, task_id):
-    """
-    View task details. Allow task details to be edited.
+    """View task details. Allow task details to be edited.
     """
     task = get_object_or_404(Item, pk=task_id)
     comment_list = Comment.objects.filter(task=task_id)
@@ -185,6 +178,7 @@ def view_task(request, task_id):
                     c.save()
 
                     # And email comment to all people who have participated in this thread.
+                    current_site = Site.objects.get_current()
                     email_subject = render_to_string("todo/email/assigned_subject.txt", {'task': task})
                     email_body = render_to_string(
                         "todo/email/newcomment_body.txt",
@@ -207,7 +201,7 @@ def view_task(request, task_id):
 
                 messages.success(request, "The task has been edited.")
 
-                return HttpResponseRedirect(reverse('todo-incomplete_tasks', args=[task.list.id, task.list.slug]))
+                return redirect('todo:lists', args=[task.list.id, task.list.slug])
         else:
             form = EditItemForm(instance=task)
             if task.due_date:
@@ -223,8 +217,7 @@ def view_task(request, task_id):
 @csrf_exempt
 @user_passes_test(check_user_allowed)
 def reorder_tasks(request):
-    """
-    Handle task re-ordering (priorities) from JQuery drag/drop in view_list.html
+    """Handle task re-ordering (priorities) from JQuery drag/drop in view_list.html
     """
     newtasklist = request.POST.getlist('tasktable[]')
     # First item in received list is always empty - remove it
@@ -245,14 +238,14 @@ def reorder_tasks(request):
 
 @login_required
 def external_add(request):
-    """
-    Allow users who don't have access to the rest of the ticket system to file a ticket in a specific list.
+    """Allow users who don't have access to the rest of the ticket system to file a ticket in a specific list.
     Public tickets are unassigned unless settings.DEFAULT_ASSIGNEE exists.
     """
     if request.POST:
         form = AddExternalItemForm(request.POST)
 
         if form.is_valid():
+            current_site = Site.objects.get_current()
             item = form.save(commit=False)
             item.list_id = settings.DEFAULT_LIST_ID
             item.created_by = request.user
@@ -270,7 +263,8 @@ def external_add(request):
 
             messages.success(request, "Your trouble ticket has been submitted. We'll get back to you soon.")
 
-            return HttpResponseRedirect(settings.PUBLIC_SUBMIT_REDIRECT)
+            return redirect(settings.PUBLIC_SUBMIT_REDIRECT)
+
     else:
         form = AddExternalItemForm()
 
@@ -279,8 +273,7 @@ def external_add(request):
 
 @user_passes_test(check_user_allowed)
 def add_list(request):
-    """
-    Allow users to add a new todo list to the group they're in.
+    """Allow users to add a new todo list to the group they're in.
     """
     if request.POST:
         form = AddListForm(request.user, request.POST)
@@ -288,7 +281,8 @@ def add_list(request):
             try:
                 form.save()
                 messages.success(request, "A new list has been added.")
-                return HttpResponseRedirect(request.path)
+                return redirect('todo:lists')
+
             except IntegrityError:
                 messages.error(
                     request,
@@ -305,19 +299,17 @@ def add_list(request):
 
 @user_passes_test(check_user_allowed)
 def search_post(request):
-    """
-    Redirect POST'd search param to query GET string
+    """Redirect POST'd search param to query GET string
     """
     if request.POST:
         q = request.POST.get('q')
-        url = reverse('todo-search') + "?q=" + q
-        return HttpResponseRedirect(url)
+        url = reverse('todo:search') + "?q=" + q
+        return redirect(url)
 
 
 @user_passes_test(check_user_allowed)
 def search(request):
-    """
-    Search for tasks
+    """Search for tasks
     """
     if request.GET:
 
@@ -343,9 +335,8 @@ def search(request):
         query_string = None
         found_items = None
 
-    return render(
-        request,
-        'todo/search_results.html', {
-            'query_string': query_string,
-            'found_items': found_items
-        }, context_instance=RequestContext(request))
+    context = {
+        'query_string': query_string,
+        'found_items': found_items
+    }
+    return render(request, 'todo/search_results.html', context)

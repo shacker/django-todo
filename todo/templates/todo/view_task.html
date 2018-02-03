@@ -26,7 +26,7 @@
             <p id="slideToggle" ><strong>&rarr; Click to edit details &larr;</strong></p>
 
             <p>
-                <strong>In list:</strong> <a href="{% url 'todo-incomplete_tasks' task.list.id task.list.slug %}" class="showlink">{{ task.list }}</a><br />
+                <strong>In list:</strong> <a href="{% url 'todo:incomplete_tasks' task.list.id task.list.slug %}" class="showlink">{{ task.list }}</a><br />
                 <strong>Assigned to:</strong> {% if task.assigned_to %}{{ task.assigned_to.get_full_name }}{% else %}Anyone{% endif %}<br />
                 <strong>Created by:</strong> {{ task.created_by.first_name }} {{ task.created_by.last_name }}<br />
                 <strong>Due date:</strong>  {{ task.due_date }}<br />

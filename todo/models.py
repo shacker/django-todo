@@ -3,17 +3,16 @@ import datetime
 
 from django.db import models
 from django.contrib.auth.models import Group
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.encoding import python_2_unicode_compatible
 from django.conf import settings
-from autoslug import AutoSlugField
 
 
 @python_2_unicode_compatible
 class List(models.Model):
     name = models.CharField(max_length=60)
-    slug = AutoSlugField(populate_from='name', editable=False, always_update=True)
-    group = models.ForeignKey(Group)
+    slug = models.SlugField(default='',)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -33,13 +32,14 @@ class List(models.Model):
 @python_2_unicode_compatible
 class Item(models.Model):
     title = models.CharField(max_length=140)
-    list = models.ForeignKey(List)
+    list = models.ForeignKey(List, on_delete=models.CASCADE)
     created_date = models.DateField(auto_now=True)
     due_date = models.DateField(blank=True, null=True, )
     completed = models.BooleanField(default=None)
     completed_date = models.DateField(blank=True, null=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='todo_created_by')
-    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, related_name='todo_assigned_to')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='todo_created_by', on_delete=models.CASCADE)
+    assigned_to = models.ForeignKey(
+        settings.AUTH_USER_MODEL, blank=True, null=True, related_name='todo_assigned_to', on_delete=models.CASCADE)
     note = models.TextField(blank=True, null=True)
     priority = models.PositiveIntegerField()
 
@@ -53,7 +53,7 @@ class Item(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return reverse('todo-task_detail', kwargs={'task_id': self.id, })
+        return reverse('todo:task_detail', kwargs={'task_id': self.id, })
 
     # Auto-set the item creation / completed date
     def save(self):
@@ -72,8 +72,8 @@ class Comment(models.Model):
     Not using Django's built-in comments because we want to be able to save
     a comment and change task details at the same time. Rolling our own since it's easy.
     """
-    author = models.ForeignKey(settings.AUTH_USER_MODEL)
-    task = models.ForeignKey(Item)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    task = models.ForeignKey(Item, on_delete=models.CASCADE)
     date = models.DateTimeField(default=datetime.datetime.now)
     body = models.TextField(blank=True)
 
