@@ -2,7 +2,6 @@
 /.coverage/
 /.eggs/
 /.idea/
-/.tox/
 /build/
 /dist/
 /docs/build/
