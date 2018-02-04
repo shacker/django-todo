@@ -29,7 +29,7 @@ class AddItemForm(ModelForm):
         self.fields['assigned_to'].label_from_instance = \
             lambda obj: "%s (%s)" % (obj.get_full_name(), obj.username)
 
-    due_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    due_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
 
     title = forms.CharField(
         widget=forms.widgets.TextInput(attrs={'size': 35})
@@ -49,7 +49,7 @@ class EditItemForm(ModelForm):
         super(EditItemForm, self).__init__(*args, **kwargs)
         self.fields['assigned_to'].queryset = get_user_model().objects.filter(groups__in=[self.instance.list.group])
 
-    due_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    due_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
 
     class Meta:
         model = Item
