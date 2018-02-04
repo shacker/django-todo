@@ -17,7 +17,7 @@ class List(models.Model):
     def __str__(self):
         return self.name
 
-    def incomplete_tasks(self):
+    def list_detail(self):
         # Count all incomplete tasks on the current list instance
         return Item.objects.filter(list=self, completed=0)
 
@@ -47,7 +47,7 @@ class Item(models.Model):
     def overdue_status(self):
         "Returns whether the item's due date has passed or not."
         if self.due_date and datetime.date.today() > self.due_date:
-            return 1
+            return True
 
     def __str__(self):
         return self.title

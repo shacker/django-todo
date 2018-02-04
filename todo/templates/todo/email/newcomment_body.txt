@@ -12,5 +12,5 @@ Task details/comments:
 https://{{ site }}{% url 'todo:task_detail' task.id %}
 
 List {{ task.list.name }}:
-https://{{ site }}{% url 'todo:incomplete_tasks' task.list.id task.list.slug %}
+https://{{ site }}{% url 'todo:list_detail' task.list.id task.list.slug %}
 

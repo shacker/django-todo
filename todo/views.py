@@ -77,7 +77,7 @@ def del_list(request, list_id, list_slug):
 
 
 @user_passes_test(check_user_allowed)
-def view_list(request, list_id=0, list_slug=None, view_completed=False):
+def list_detail(request, list_id=None, list_slug=None, view_completed=False):
     """Display and manage items in a list.
     """
 
@@ -145,11 +145,11 @@ def view_list(request, list_id=0, list_slug=None, view_completed=False):
                 'priority': 999,
             })
 
-    return render(request, 'todo/view_list.html', locals())
+    return render(request, 'todo/list_detail.html', locals())
 
 
 @user_passes_test(check_user_allowed)
-def view_task(request, task_id):
+def task_detail(request, task_id):
     """View task details. Allow task details to be edited.
     """
     task = get_object_or_404(Item, pk=task_id)
@@ -201,7 +201,7 @@ def view_task(request, task_id):
 
                 messages.success(request, "The task has been edited.")
 
-                return redirect('todo:lists', args=[task.list.id, task.list.slug])
+                return redirect('todo:list_detail', list_id=task.list.id, list_slug=task.list.slug)
         else:
             form = EditItemForm(instance=task)
             if task.due_date:
@@ -217,7 +217,7 @@ def view_task(request, task_id):
 @csrf_exempt
 @user_passes_test(check_user_allowed)
 def reorder_tasks(request):
-    """Handle task re-ordering (priorities) from JQuery drag/drop in view_list.html
+    """Handle task re-ordering (priorities) from JQuery drag/drop in list_detail.html
     """
     newtasklist = request.POST.getlist('tasktable[]')
     # First item in received list is always empty - remove it

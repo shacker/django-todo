@@ -43,8 +43,7 @@
     {% if auth_ok %}
         <form action="" method="POST">
             {% csrf_token %}
-
-            {# Only show task adder if viewing a proper list #}
+            {# Only show task adder if viewing a list is not "mine" #}
             {% if list_slug != "mine" %}
                 <h2 style="margin-bottom:0px;" id="slideToggle" >&rarr; Click to add task &larr;</h2>
 
@@ -110,15 +109,15 @@
             	            <td style="text-align:center;">{% if task.note %}&asymp;{% endif %} </td>
             	            <td style="text-align:center;">{% if task.comment_set.all.count != 0 %}{{ task.comment_set.all.count }}{% endif %}</td>
             	            {% if list_slug == "mine" %}
-                                <td><a href="{% url 'todo:incomplete_tasks' task.list.id task.list.slug %}">{{ task.list }}</a></td>
+                                <td><a href="{% url 'todo:list_detail' task.list.id task.list.slug %}">{{ task.list }}</a></td>
                             {% endif %}
             	            <td><input type="checkbox" name="del_tasks" value="{{ task.id }}" id="del_task_{{ task.id }}">   </td>
                         </tr>
             	    {% endfor %}
             	</table>
 
-                <p><input type="submit" name="mark_tasks_done" value="Continue..."  class="todo-button"></p>
-                <p><a  class="todo" href="{% url 'todo:completed_tasks' list_id list_slug %}">View completed tasks</a></p>
+              <p><input type="submit" name="mark_tasks_done" value="Continue..."  class="todo-button"></p>
+              <p><a  class="todo" href="{% url 'todo:completed_tasks' list_id list_slug %}">View completed tasks</a></p>
 
             {% else %}
 
@@ -153,7 +152,7 @@
             	</table>
             	<p><input type="submit" name="deldonetasks" value="Continue..."  class="todo-button"></p>
             	</form>
-                <p><a class="todo" href="{% url 'todo:incomplete_tasks' list_id list_slug %}">View incomplete tasks</a></p>
+                <p><a class="todo" href="{% url 'todo:list_detail' list_id list_slug %}">View incomplete tasks</a></p>
             {% endif %}
 
     	{% if user.is_staff %}

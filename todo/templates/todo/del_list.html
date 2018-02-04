@@ -23,7 +23,7 @@
             <p><input type="submit" name="delete-confirm" value="Do it! &rarr;" class="todo-button"> </p>
         </form>
 
-        <a href="{% url 'todo:incomplete_tasks' list.id list_slug %}">Return to list: {{ list.name }}</a>
+        <a href="{% url 'todo:list_detail' list.id list_slug %}">Return to list: {{ list.name }}</a>
 
     {% else %}
         <p>Sorry, you don't have permission to delete lists. Please contact your group administrator.</p>

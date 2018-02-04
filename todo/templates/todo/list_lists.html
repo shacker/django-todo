@@ -15,8 +15,8 @@
         <ul>
             {% for item in group.list %}
    	            <li>
-                  <a class="todo" href="{% url 'todo:incomplete_tasks' item.id item.slug %}">{{ item.name }}</a>
-                    ({{ item.incomplete_tasks.count }}/{{ item.item_set.count }})
+                  <a class="todo" href="{% url 'todo:list_detail' item.id item.slug %}">{{ item.name }}</a>
+                    ({{ item.list_detail.count }}/{{ item.item_set.count }})
                 </li>
             {% endfor %}
         </ul>
