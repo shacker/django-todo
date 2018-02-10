@@ -1,11 +1,11 @@
 {% extends "todo/base.html" %}
 
-{% block title %}{{ list_title }} to-do items{% endblock %}
+{% block title %}Delete list{% endblock %}
 
 {% block content %}
 
     {% if user.is_staff %}
-        <h1>Delete entire list: {{ list.name }} ?</h1>
+        <h1>Delete entire list: {{ task_list.name }} ?</h1>
 
         <p>Category tally:</p>
 
@@ -19,11 +19,11 @@
 
         <form action="" method="post" accept-charset="utf-8">
 		    {% csrf_token %}
-            <input type="hidden" name="list" value="{{ list.id }}" id="some_name">
+            <input type="hidden" name="task_list" value="{{ task_list.id }}">
             <p><input type="submit" name="delete-confirm" value="Do it! &rarr;" class="todo-button"> </p>
         </form>
 
-        <a href="{% url 'todo:list_detail' list.id list_slug %}">Return to list: {{ list.name }}</a>
+        <a href="{% url 'todo:list_detail' task_list.id task_list.slug %}">Return to list: {{ task_list.name }}</a>
 
     {% else %}
         <p>Sorry, you don't have permission to delete lists. Please contact your group administrator.</p>

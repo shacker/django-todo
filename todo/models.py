@@ -9,7 +9,7 @@ from django.conf import settings
 
 
 @python_2_unicode_compatible
-class List(models.Model):
+class TaskList(models.Model):
     name = models.CharField(max_length=60)
     slug = models.SlugField(default='',)
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
@@ -19,11 +19,11 @@ class List(models.Model):
 
     def list_detail(self):
         # Count all incomplete tasks on the current list instance
-        return Item.objects.filter(list=self, completed=0)
+        return Item.objects.filter(task_list=self, completed=0)
 
     class Meta:
         ordering = ["name"]
-        verbose_name_plural = "Lists"
+        verbose_name_plural = "Task Lists"
 
         # Prevents (at the database level) creation of two lists with the same name in the same group
         unique_together = ("group", "slug")
@@ -32,7 +32,7 @@ class List(models.Model):
 @python_2_unicode_compatible
 class Item(models.Model):
     title = models.CharField(max_length=140)
-    list = models.ForeignKey(List, on_delete=models.CASCADE)
+    task_list = models.ForeignKey(TaskList, on_delete=models.CASCADE, null=True)
     created_date = models.DateField(auto_now=True)
     due_date = models.DateField(blank=True, null=True, )
     completed = models.BooleanField(default=None)

@@ -14,9 +14,9 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
 from todo import settings
-from todo.forms import AddListForm, AddItemForm, EditItemForm, AddExternalItemForm, SearchForm
-from todo.models import Item, List, Comment
-from todo.utils import mark_done, undo_completed_task, del_tasks, send_notify_mail
+from todo.forms import AddTaskListForm, AddItemForm, EditItemForm, AddExternalItemForm, SearchForm
+from todo.models import Item, TaskList, Comment
+from todo.utils import toggle_done, toggle_deleted, send_notify_mail
 
 
 def check_user_allowed(user):
@@ -43,9 +43,9 @@ def list_lists(request):
 
     # Superusers see all lists
     if request.user.is_superuser:
-        list_list = List.objects.all().order_by('group', 'name')
+        list_list = TaskList.objects.all().order_by('group', 'name')
     else:
-        list_list = List.objects.filter(group__in=request.user.groups.all()).order_by('group', 'name')
+        list_list = TaskList.objects.filter(group__in=request.user.groups.all()).order_by('group', 'name')
 
     list_count = list_list.count()
 
@@ -53,7 +53,7 @@ def list_lists(request):
     if request.user.is_superuser:
         item_count = Item.objects.filter(completed=0).count()
     else:
-        item_count = Item.objects.filter(completed=0).filter(list__group__in=request.user.groups.all()).count()
+        item_count = Item.objects.filter(completed=0).filter(task_list__group__in=request.user.groups.all()).count()
 
     return render(request, 'todo/list_lists.html', locals())
 
@@ -62,68 +62,47 @@ def list_lists(request):
 def del_list(request, list_id, list_slug):
     """Delete an entire list. Danger Will Robinson! Only staff members should be allowed to access this view.
     """
-    list = get_object_or_404(List, slug=list_slug)
+    task_list = get_object_or_404(TaskList, slug=list_slug)
 
     if request.method == 'POST':
-        List.objects.get(id=list.id).delete()
-        messages.success(request, "{list_name} is gone.".format(list_name=list.name))
+        TaskList.objects.get(id=task_list.id).delete()
+        messages.success(request, "{list_name} is gone.".format(list_name=task_list.name))
         return redirect('todo:lists')
     else:
-        item_count_done = Item.objects.filter(list=list.id, completed=1).count()
-        item_count_undone = Item.objects.filter(list=list.id, completed=0).count()
-        item_count_total = Item.objects.filter(list=list.id).count()
+        item_count_done = Item.objects.filter(task_list=task_list.id, completed=True).count()
+        item_count_undone = Item.objects.filter(task_list=task_list.id, completed=False).count()
+        item_count_total = Item.objects.filter(task_list=task_list.id).count()
 
     return render(request, 'todo/del_list.html', locals())
 
 
-@user_passes_test(check_user_allowed)
 def list_detail(request, list_id=None, list_slug=None, view_completed=False):
-    """Display and manage items in a list.
+    """Display and manage items in a todo list.
     """
 
-    # Make sure the accessing user has permission to view this list.
-    # Always authorize the "mine" view. Admins can view/edit all lists.
-    if list_slug == "mine" or list_slug == "recent-add" or list_slug == "recent-complete":
-        auth_ok = True
-    else:
-        list = get_object_or_404(List, id=list_id)
-        if list.group in request.user.groups.all() or request.user.is_staff or list_slug == "mine":
-            auth_ok = True
-        else:  # User does not belong to the group this list is attached to
-            messages.error(request, "You do not have permission to view/edit this list.")
+    if request.POST:
+        # Process completed and deleted requests on each POST
+        toggle_done(request, request.POST.getlist('toggle_done_tasks'))
+        toggle_deleted(request, request.POST.getlist('toggle_deleted_tasks'))
 
-    # Process all possible list interactions on each submit
-    mark_done(request, request.POST.getlist('mark_done'))
-    del_tasks(request, request.POST.getlist('del_tasks'))
-    undo_completed_task(request, request.POST.getlist('undo_completed_task'))
-
-    thedate = datetime.datetime.now()
-    created_date = "%s-%s-%s" % (thedate.year, thedate.month, thedate.day)
-
-    # Get set of items with this list ID, or filter on items assigned to me, or recently added/completed
     if list_slug == "mine":
-        task_list = Item.objects.filter(assigned_to=request.user, completed=False)
-        completed_list = Item.objects.filter(assigned_to=request.user, completed=True)
-
-    elif list_slug == "recent-add":
-        # Only show items in lists that are in groups that the current user is also in.
-        # Assume this only includes uncompleted items.
-        task_list = Item.objects.filter(
-            list__group__in=(request.user.groups.all()),
-            completed=False).order_by('-created_date')[:50]
-
-    elif list_slug == "recent-complete":
-        # Only show items in lists that are in groups that the current user is also in.
-        task_list = Item.objects.filter(
-            list__group__in=request.user.groups.all(),
-            completed=True).order_by('-completed_date')[:50]
-
+        items = Item.objects.filter(assigned_to=request.user)
     else:
-        task_list = Item.objects.filter(list=list.id, completed=0)
-        completed_list = Item.objects.filter(list=list.id, completed=1)
+        task_list = get_object_or_404(TaskList, id=list_id)
+        items = Item.objects.filter(task_list=task_list.id)
+
+    # Apply filters to base queryset
+    if view_completed:
+        items = items.filter(completed=True)
+    else:
+        items = items.filter(completed=False)
+
+    # ######################
+    #  Add New Task Form
+    # ######################
 
     if request.POST.getlist('add_task'):
-        form = AddItemForm(list, request.POST, initial={
+        form = AddItemForm(task_list, request.POST, initial={
             'assigned_to': request.user.id,
             'priority': 999,
         })
@@ -140,7 +119,7 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
     else:
         # Don't allow adding new tasks on some views
         if list_slug != "mine" and list_slug != "recent-add" and list_slug != "recent-complete":
-            form = AddItemForm(list, initial={
+            form = AddItemForm(task_list=task_list, initial={
                 'assigned_to': request.user.id,
                 'priority': 999,
             })
@@ -159,7 +138,7 @@ def task_detail(request, task_id):
     # Get the group this task belongs to, and check whether current user is a member of that group.
     # Admins can edit all tasks.
 
-    if task.list.group in request.user.groups.all() or request.user.is_staff:
+    if task.task_list.group in request.user.groups.all() or request.user.is_staff:
         auth_ok = True
 
         if request.POST:
@@ -201,7 +180,7 @@ def task_detail(request, task_id):
 
                 messages.success(request, "The task has been edited.")
 
-                return redirect('todo:list_detail', list_id=task.list.id, list_slug=task.list.slug)
+                return redirect('todo:list_detail', list_id=task.task_list.id, list_slug=task.task_list.slug)
         else:
             form = EditItemForm(instance=task)
             if task.due_date:
@@ -276,7 +255,7 @@ def add_list(request):
     """Allow users to add a new todo list to the group they're in.
     """
     if request.POST:
-        form = AddListForm(request.user, request.POST)
+        form = AddTaskListForm(request.user, request.POST)
         if form.is_valid():
             try:
                 form.save()
@@ -290,9 +269,9 @@ def add_list(request):
                     "Most likely a list with the same name in the same group already exists.")
     else:
         if request.user.groups.all().count() == 1:
-            form = AddListForm(request.user, initial={"group": request.user.groups.all()[0]})
+            form = AddTaskListForm(request.user, initial={"group": request.user.groups.all()[0]})
         else:
-            form = AddListForm(request.user)
+            form = AddTaskListForm(request.user)
 
     return render(request, 'todo/add_list.html', locals())
 

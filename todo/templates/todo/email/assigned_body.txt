@@ -1,6 +1,6 @@
 Dear {{ task.assigned_to.first_name }} -
 
-A new task on the list {{ task.list.name }} has been assigned to you by {{ task.created_by.first_name }} {{ task.created_by.last_name }}:
+A new task on the list {{ task.task_list.name }} has been assigned to you by {{ task.created_by.first_name }} {{ task.created_by.last_name }}:
 
 {{ task.title }}
 
@@ -16,5 +16,5 @@ Note: {{ task.note }}
 Task details/comments:
 http://{{ site }}{% url 'todo:task_detail' task.id %}
 
-List {{ task.list.name }}:
-http://{{ site }}{% url 'todo:list_detail' task.list.id task.list.slug %}
+List {{ task.task_list.name }}:
+http://{{ site }}{% url 'todo:list_detail' task.task_list.id task.task_list.slug %}
