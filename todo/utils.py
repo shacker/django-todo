@@ -8,26 +8,19 @@ from django.template.loader import render_to_string
 from todo.models import Item
 
 
-def mark_done(request, done_items):
+def toggle_done(request, items):
     # Check for items in the mark_done POST array. If present, change status to complete.
-    for item in done_items:
+    for item in items:
         i = Item.objects.get(id=item)
-        i.completed = True
+        old_state = "completed" if i.completed else "incomplete"
+        i.completed = not i.completed  # Invert the done state, either way
+        new_state = "completed" if i.completed else "incomplete"
         i.completed_date = datetime.datetime.now()
         i.save()
-        messages.success(request, "Item \"{i}\" marked complete.".format(i=i.title))
+        messages.success(request, "Item \"{i}\" changed from {o} to {n}.".format(i=i.title, o=old_state, n=new_state))
 
 
-def undo_completed_task(request, undone_items):
-    # Undo: Set completed items back to incomplete
-    for item in undone_items:
-        i = Item.objects.get(id=item)
-        i.completed = False
-        i.save()
-        messages.success(request, "Previously completed task \"{i}\" marked incomplete.".format(i=i.title))
-
-
-def del_tasks(request, deleted_items):
+def toggle_deleted(request, deleted_items):
     # Delete selected items
     for item_id in deleted_items:
         i = Item.objects.get(id=item_id)
