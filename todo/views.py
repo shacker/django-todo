@@ -192,12 +192,12 @@ def task_detail(request, task_id):
             messages.success(request, "The task has been edited.")
 
             return redirect('todo:list_detail', list_id=task.task_list.id, list_slug=task.task_list.slug)
+    else:
+        form = EditItemForm(instance=task)
+        if task.due_date:
+            thedate = task.due_date
         else:
-            form = EditItemForm(instance=task)
-            if task.due_date:
-                thedate = task.due_date
-            else:
-                thedate = datetime.datetime.now()
+            thedate = datetime.datetime.now()
 
     return render(request, 'todo/task_detail.html', locals())
 
