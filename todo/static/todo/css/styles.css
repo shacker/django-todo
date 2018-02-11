@@ -15,15 +15,6 @@ ul.messages li {
 	color: gray;
 }
 
-a.todo {
-	text-decoration: none;
-	color: #474747;
-}
-
-a.showlink {
-	text-decoration: underline;
-}
-
 
 label {
 	display: block;

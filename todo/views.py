@@ -190,7 +190,7 @@ def task_detail(request, task_id):
     else:
         messages.info(request, "You do not have permission to view/edit this task.")
 
-    return render(request, 'todo/view_task.html', locals())
+    return render(request, 'todo/task_detail.html', locals())
 
 
 @csrf_exempt
@@ -247,7 +247,7 @@ def external_add(request):
     else:
         form = AddExternalItemForm()
 
-    return render(request, 'todo/add_external_task.html', locals())
+    return render(request, 'todo/add_task_external.html', locals())
 
 
 @user_passes_test(check_user_allowed)
