@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
+from django.core.exceptions import PermissionDenied
 from django.db import IntegrityError
 from django.db.models import Q
 from django.http import HttpResponse
@@ -21,8 +22,10 @@ from todo.utils import toggle_done, toggle_deleted, send_notify_mail
 
 def check_user_allowed(user):
     """
-    Conditions for user_passes_test decorator.
+    Verifies user is logged in, and in staff if that setting is enabled.
+    Per-object permission checks (e.g. to view a particular list) must be in the views that handle those objects.
     """
+
     if settings.STAFF_ONLY:
         return user.is_authenticated and user.is_staff
     else:
@@ -64,6 +67,11 @@ def del_list(request, list_id, list_slug):
     """
     task_list = get_object_or_404(TaskList, slug=list_slug)
 
+    # Ensure user has permission to delete list. Admins can delete all lists.
+    # Get the group this list belongs to, and check whether current user is a member of that group.
+    if task_list.group not in request.user.groups.all() or not request.user.is_staff:
+        raise PermissionDenied
+
     if request.method == 'POST':
         TaskList.objects.get(id=task_list.id).delete()
         messages.success(request, "{list_name} is gone.".format(list_name=task_list.name))
@@ -79,6 +87,13 @@ def del_list(request, list_id, list_slug):
 def list_detail(request, list_id=None, list_slug=None, view_completed=False):
     """Display and manage items in a todo list.
     """
+
+    task_list = get_object_or_404(TaskList, id=list_id, slug=list_slug)
+
+    # Ensure user has permission to view list. Admins can view all lists.
+    # Get the group this task_list belongs to, and check whether current user is a member of that group.
+    if task_list.group not in request.user.groups.all() and not request.user.is_staff:
+        raise PermissionDenied
 
     if request.POST:
         # Process completed and deleted requests on each POST
@@ -134,50 +149,49 @@ def task_detail(request, task_id):
     task = get_object_or_404(Item, pk=task_id)
     comment_list = Comment.objects.filter(task=task_id)
 
-    # Ensure user has permission to view item. Admins can edit all tasks.
+    # Ensure user has permission to view item. Admins can view all tasks.
     # Get the group this task belongs to, and check whether current user is a member of that group.
+    if task.task_list.group not in request.user.groups.all() and not request.user.is_staff:
+        raise PermissionDenied
 
-    if task.task_list.group in request.user.groups.all() or request.user.is_staff:
-        auth_ok = True
+    if request.POST:
+        form = EditItemForm(request.POST, instance=task)
 
-        if request.POST:
-            form = EditItemForm(request.POST, instance=task)
+        if form.is_valid():
+            form.save()
 
-            if form.is_valid():
-                form.save()
+            # Also save submitted comment, if non-empty
+            if request.POST['comment-body']:
+                c = Comment(
+                    author=request.user,
+                    task=task,
+                    body=request.POST['comment-body'],
+                )
+                c.save()
 
-                # Also save submitted comment, if non-empty
-                if request.POST['comment-body']:
-                    c = Comment(
-                        author=request.user,
-                        task=task,
-                        body=request.POST['comment-body'],
-                    )
-                    c.save()
+                # And email comment to all people who have participated in this thread.
+                current_site = Site.objects.get_current()
+                email_subject = render_to_string("todo/email/assigned_subject.txt", {'task': task})
+                email_body = render_to_string(
+                    "todo/email/newcomment_body.txt",
+                    {'task': task, 'body': request.POST['comment-body'], 'site': current_site, 'user': request.user}
+                )
 
-                    # And email comment to all people who have participated in this thread.
-                    current_site = Site.objects.get_current()
-                    email_subject = render_to_string("todo/email/assigned_subject.txt", {'task': task})
-                    email_body = render_to_string(
-                        "todo/email/newcomment_body.txt",
-                        {'task': task, 'body': request.POST['comment-body'], 'site': current_site, 'user': request.user}
-                    )
+                # Get list of all thread participants - everyone who has commented on it plus task creator.
+                commenters = Comment.objects.filter(task=task)
+                recip_list = [c.author.email for c in commenters]
+                recip_list.append(task.created_by.email)
+                recip_list = list(set(recip_list))  # Eliminate duplicates
 
-                    # Get list of all thread participants - everyone who has commented on it plus task creator.
-                    commenters = Comment.objects.filter(task=task)
-                    recip_list = [c.author.email for c in commenters]
-                    recip_list.append(task.created_by.email)
-                    recip_list = list(set(recip_list))  # Eliminate duplicates
+                try:
+                    send_mail(email_subject, email_body, task.created_by.email, recip_list, fail_silently=False)
+                    messages.success(request, "Comment sent to thread participants.")
+                except ConnectionRefusedError:
+                    messages.error(request, "Comment saved but mail not sent. Contact your administrator.")
 
-                    try:
-                        send_mail(email_subject, email_body, task.created_by.email, recip_list, fail_silently=False)
-                        messages.success(request, "Comment sent to thread participants.")
-                    except ConnectionRefusedError:
-                        messages.error(request, "Comment saved but mail not sent. Contact your administrator.")
+            messages.success(request, "The task has been edited.")
 
-                messages.success(request, "The task has been edited.")
-
-                return redirect('todo:list_detail', list_id=task.task_list.id, list_slug=task.task_list.slug)
+            return redirect('todo:list_detail', list_id=task.task_list.id, list_slug=task.task_list.slug)
         else:
             form = EditItemForm(instance=task)
             if task.due_date:
