@@ -198,8 +198,6 @@ def task_detail(request, task_id):
                 thedate = task.due_date
             else:
                 thedate = datetime.datetime.now()
-    else:
-        messages.info(request, "You do not have permission to view/edit this task.")
 
     return render(request, 'todo/task_detail.html', locals())
 
