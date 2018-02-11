@@ -134,9 +134,8 @@ def task_detail(request, task_id):
     task = get_object_or_404(Item, pk=task_id)
     comment_list = Comment.objects.filter(task=task_id)
 
-    # Ensure user has permission to view item.
+    # Ensure user has permission to view item. Admins can edit all tasks.
     # Get the group this task belongs to, and check whether current user is a member of that group.
-    # Admins can edit all tasks.
 
     if task.task_list.group in request.user.groups.all() or request.user.is_staff:
         auth_ok = True
@@ -164,18 +163,16 @@ def task_detail(request, task_id):
                         {'task': task, 'body': request.POST['comment-body'], 'site': current_site, 'user': request.user}
                     )
 
-                    # Get list of all thread participants - task creator plus everyone who has commented on it.
-                    recip_list = []
-                    recip_list.append(task.created_by.email)
+                    # Get list of all thread participants - everyone who has commented on it plus task creator.
                     commenters = Comment.objects.filter(task=task)
-                    for c in commenters:
-                        recip_list.append(c.author.email)
-                    recip_list = set(recip_list)  # Eliminate duplicates
+                    recip_list = [c.author.email for c in commenters]
+                    recip_list.append(task.created_by.email)
+                    recip_list = list(set(recip_list))  # Eliminate duplicates
 
                     try:
                         send_mail(email_subject, email_body, task.created_by.email, recip_list, fail_silently=False)
                         messages.success(request, "Comment sent to thread participants.")
-                    except:
+                    except ConnectionRefusedError:
                         messages.error(request, "Comment saved but mail not sent. Contact your administrator.")
 
                 messages.success(request, "The task has been edited.")
@@ -237,7 +234,7 @@ def external_add(request):
             try:
                 send_mail(
                     email_subject, email_body, item.created_by.email, [item.assigned_to.email, ], fail_silently=False)
-            except:
+            except ConnectionRefusedError:
                 messages.error(request, "Task saved but mail not sent. Contact your administrator.")
 
             messages.success(request, "Your trouble ticket has been submitted. We'll get back to you soon.")
