@@ -45,7 +45,7 @@
       {{ task.due_date }}<br/>
 
       <strong>Completed:</strong>
-      {{ form.completed }}<br/>
+      {{ form.completed|yesno:"Yes,No" }}<br/>
     </p>
 
     {% if task.note %}
