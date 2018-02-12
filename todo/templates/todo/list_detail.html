@@ -7,8 +7,6 @@
   {% if list_slug != "mine" %}
     <form action="" name="add_task" method="post">
       {% csrf_token %}
-      {# Only show task adder if list is not "mine" #}
-      {#  fixme: Not working because need to send named form into this template. And move into a subtemplate. #}
       <h2 id="slideToggle" >&rarr; Click to add task &larr;</h2>
       <div id="AddTask">
         <table class="table">
@@ -95,7 +93,6 @@
     <p><input type="submit" name="process_tasks" value="Continue..."  class="todo-button"></p>
   </form>
 
-  {# fixme: convert to bs buttons #}
   {% if list_slug != "mine" %}
     {% if view_completed %}
       <p><a href="{% url 'todo:list_detail' list_id list_slug %}">View incomplete tasks</a></p>

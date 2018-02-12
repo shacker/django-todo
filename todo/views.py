@@ -88,12 +88,13 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
     """Display and manage items in a todo list.
     """
 
-    task_list = get_object_or_404(TaskList, id=list_id, slug=list_slug)
+    if not list_slug == "mine":
+        task_list = get_object_or_404(TaskList, id=list_id, slug=list_slug)
 
-    # Ensure user has permission to view list. Admins can view all lists.
-    # Get the group this task_list belongs to, and check whether current user is a member of that group.
-    if task_list.group not in request.user.groups.all() and not request.user.is_staff:
-        raise PermissionDenied
+        # Ensure user has permission to view list. Admins can view all lists.
+        # Get the group this task_list belongs to, and check whether current user is a member of that group.
+        if task_list.group not in request.user.groups.all() and not request.user.is_staff:
+            raise PermissionDenied
 
     if request.POST:
         # Process completed and deleted requests on each POST
