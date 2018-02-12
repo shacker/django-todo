@@ -10,9 +10,6 @@ Note: {{ task.note }}
 {% endautoescape %}
 {% endif %}
 
-
-
-
 Task details/comments:
 http://{{ site }}{% url 'todo:task_detail' task.id %}
 

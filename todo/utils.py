@@ -29,15 +29,17 @@ def toggle_deleted(request, deleted_items):
 
 
 def send_notify_mail(request, new_task):
-    # Send email
-    current_site = Site.objects.get_current()
-    email_subject = render_to_string("todo/email/assigned_subject.txt", {'task': new_task})
-    email_body = render_to_string(
-        "todo/email/assigned_body.txt",
-        {'task': new_task, 'site': current_site, })
-    try:
-        send_mail(
-            email_subject, email_body, new_task.created_by.email,
-            [new_task.assigned_to.email], fail_silently=False)
-    except ConnectionRefusedError:
-        messages.error(request, "Task saved but mail not sent. Contact your administrator.")
+    # Send email to assignee when task is assigned to someone else.
+    # Unassigned tasks should not try to notify.
+    if new_task.assigned_to:
+        current_site = Site.objects.get_current()
+        email_subject = render_to_string("todo/email/assigned_subject.txt", {'task': new_task})
+        email_body = render_to_string(
+            "todo/email/assigned_body.txt",
+            {'task': new_task, 'site': current_site, })
+        try:
+            send_mail(
+                email_subject, email_body, new_task.created_by.email,
+                [new_task.assigned_to.email], fail_silently=False)
+        except ConnectionRefusedError:
+            messages.error(request, "Task saved but mail not sent. Contact your administrator.")
