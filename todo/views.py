@@ -11,7 +11,6 @@ from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.template.loader import render_to_string
-from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
 from todo import settings
@@ -225,6 +224,70 @@ def reorder_tasks(request):
     return HttpResponse(status=201)
 
 
+@user_passes_test(check_user_allowed)
+def add_list(request):
+    """Allow users to add a new todo list to the group they're in.
+    """
+    if request.POST:
+        form = AddTaskListForm(request.user, request.POST)
+        if form.is_valid():
+            try:
+                form.save()
+                messages.success(request, "A new list has been added.")
+                return redirect('todo:lists')
+
+            except IntegrityError:
+                messages.error(
+                    request,
+                    "There was a problem saving the new list. "
+                    "Most likely a list with the same name in the same group already exists.")
+    else:
+        if request.user.groups.all().count() == 1:
+            form = AddTaskListForm(request.user, initial={"group": request.user.groups.all()[0]})
+        else:
+            form = AddTaskListForm(request.user)
+
+    return render(request, 'todo/add_list.html', locals())
+
+
+@user_passes_test(check_user_allowed)
+def search(request):
+    """Search for tasks user has permission to see.
+    """
+    if request.GET:
+
+        query_string = ''
+        found_items = None
+        if ('q' in request.GET) and request.GET['q'].strip():
+            query_string = request.GET['q']
+
+            found_items = Item.objects.filter(
+                Q(title__icontains=query_string) |
+                Q(note__icontains=query_string)
+            )
+        else:
+            # What if they selected the "completed" toggle but didn't enter a query string?
+            # We still need found_items in a queryset so it can be "excluded" below.
+            found_items = Item.objects.all()
+
+        if 'inc_complete' in request.GET:
+            found_items = found_items.exclude(completed=True)
+
+    else:
+        query_string = None
+        found_items = None
+
+    # Only include items that are in groups of which this user is a member:
+    if not request.user.is_superuser:
+        found_items = found_items.filter(task_list__group__in=request.user.groups.all())
+
+    context = {
+        'query_string': query_string,
+        'found_items': found_items
+    }
+    return render(request, 'todo/search_results.html', context)
+
+
 @login_required
 def external_add(request):
     """Allow users who don't have access to the rest of the ticket system to file a ticket in a specific list.
@@ -258,64 +321,3 @@ def external_add(request):
         form = AddExternalItemForm()
 
     return render(request, 'todo/add_task_external.html', locals())
-
-
-@user_passes_test(check_user_allowed)
-def add_list(request):
-    """Allow users to add a new todo list to the group they're in.
-    """
-    if request.POST:
-        form = AddTaskListForm(request.user, request.POST)
-        if form.is_valid():
-            try:
-                form.save()
-                messages.success(request, "A new list has been added.")
-                return redirect('todo:lists')
-
-            except IntegrityError:
-                messages.error(
-                    request,
-                    "There was a problem saving the new list. "
-                    "Most likely a list with the same name in the same group already exists.")
-    else:
-        if request.user.groups.all().count() == 1:
-            form = AddTaskListForm(request.user, initial={"group": request.user.groups.all()[0]})
-        else:
-            form = AddTaskListForm(request.user)
-
-    return render(request, 'todo/add_list.html', locals())
-
-
-@user_passes_test(check_user_allowed)
-def search(request):
-    """Search for tasks
-    """
-    if request.GET:
-
-        query_string = ''
-        found_items = None
-        if ('q' in request.GET) and request.GET['q'].strip():
-            query_string = request.GET['q']
-
-            found_items = Item.objects.filter(
-                Q(title__icontains=query_string) |
-                Q(note__icontains=query_string)
-            )
-        else:
-
-            # What if they selected the "completed" toggle but didn't type in a query string?
-            # We still need found_items in a queryset so it can be "excluded" below.
-            found_items = Item.objects.all()
-
-        if 'inc_complete' in request.GET:
-            found_items = found_items.exclude(completed=True)
-
-    else:
-        query_string = None
-        found_items = None
-
-    context = {
-        'query_string': query_string,
-        'found_items': found_items
-    }
-    return render(request, 'todo/search_results.html', context)
