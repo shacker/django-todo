@@ -40,12 +40,6 @@ urlpatterns = [
         views.task_detail,
         name='task_detail'),
 
-    # FIXME need both of these?
-    path(
-        'search-post/',
-        views.search_post,
-        name="search-post"),
-
     path(
         'search/',
         views.search,

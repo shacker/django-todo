@@ -287,16 +287,6 @@ def add_list(request):
 
 
 @user_passes_test(check_user_allowed)
-def search_post(request):
-    """Redirect POST'd search param to query GET string
-    """
-    if request.POST:
-        q = request.POST.get('q')
-        url = reverse('todo:search') + "?q=" + q
-        return redirect(url)
-
-
-@user_passes_test(check_user_allowed)
 def search(request):
     """Search for tasks
     """
