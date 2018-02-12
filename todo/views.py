@@ -290,16 +290,26 @@ def search(request):
 
 @login_required
 def external_add(request):
-    """Allow users who don't have access to the rest of the ticket system to file a ticket in a specific list.
-    Public tickets are unassigned unless settings.DEFAULT_ASSIGNEE exists.
+    """Allow authenticated users who don't have access to the rest of the ticket system to file a ticket
+    in the list specified in settings (e.g. django-todo can be used a ticket filing system for a school, where
+    students can file tickets without access to the rest of the todo system).
+
+    Publicly filed tickets are unassigned unless settings.DEFAULT_ASSIGNEE exists.
     """
+
+    if not settings.DEFAULT_LIST_ID:
+        raise RuntimeError("This feature requires DEFAULT_LIST_ID in settings. See documentation.")
+
+    if not TaskList.objects.filter(id=settings.DEFAULT_LIST_ID).exists():
+        raise RuntimeError("There is no TaskList with ID specified for DEFAULT_LIST_ID in settings.")
+
     if request.POST:
         form = AddExternalItemForm(request.POST)
 
         if form.is_valid():
             current_site = Site.objects.get_current()
             item = form.save(commit=False)
-            item.list_id = settings.DEFAULT_LIST_ID
+            item.task_list = TaskList.objects.get(id=settings.DEFAULT_LIST_ID)
             item.created_by = request.user
             if settings.DEFAULT_ASSIGNEE:
                 item.assigned_to = User.objects.get(username=settings.DEFAULT_ASSIGNEE)

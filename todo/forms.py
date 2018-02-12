@@ -49,7 +49,8 @@ class EditItemForm(ModelForm):
     # must find other members of the groups the current list belongs to.
     def __init__(self, *args, **kwargs):
         super(EditItemForm, self).__init__(*args, **kwargs)
-        self.fields['assigned_to'].queryset = get_user_model().objects.filter(groups__in=[self.instance.task_list.group])
+        self.fields['assigned_to'].queryset = get_user_model().objects.filter(
+            groups__in=[self.instance.task_list.group])
 
     due_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
 
@@ -66,12 +67,12 @@ class AddExternalItemForm(ModelForm):
     )
     note = forms.CharField(
         widget=forms.widgets.Textarea(),
-        help_text='Foo',
+        help_text='Please describe the issue.',
     )
 
     class Meta:
         model = Item
-        exclude = ('list', 'created_date', 'due_date', 'created_by', 'assigned_to',)
+        exclude = ('task_list', 'created_date', 'due_date', 'created_by', 'assigned_to',)
 
 
 class SearchForm(forms.Form):
