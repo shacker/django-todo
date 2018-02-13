@@ -63,16 +63,21 @@ class AddExternalItemForm(ModelForm):
     """Form to allow users who are not part of the GTD system to file a ticket."""
 
     title = forms.CharField(
-        widget=forms.widgets.TextInput(attrs={'size': 35})
+        widget=forms.widgets.TextInput(attrs={'size': 35}),
+        label="Summary"
     )
     note = forms.CharField(
         widget=forms.widgets.Textarea(),
-        help_text='Please describe the issue.',
+        label='Problem Description',
+    )
+    priority = forms.IntegerField(
+        widget=forms.HiddenInput(),
     )
 
     class Meta:
         model = Item
-        exclude = ('task_list', 'created_date', 'due_date', 'created_by', 'assigned_to',)
+        exclude = (
+            'task_list', 'created_date', 'due_date', 'created_by', 'assigned_to', 'completed', 'completed_date', )
 
 
 class SearchForm(forms.Form):

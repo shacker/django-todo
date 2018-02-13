@@ -315,19 +315,22 @@ def external_add(request):
                 item.assigned_to = User.objects.get(username=settings.DEFAULT_ASSIGNEE)
             item.save()
 
-            email_subject = render_to_string("todo/email/assigned_subject.txt", {'task': item.title})
-            email_body = render_to_string("todo/email/assigned_body.txt", {'task': item, 'site': current_site, })
-            try:
-                send_mail(
-                    email_subject, email_body, item.created_by.email, [item.assigned_to.email, ], fail_silently=False)
-            except ConnectionRefusedError:
-                messages.error(request, "Task saved but mail not sent. Contact your administrator.")
+            # Send email to assignee if we have one
+            if item.assigned_to:
+                email_subject = render_to_string("todo/email/assigned_subject.txt", {'task': item.title})
+                email_body = render_to_string("todo/email/assigned_body.txt", {'task': item, 'site': current_site, })
+                try:
+                    send_mail(
+                        email_subject, email_body, item.created_by.email,
+                        [item.assigned_to.email, ], fail_silently=False)
+                except ConnectionRefusedError:
+                    messages.error(request, "Task saved but mail not sent. Contact your administrator.")
 
             messages.success(request, "Your trouble ticket has been submitted. We'll get back to you soon.")
 
             return redirect(settings.PUBLIC_SUBMIT_REDIRECT)
 
     else:
-        form = AddExternalItemForm()
+        form = AddExternalItemForm(initial={'priority': 999})
 
     return render(request, 'todo/add_task_external.html', locals())
