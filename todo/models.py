@@ -35,7 +35,7 @@ class Item(models.Model):
     task_list = models.ForeignKey(TaskList, on_delete=models.CASCADE, null=True)
     created_date = models.DateField(auto_now=True)
     due_date = models.DateField(blank=True, null=True, )
-    completed = models.BooleanField(default=None)
+    completed = models.BooleanField(default=False)
     completed_date = models.DateField(blank=True, null=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='todo_created_by', on_delete=models.CASCADE)
     assigned_to = models.ForeignKey(
