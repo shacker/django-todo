@@ -22,7 +22,7 @@ from todo.utils import toggle_done, toggle_deleted, send_notify_mail
 def check_user_allowed(user):
     """
     Verifies user is logged in, and in staff if that setting is enabled.
-    Per-object permission checks (e.g. to view a particular list) must be in the views that handle those objects.
+    Per-object permission checks (e.g. to view a particular list) are in the views that handle those objects.
     """
 
     if settings.STAFF_ONLY:
@@ -106,7 +106,6 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
         task_list = get_object_or_404(TaskList, id=list_id)
         items = Item.objects.filter(task_list=task_list.id)
 
-    # Apply filters to base queryset
     if view_completed:
         items = items.filter(completed=True)
     else:
