@@ -41,5 +41,5 @@ def send_notify_mail(request, new_task):
             send_mail(
                 email_subject, email_body, new_task.created_by.email,
                 [new_task.assigned_to.email], fail_silently=False)
-        except ConnectionRefusedError:
-            messages.error(request, "Task saved but mail not sent. Contact your administrator.")
+        except Exception as e:
+            messages.error(request, "Task saved but mail not sent. Contact your administrator.: {}".format(e))

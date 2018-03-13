@@ -178,15 +178,16 @@ def task_detail(request, task_id):
 
                 # Get list of all thread participants - everyone who has commented on it plus task creator.
                 commenters = Comment.objects.filter(task=task)
-                recip_list = [c.author.email for c in commenters]
+                recip_list = [ca.author.email for ca in commenters]
                 recip_list.append(task.created_by.email)
                 recip_list = list(set(recip_list))  # Eliminate duplicates
 
                 try:
                     send_mail(email_subject, email_body, task.created_by.email, recip_list, fail_silently=False)
                     messages.success(request, "Comment sent to thread participants.")
-                except ConnectionRefusedError:
-                    messages.error(request, "Comment saved but mail not sent. Contact your administrator.")
+                except Exception as e:
+                    messages.error(
+                        request, "Comment saved but mail not sent. Contact your administrator. :: {}".format(e))
 
             messages.success(request, "The task has been edited.")
 
