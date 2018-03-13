@@ -4,8 +4,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
-from django.core.mail import send_mail
 from django.core.exceptions import PermissionDenied
+from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.db.models import Q
 from django.http import HttpResponse
@@ -19,20 +19,20 @@ from todo.models import Item, TaskList, Comment
 from todo.utils import toggle_done, toggle_deleted, send_notify_mail
 
 
-def check_user_allowed(user):
+def check_user_allowed(user: User) -> HttpResponse:
     """
     Verifies user is logged in, and in staff if that setting is enabled.
     Per-object permission checks (e.g. to view a particular list) are in the views that handle those objects.
     """
 
-    if settings.STAFF_ONLY:
+    if settings.STAFF_ONLY: 
         return user.is_authenticated and user.is_staff
     else:
         return user.is_authenticated
 
 
 @user_passes_test(check_user_allowed)
-def list_lists(request):
+def list_lists(request) -> HttpResponse:
     """Homepage view - list of lists a user can view, and ability to add a list.
     """
 
@@ -61,7 +61,7 @@ def list_lists(request):
 
 
 @user_passes_test(check_user_allowed)
-def del_list(request, list_id, list_slug):
+def del_list(request, list_id: int, list_slug: str) -> HttpResponse:
     """Delete an entire list. Danger Will Robinson! Only staff members should be allowed to access this view.
     """
     task_list = get_object_or_404(TaskList, slug=list_slug)
@@ -142,7 +142,7 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
 
 
 @user_passes_test(check_user_allowed)
-def task_detail(request, task_id):
+def task_detail(request, task_id: int) -> HttpResponse:
     """View task details. Allow task details to be edited.
     """
     task = get_object_or_404(Item, pk=task_id)
@@ -204,7 +204,7 @@ def task_detail(request, task_id):
 
 @csrf_exempt
 @user_passes_test(check_user_allowed)
-def reorder_tasks(request):
+def reorder_tasks(request) -> HttpResponse:
     """Handle task re-ordering (priorities) from JQuery drag/drop in list_detail.html
     """
     newtasklist = request.POST.getlist('tasktable[]')
@@ -225,7 +225,7 @@ def reorder_tasks(request):
 
 
 @user_passes_test(check_user_allowed)
-def add_list(request):
+def add_list(request) -> HttpResponse:
     """Allow users to add a new todo list to the group they're in.
     """
     if request.POST:
@@ -251,7 +251,7 @@ def add_list(request):
 
 
 @user_passes_test(check_user_allowed)
-def search(request):
+def search(request) -> HttpResponse:
     """Search for tasks user has permission to see.
     """
     if request.GET:
@@ -289,7 +289,7 @@ def search(request):
 
 
 @login_required
-def external_add(request):
+def external_add(request) -> HttpResponse:
     """Allow authenticated users who don't have access to the rest of the ticket system to file a ticket
     in the list specified in settings (e.g. django-todo can be used a ticket filing system for a school, where
     students can file tickets without access to the rest of the todo system).
