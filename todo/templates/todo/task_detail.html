@@ -6,18 +6,6 @@
 
 {% block content %}
 
-  <script type="text/javascript">
-    $(document).ready(function () {
-      // Initially hide the TaskEdit form
-      $('#TaskEdit').hide();
-
-      // toggle slide to show the Add Task form when link clicked
-      $('#slideToggle').click(function () {
-        $(this).siblings('#TaskEdit').slideToggle();
-      });
-    });
-  </script>
-
   <h2>{{ task }}</h2>
 
   <form action="" method="POST">
@@ -106,20 +94,35 @@
 
   </form>
 
-  <h3>Comments on this task</h3>
-
   <div class="task_comments">
-    {% for comment in comment_list %}
-      <p>
-        <strong>{{ comment.author.first_name }}
-          {{ comment.author.last_name }},
-          {{ comment.date|date:"F d Y P" }}
-        </strong>
-      </p>
-      {{ comment.body|safe|urlize|linebreaks }}
-      {% empty %}
-      <p>No Comments</p>
-    {% endfor %}
+    {% if comment_list %}
+      <h3>Comments on this task</h3>
+      {% for comment in comment_list %}
+        <p>
+          <strong>{{ comment.author.first_name }}
+            {{ comment.author.last_name }},
+            {{ comment.date|date:"F d Y P" }}
+          </strong>
+        </p>
+        {{ comment.body|safe|urlize|linebreaks }}
+      {% endfor %}      
+    {% else %}
+        <h3>No comments (yet).</h3>
+    {% endif %}
   </div>
 
 {% endblock %}
+
+{% block extra_js %}
+  <script type="text/javascript">
+    $(document).ready(function () {
+      // Initially hide the TaskEdit form
+      $('#TaskEdit').hide();
+
+      // toggle slide to show the Add Task form when link clicked
+      $('#slideToggle').click(function () {
+        $(this).siblings('#TaskEdit').slideToggle();
+      });
+    });
+  </script>
+{% endblock extra_js %}

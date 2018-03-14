@@ -96,7 +96,7 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
             raise PermissionDenied
 
     if request.POST:
-        # Process completed and deleted requests on each POST
+        # Process completed and deleted items on each POST
         toggle_done(request, request.POST.getlist('toggle_done_tasks'))
         toggle_deleted(request, request.POST.getlist('toggle_deleted_tasks'))
 
