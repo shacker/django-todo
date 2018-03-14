@@ -16,7 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 from todo import settings
 from todo.forms import AddTaskListForm, AddItemForm, EditItemForm, AddExternalItemForm, SearchForm
 from todo.models import Item, TaskList, Comment
-from todo.utils import toggle_done, toggle_deleted, send_notify_mail
+from todo.utils import toggle_done, toggle_deleted, send_notify_mail, send_email_to_thread_participants
 
 
 def check_user_allowed(user: User) -> HttpResponse:
@@ -143,8 +143,9 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
 
 @user_passes_test(check_user_allowed)
 def task_detail(request, task_id: int) -> HttpResponse:
-    """View task details. Allow task details to be edited.
+    """View task details. Allow task details to be edited. Process new comments on task.
     """
+
     task = get_object_or_404(Item, pk=task_id)
     comment_list = Comment.objects.filter(task=task_id)
 
@@ -168,26 +169,8 @@ def task_detail(request, task_id: int) -> HttpResponse:
                 )
                 c.save()
 
-                # And email comment to all people who have participated in this thread.
-                current_site = Site.objects.get_current()
-                email_subject = render_to_string("todo/email/assigned_subject.txt", {'task': task})
-                email_body = render_to_string(
-                    "todo/email/newcomment_body.txt",
-                    {'task': task, 'body': request.POST['comment-body'], 'site': current_site, 'user': request.user}
-                )
-
-                # Get list of all thread participants - everyone who has commented on it plus task creator.
-                commenters = Comment.objects.filter(task=task)
-                recip_list = [ca.author.email for ca in commenters]
-                recip_list.append(task.created_by.email)
-                recip_list = list(set(recip_list))  # Eliminate duplicates
-
-                try:
-                    send_mail(email_subject, email_body, task.created_by.email, recip_list, fail_silently=False)
-                    messages.success(request, "Comment sent to thread participants.")
-                except Exception as e:
-                    messages.error(
-                        request, "Comment saved but mail not sent. Contact your administrator. :: {}".format(e))
+                send_email_to_thread_participants(request, task):
+                messages.success(request, "Notification email sent to thread participants.")
 
             messages.success(request, "The task has been edited.")
 
@@ -199,7 +182,14 @@ def task_detail(request, task_id: int) -> HttpResponse:
         else:
             thedate = datetime.datetime.now()
 
-    return render(request, 'todo/task_detail.html', locals())
+    context = {
+        "task": task,
+        "comment_list": comment_list,
+        "form": form,
+        "thedate": thedate,
+    }
+
+    return render(request, 'todo/task_detail.html', context)
 
 
 @csrf_exempt
