@@ -22,8 +22,12 @@
       </a><br/>
 
       <strong>Assigned to:</strong>
-      {% if task.assigned_to %}{{ task.assigned_to.get_full_name }}
-      {% else %}Anyone{% endif %}<br/>
+      {% if task.assigned_to %}
+        {{ task.assigned_to.get_full_name }}
+      {% else %}
+        Anyone
+      {% endif %}
+      <br/>
 
       <strong>Created by:</strong>
       {{ task.created_by.first_name }}
@@ -105,7 +109,7 @@
           </strong>
         </p>
         {{ comment.body|safe|urlize|linebreaks }}
-      {% endfor %}      
+      {% endfor %}
     {% else %}
         <h3>No comments (yet).</h3>
     {% endif %}

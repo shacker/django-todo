@@ -15,15 +15,15 @@ urlpatterns = [
         name="mine"),
 
     path(
-        '<int:list_id>/<str:list_slug>/',
-        views.list_detail,
-        name='list_detail'),
-
-    path(
         '<int:list_id>/<str:list_slug>/completed/',
         views.list_detail,
         {'view_completed': True},
         name='list_detail_completed'),
+
+    path(
+        '<int:list_id>/<str:list_slug>/',
+        views.list_detail,
+        name='list_detail'),
 
     path(
         '<int:list_id>/<str:list_slug>/delete/',

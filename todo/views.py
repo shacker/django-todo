@@ -16,19 +16,12 @@ from django.views.decorators.csrf import csrf_exempt
 from todo import settings
 from todo.forms import AddTaskListForm, AddItemForm, EditItemForm, AddExternalItemForm, SearchForm
 from todo.models import Item, TaskList, Comment
-from todo.utils import toggle_done, toggle_deleted, send_notify_mail, send_email_to_thread_participants
-
-
-def check_user_allowed(user: User) -> HttpResponse:
-    """
-    Verifies user is logged in, and in staff if that setting is enabled.
-    Per-object permission checks (e.g. to view a particular list) are in the views that handle those objects.
-    """
-
-    if settings.STAFF_ONLY: 
-        return user.is_authenticated and user.is_staff
-    else:
-        return user.is_authenticated
+from todo.utils import (
+    toggle_done,
+    toggle_deleted,
+    send_notify_mail,
+    send_email_to_thread_participants,
+    check_user_allowed)
 
 
 @user_passes_test(check_user_allowed)
@@ -45,11 +38,11 @@ def list_lists(request) -> HttpResponse:
 
     # Superusers see all lists
     if request.user.is_superuser:
-        list_list = TaskList.objects.all().order_by('group', 'name')
+        lists = TaskList.objects.all().order_by('group', 'name')
     else:
-        list_list = TaskList.objects.filter(group__in=request.user.groups.all()).order_by('group', 'name')
+        lists = TaskList.objects.filter(group__in=request.user.groups.all()).order_by('group', 'name')
 
-    list_count = list_list.count()
+    list_count = lists.count()
 
     # superusers see all lists, so count shouldn't filter by just lists the admin belongs to
     if request.user.is_superuser:
@@ -57,7 +50,15 @@ def list_lists(request) -> HttpResponse:
     else:
         item_count = Item.objects.filter(completed=0).filter(task_list__group__in=request.user.groups.all()).count()
 
-    return render(request, 'todo/list_lists.html', locals())
+    context = {
+       "lists": lists,
+       "thedate": thedate,
+       "searchform": searchform,
+       "list_count": list_count,
+       "item_count": item_count,
+    }
+
+    return render(request, 'todo/list_lists.html', context)
 
 
 @user_passes_test(check_user_allowed)
@@ -80,12 +81,23 @@ def del_list(request, list_id: int, list_slug: str) -> HttpResponse:
         item_count_undone = Item.objects.filter(task_list=task_list.id, completed=False).count()
         item_count_total = Item.objects.filter(task_list=task_list.id).count()
 
-    return render(request, 'todo/del_list.html', locals())
+    context = {
+        "task_list": task_list,
+        "item_count_done": item_count_done,
+        "item_count_undone": item_count_undone,
+        "item_count_total": item_count_total,
+    }
+
+    return render(request, 'todo/del_list.html', context)
 
 
 def list_detail(request, list_id=None, list_slug=None, view_completed=False):
     """Display and manage items in a todo list.
     """
+
+    # Defaults
+    task_list = None
+    form = None
 
     if not list_slug == "mine":
         task_list = get_object_or_404(TaskList, id=list_id, slug=list_slug)
@@ -138,7 +150,16 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
                 'priority': 999,
             })
 
-    return render(request, 'todo/list_detail.html', locals())
+    context = {
+        "list_id": list_id,
+        "list_slug": list_slug,
+        "task_list": task_list,
+        "form": form,
+        "items": items,
+        "view_completed": view_completed,
+    }
+
+    return render(request, 'todo/list_detail.html', context)
 
 
 @user_passes_test(check_user_allowed)
@@ -169,7 +190,7 @@ def task_detail(request, task_id: int) -> HttpResponse:
                 )
                 c.save()
 
-                send_email_to_thread_participants(request, task):
+                send_email_to_thread_participants(request, task)
                 messages.success(request, "Notification email sent to thread participants.")
 
             messages.success(request, "The task has been edited.")
@@ -237,7 +258,11 @@ def add_list(request) -> HttpResponse:
         else:
             form = AddTaskListForm(request.user)
 
-    return render(request, 'todo/add_list.html', locals())
+    context = {
+        "form": form,
+    }
+
+    return render(request, 'todo/add_list.html', context)
 
 
 @user_passes_test(check_user_allowed)
@@ -323,4 +348,8 @@ def external_add(request) -> HttpResponse:
     else:
         form = AddExternalItemForm(initial={'priority': 999})
 
-    return render(request, 'todo/add_task_external.html', locals())
+    context = {
+        "form": form,
+    }
+
+    return render(request, 'todo/add_task_external.html', context)

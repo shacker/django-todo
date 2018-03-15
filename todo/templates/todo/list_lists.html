@@ -8,7 +8,7 @@
 
    <p>{{ item_count }} items in {{ list_count }} lists</p>
 
-   	{% regroup list_list by group as section_list %}
+   	{% regroup lists by group as section_list %}
 
     {% for group in section_list %}
         <h3>{{ group.grouper }}</h3>
