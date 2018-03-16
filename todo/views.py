@@ -106,9 +106,9 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
 
     else:
         # Show a specific list, ensuring permissions.
+        task_list = get_object_or_404(TaskList, id=list_id)
         if task_list.group not in request.user.groups.all() and not request.user.is_staff:
             raise PermissionDenied
-        task_list = get_object_or_404(TaskList, id=list_id)
         items = Item.objects.filter(task_list=task_list.id)
 
     # Additional filtering
