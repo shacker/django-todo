@@ -5,7 +5,20 @@ from todo import views
 app_name = 'todo'
 
 urlpatterns = [
+
     path('', views.list_lists, name="lists"),
+
+    # View reorder_tasks is only called by JQuery for drag/drop task ordering.
+    path(
+        'reorder_tasks/',
+        views.reorder_tasks,
+        name="reorder_tasks"),
+
+    # Allow users to post tasks from outside django-todo (e.g. for filing tickets - see docs)
+    path(
+        'ticket/add/',
+        views.external_add,
+        name="external_add"),
 
     # Three paths into `list_detail` view
     path(
@@ -44,12 +57,4 @@ urlpatterns = [
         'search/',
         views.search,
         name="search"),
-
-    # View reorder_tasks is only called by JQuery for drag/drop task ordering
-    # Fix me - this could be an op in the same view, rather than a separate view.
-    path('reorder_tasks/', views.reorder_tasks, name="reorder_tasks"),
-
-    path('ticket/add/', views.external_add, name="external_add"),
-    path('recent/added/', views.list_detail, {'list_slug': 'recent-add'}, name="recently_added"),
-    path('recent/completed/', views.list_detail, {'list_slug': 'recent-complete'}, name="recently_completed"),
 ]

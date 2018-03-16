@@ -69,6 +69,7 @@ def del_list(request, list_id: int, list_slug: str) -> HttpResponse:
 
     # Ensure user has permission to delete list. Admins can delete all lists.
     # Get the group this list belongs to, and check whether current user is a member of that group.
+    # FIXME: This means any group member can delete lists, which is probably too permissive.
     if task_list.group not in request.user.groups.all() or not request.user.is_staff:
         raise PermissionDenied
 
@@ -99,29 +100,29 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
     task_list = None
     form = None
 
-    if not list_slug == "mine":
-        task_list = get_object_or_404(TaskList, id=list_id, slug=list_slug)
+    # Which items to show on this list view?
+    if list_slug == "mine":
+        items = Item.objects.filter(assigned_to=request.user)
 
-        # Ensure user has permission to view list. Admins can view all lists.
-        # Get the group this task_list belongs to, and check whether current user is a member of that group.
+    else:
+        # Show a specific list, ensuring permissions.
         if task_list.group not in request.user.groups.all() and not request.user.is_staff:
             raise PermissionDenied
+        task_list = get_object_or_404(TaskList, id=list_id)
+        items = Item.objects.filter(task_list=task_list.id)
+
+    # Additional filtering
+    if view_completed:
+        items = items.filter(completed=True)
+    else:
+        items = items.filter(completed=False)
 
     if request.POST:
         # Process completed and deleted items on each POST
         toggle_done(request, request.POST.getlist('toggle_done_tasks'))
         toggle_deleted(request, request.POST.getlist('toggle_deleted_tasks'))
 
-    if list_slug == "mine":
-        items = Item.objects.filter(assigned_to=request.user)
-    else:
-        task_list = get_object_or_404(TaskList, id=list_id)
-        items = Item.objects.filter(task_list=task_list.id)
 
-    if view_completed:
-        items = items.filter(completed=True)
-    else:
-        items = items.filter(completed=False)
 
     # ######################
     #  Add New Task Form
@@ -144,7 +145,7 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
             return redirect(request.path)
     else:
         # Don't allow adding new tasks on some views
-        if list_slug != "mine" and list_slug != "recent-add" and list_slug != "recent-complete":
+        if list_slug not in ["mine", "recent-add", "recent-complete", ]:
             form = AddItemForm(task_list=task_list, initial={
                 'assigned_to': request.user.id,
                 'priority': 999,
