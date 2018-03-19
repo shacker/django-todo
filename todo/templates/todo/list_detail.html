@@ -1,4 +1,5 @@
 {% extends "todo/base.html" %}
+{% load staticfiles %}
 
 {% block title %}Todo List: {{ task_list.name }}{% endblock %}
 
@@ -7,31 +8,48 @@
   {% if list_slug != "mine" %}
     <form action="" name="add_task" method="post">
       {% csrf_token %}
-      <h2 id="slideToggle" >&rarr; Click to add task &larr;</h2>
-      <div id="AddTask">
-        <table class="table">
-           <tr>
-             <td><label for="id_title">Task:</label> {{ form.title }}</td>
-             <td><label for="id_due_date">Due date:</label> {{ form.due_date }}</td>
-             <td><label for="id_assigned">Assign to:</label> {{ form.assigned_to }}</td>
-             <td><label for="id_notify">Notify*:</label> <input type="checkbox" checked="checked" name="notify" value="1" id="notify"></td>
-           </tr>
-           <tr>
-             <td>
-               <label for="id_note">Note:</label>
-               {{ form.note }}
-               <p class="minor">*Email notifications will only be sent if task is assigned to someone besides yourself.</p>
-             </td>
-           </tr>
-        </table>
 
-        <input type="hidden" name="priority" value="999" id="id_priority">
-        <input type="hidden" name="created_by" value="{{ request.user.id }}" id="id_created_by">
-        <input type="hidden" name="task_list" value="{{ task_list.id }}" id="id_task_list">
-        <input type="hidden" name="created_date" value="{{ created_date }}" id="id_created_date">
-        <p><input type="submit" name="add_task" value="Add task" class="todo-button"></p>
+      <button class="btn btn-primary" id="AddTaskButton" type="button"
+        data-toggle="collapse" data-target="#AddTask">Add Task</button>
+
+      <div id="AddTask" class="collapse mt-3">
+          <div class="form-group">
+            <label for="id_title" name="title">Task</label>
+            <input type="text" class="form-control" id="id_title" name="title" required placeholder="Task title" value="{{ form.title.text }}">
+          </div>
+
+          <div class="form-group">
+            <label for="id_note">Description</label>
+            <textarea class="form-control" id="id_note" name="note"
+              rows="5" aria-describedby="inputNoteHelp">{{ form.note.text }}</textarea>
+            <small id="inputNoteHelp" class="form-text text-muted">Describe the task or bug. Provide steps to reproduce the issue.</small>
+          </div>
+
+          <div class="form-group">
+              <label for="id_due_date">Due Date</label>
+              <input type="date" class="form-control" id="id_due_date" name="due_date" value="{{ form.due_date.text }}">
+          </div>
+
+          <div class="form-group">
+              <label for="id_assigned_to">Assigned To</label>
+              {# See todo.forms.AddItemForm #}
+              {{form.assigned_to}}
+          </div>
+
+          <div class="form-group">
+              <label for="id_notify">Notify</label>
+              <input type="checkbox" checked="checked" class="form-control" id="id_notify" name="notify" aria-describedby="inputNotifyHelp" value="{{ form.notify.text }}">
+              <small id="inputNotifyHelp" class="form-text text-muted">Email notifications will only be sent if task is assigned to someone other than yourself.</small>
+          </div>
+
+          <input type="hidden" name="priority" value="999" id="id_priority">
+          <input type="hidden" name="created_by" value="{{ request.user.id }}" id="id_created_by">
+          <input type="hidden" name="task_list" value="{{ task_list.id }}" id="id_task_list">
+          <input type="hidden" name="created_date" value="{{ created_date }}" id="id_created_date">
+          <p><input type="submit" name="add_task" value="Submit" class="btn btn-primary"></p>
       </div>
     </form>
+    <hr />
   {% endif %}
 
   {% if items %}
@@ -40,7 +58,6 @@
     {% else %}
       <h1>{{ view_completed|yesno:"Completed tasks, Tasks" }} in "{{ task_list.name }}"</h1>
       <p>This list belongs to group {{ task_list.group }}</p>
-      <h3>Tasks :: Drag rows to set priorities</h3>
     {% endif %}
 
     <form action="" name="show_tasks" method="post">
@@ -91,6 +108,9 @@
             </tr>
           {% endfor %}
         </table>
+        <p>
+          <small><i>Drag rows to set priorities</i></small>
+        </p>
         <p><input type="submit" name="process_tasks" value="Continue..."  class="todo-button"></p>
     </form>
   {% else %}
@@ -112,6 +132,8 @@
 {% endblock %}
 
 {% block extra_js %}
+  <script src="{% static 'todo/js/jquery.tablednd_0_5.js' %}" type="text/javascript"></script>
+
   <script type="text/javascript">
     function order_tasks(data) {
       // The JQuery plugin tableDnD provides a serialize() function which provides the re-ordered
@@ -131,13 +153,14 @@
         }
       });
 
-      // Initially hide the Add Task form
-      $('#AddTask').hide();
-
-      // toggle slide to show the Add Task form when link clicked
-      $('#slideToggle').click(function(){
-        $(this).siblings('#AddTask').slideToggle();
-      });
     });
+
+    // When adding a task, change the text of the Add Task button
+    function handleClick()
+    {
+        console.log(this.innerHTML);
+        this.innerHTML = (this.innerHTML == 'Add Task' ? 'Cancel' : 'Add Task');
+    }
+    document.getElementById('AddTaskButton').onclick=handleClick;
   </script>
 {% endblock extra_js %}

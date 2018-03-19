@@ -24,19 +24,17 @@ class AddItemForm(ModelForm):
     must find other members of the groups the current list belongs to."""
 
     def __init__(self, task_list, *args, **kwargs):
-        super(AddItemForm, self).__init__(*args, **kwargs)
-        # debug:
-        # print(dir(self.fields['list']))
-        # print(self.fields['list'].initial)
+        super().__init__(*args, **kwargs)
         self.fields['assigned_to'].queryset = get_user_model().objects.filter(groups__in=[task_list.group])
-        self.fields['assigned_to'].label_from_instance = \
-            lambda obj: "%s (%s)" % (obj.get_full_name(), obj.username)
+        self.fields['assigned_to'].label_from_instance = lambda obj: "%s (%s)" % (obj.get_full_name(), obj.username)
+        self.fields['assigned_to'].widget.attrs = {
+            'id': 'id_assigned_to', 'class': "custom-select mb-3", 'name': 'assigned_to'}
 
     due_date = forms.DateField(
-        widget=forms.DateInput(attrs={'type': 'date'}), required=False)
+            widget=forms.DateInput(attrs={'type': 'date'}), required=False)
 
     title = forms.CharField(
-        widget=forms.widgets.TextInput(attrs={'size': 35}))
+        widget=forms.widgets.TextInput())
 
     note = forms.CharField(
         widget=forms.Textarea(), required=False)

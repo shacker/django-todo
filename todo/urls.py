@@ -6,7 +6,10 @@ app_name = 'todo'
 
 urlpatterns = [
 
-    path('', views.list_lists, name="lists"),
+    path(
+        '',
+        views.list_lists,
+        name="lists"),
 
     # View reorder_tasks is only called by JQuery for drag/drop task ordering.
     path(

@@ -122,8 +122,6 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
         toggle_done(request, request.POST.getlist('toggle_done_tasks'))
         toggle_deleted(request, request.POST.getlist('toggle_deleted_tasks'))
 
-
-
     # ######################
     #  Add New Task Form
     # ######################
@@ -240,6 +238,7 @@ def reorder_tasks(request) -> HttpResponse:
 def add_list(request) -> HttpResponse:
     """Allow users to add a new todo list to the group they're in.
     """
+
     if request.POST:
         form = AddTaskListForm(request.user, request.POST)
         if form.is_valid():
