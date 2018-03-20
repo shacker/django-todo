@@ -1,32 +1,33 @@
 {% extends "todo/base.html" %}
-
 {% block title %}Delete list{% endblock %}
 
 {% block content %}
+  {% if user.is_staff %}
+  <h1>Delete entire list: {{ task_list.name }} ?</h1>
 
-    {% if user.is_staff %}
-        <h1>Delete entire list: {{ task_list.name }} ?</h1>
+  <p>Category tally:</p>
 
-        <p>Category tally:</p>
+  <ul>
+    <li>Incomplete: {{ item_count_undone }} </li>
+    <li>Complete: {{ item_count_done }} </li>
+    <li>
+      <strong>Total: {{ item_count_total }}</strong>
+    </li>
+  </ul>
 
-         <ul>
-            <li>Incomplete: {{ item_count_undone }} </li>
-            <li>Complete: {{ item_count_done }} </li>
-            <li><strong>Total: {{ item_count_total }}</strong> </li>
-         </ul>
+  <p> ... all of which will be irretrievably
+    <strong>blown away</strong>. Are you sure you want to do that?</p>
 
-        <p> ... all of which will be irretrievably <strong>blown away</strong>. Are you sure you want to do that?</p>
+  <form action="" method="post" accept-charset="utf-8">
+    {% csrf_token %}
+    <input type="hidden" name="task_list" value="{{ task_list.id }}">
+    <p>
+      <a href="{% url 'todo:list_detail' task_list.id task_list.slug %}" class="btn btn-success">Return to list: {{ task_list.name }}</a>
+      <input type="submit" name="delete-confirm" value="Do it! &rarr;" class="btn btn-danger">
+    </p>
+  </form>
 
-        <form action="" method="post" accept-charset="utf-8">
-		    {% csrf_token %}
-            <input type="hidden" name="task_list" value="{{ task_list.id }}">
-            <p><input type="submit" name="delete-confirm" value="Do it! &rarr;" class="todo-button"> </p>
-        </form>
 
-        <a href="{% url 'todo:list_detail' task_list.id task_list.slug %}">Return to list: {{ task_list.name }}</a>
-
-    {% else %}
-        <p>Sorry, you don't have permission to delete lists. Please contact your group administrator.</p>
-    {% endif %}
-
-{% endblock %}
+{% else %}
+  <p>Sorry, you don't have permission to delete lists. Please contact your group administrator.</p>
+{% endif %} {% endblock %}

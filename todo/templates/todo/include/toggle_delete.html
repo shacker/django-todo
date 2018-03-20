@@ -1,0 +1,8 @@
+{% if list_slug != "mine" %} {% if view_completed %}
+  <a href="{% url 'todo:list_detail' list_id list_slug %}" class="btn btn-sm btn-warning">View incomplete tasks</a>
+{% else %}
+  <a href="{% url 'todo:list_detail_completed' list_id list_slug %}" class="btn btn-sm btn-info">View completed tasks</a>
+{% endif %}
+
+<a href="{% url 'todo:del_list' list_id list_slug %}" class="btn btn-sm btn-danger">Delete this list</a>
+{% endif %}
