@@ -1,51 +1,51 @@
 {% extends "todo/base.html" %}
 
-{% block title %}Task:
-  {{ task.title }}
-{% endblock %}
+{% block title %}Task:{{ task.title }}{% endblock %}
 
 {% block content %}
 
-  <h2>{{ task }}</h2>
-
-  <form action="" method="POST">
-    {% csrf_token %}
-
-    <p id="slideToggle">
-      <strong>&rarr; Click to edit details &larr;</strong>
-    </p>
-
-    <p>
-      <strong>In list:</strong>
-      <a href="{% url 'todo:list_detail' task.task_list.id task.task_list.slug %}">
-        {{ task.task_list }}
-      </a><br/>
-
-      <strong>Assigned to:</strong>
-      {% if task.assigned_to %}
-        {{ task.assigned_to.get_full_name }}
-      {% else %}
-        Anyone
+  <div class="card-deck">
+    <div class="card col-sm-8">
+      <div class="card-body">
+        <h3 class="card-title">{{ task.title }}</h3>
+        {% if task.note %}
+          <p class="card-text">{{ task.note|safe|urlize|linebreaks }}</p>
       {% endif %}
-      <br/>
+      </div>
+    </div>
 
-      <strong>Created by:</strong>
-      {{ task.created_by.first_name }}
-      {{ task.created_by.last_name }}<br/>
+    <div class="card col-sm-4">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+                <strong>Assigned to:</strong>
+                {% if task.assigned_to %}
+                  {{ task.assigned_to.get_full_name }}
+                {% else %}
+                  Anyone
+                {% endif %}
+            </li>
+            <li class="list-group-item">
+                <strong>Reported by:</strong> {{ task.created_by.get_full_name }}
+            </li>
+            <li class="list-group-item">
+                <strong>Due date:</strong> {{ task.due_date }}
+            </li>
+            <li class="list-group-item">
+                <strong>Completed:</strong> {{ task.completed|yesno:"Yes,No" }}
+            </li>
+            <li class="list-group-item">
+                <strong>In list:</strong>
+                <a href="{% url 'todo:list_detail' task.task_list.id task.task_list.slug %}">
+                  {{ task.task_list }}
+                </a>
+              </li>
+          </ul>
+        </div>
+      </div>
 
-      <strong>Due date:</strong>
-      {{ task.due_date }}<br/>
+    <button id="slideToggle" class="mt-3 btn btn-primary">Edit task</button>
 
-      <strong>Completed:</strong>
-      {{ form.completed|yesno:"Yes,No" }}<br/>
-    </p>
-
-    {% if task.note %}
-      <div class="task_note">
-        <strong>Note:</strong>
-        {{ task.note|safe|urlize|linebreaks }}</div>
-    {% endif %}
-
+    {% comment %} Needs form tag {% endcomment %}
     <div id="TaskEdit">
       <h3>Edit Task</h3>
 
@@ -96,7 +96,7 @@
     <textarea name="comment-body"></textarea>
     <p><input class="btn btn-primary" type="submit" value="Submit"></p>
 
-  </form>
+  
 
   <div class="task_comments">
     {% if comment_list %}
