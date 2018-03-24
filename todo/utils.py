@@ -8,8 +8,7 @@ from django.core.mail import send_mail
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 
-
-from todo.models import Item, TaskList, Comment
+from todo.models import Item, Comment
 
 
 def check_user_allowed(user: User) -> HttpResponse:
@@ -25,7 +24,10 @@ def check_user_allowed(user: User) -> HttpResponse:
 
 
 def toggle_done(request, items):
-    # Check for items in the mark_done POST array. If present, change status to complete.
+    """Check for items in the mark_done POST array. If present, change status to complete.
+    Takes a list of task IDs. No return value.
+    """
+
     for item in items:
         i = Item.objects.get(id=item)
         old_state = "completed" if i.completed else "incomplete"

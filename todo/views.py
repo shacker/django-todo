@@ -194,10 +194,14 @@ def task_detail(request, task_id: int) -> HttpResponse:
         if form.is_valid():
             form.save()
             messages.success(request, "The task has been edited.")
-
             return redirect('todo:list_detail', list_id=task.task_list.id, list_slug=task.task_list.slug)
     else:
         form = AddEditItemForm(request.user, instance=task, initial={'task_list': task.task_list})
+
+    # Mark complete
+    if request.POST.get('toggle_done'):
+        toggle_done(request, [task.id, ])
+        return redirect('todo:task_detail', task_id=task.id,)
 
     if task.due_date:
         thedate = task.due_date
