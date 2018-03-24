@@ -10,7 +10,7 @@
   {% regroup lists by group as section_list %}
   {% for group in section_list %}
     <h3>Group: {{ group.grouper }}</h3>
-    <ul class="list-group">
+    <ul class="list-group mb-4">
       {% for item in group.list %}
       <li class="list-group-item d-flex justify-content-between align-items-center">
         <a href="{% url 'todo:list_detail' item.id item.slug %}">{{ item.name }}</a>

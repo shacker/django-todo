@@ -13,6 +13,8 @@ class AddTaskListForm(ModelForm):
     def __init__(self, user, *args, **kwargs):
         super(AddTaskListForm, self).__init__(*args, **kwargs)
         self.fields['group'].queryset = Group.objects.filter(user=user)
+        self.fields['group'].widget.attrs = {
+            'id': 'id_group', 'class': "custom-select mb-3", 'name': 'group'}
 
     class Meta:
         model = TaskList
@@ -25,7 +27,7 @@ class AddEditItemForm(ModelForm):
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['assigned_to'].queryset = get_user_model().objects.filter(groups__in=user.groups.all())
+        self.fields['assigned_to'].queryset = get_user_model().objects.filter(groups__in=user.groups.all()).distinct()
         self.fields['assigned_to'].label_from_instance = lambda obj: "%s (%s)" % (obj.get_full_name(), obj.username)
         self.fields['assigned_to'].widget.attrs = {
             'id': 'id_assigned_to', 'class': "custom-select mb-3", 'name': 'assigned_to'}
