@@ -3,22 +3,27 @@
 {% block title %}Task:{{ task.title }}{% endblock %}
 
 {% block content %}
-
-  <button class="btn btn-primary" id="EditTaskButton" type="button"
-  data-toggle="collapse" data-target="#AddEditTask">Edit Task</button>
-
-  <div class="card-deck">
-    <div class="card col-sm-8">
-      <div class="card-body">
-        <h3 class="card-title">{{ task.title }}</h3>
-        {% if task.note %}
-          <p class="card-text">{{ task.note|safe|urlize|linebreaks }}</p>
+  <div class="row">
+    <div class="col-sm-8">
+      <h3 class="card-title">{{ task.title }}</h3>
+      {% if task.note %}
+        <p class="card-text">{{ task.note|safe|urlize|linebreaks }}</p>
       {% endif %}
-      </div>
     </div>
 
-    <div class="card col-sm-4">
-      <ul class="list-group list-group-flush">
+    <div class="col-sm-4">
+      <ul class="list-group">
+        <li class="list-group-item">
+          <form action="" method="post">
+            {% csrf_token %}
+
+            <button class="btn btn-sm btn-primary" id="EditTaskButton" type="button"
+            data-toggle="collapse" data-target="#AddEditTask">Edit Task</button>
+
+            <input class="btn btn-sm btn-info" id="CompleteTaskButton" type="submit" name="toggle_done"
+              value="{% if task.completed %}Mark Incomplete{% else %}Mark Done{% endif %}">
+          </form>
+        </li>
         <li class="list-group-item">
           <strong>Assigned to:</strong>
           {% if task.assigned_to %} {{ task.assigned_to.get_full_name }} {% else %} Anyone {% endif %}
@@ -40,7 +45,6 @@
         </li>
       </ul>
     </div>
-
   </div>
 
   <div id="TaskEdit">
@@ -48,18 +52,18 @@
     {% include 'todo/include/task_edit.html' %}
   </div>
 
-  <h3>Add comment</h3>
+  <h5>Add comment</h5>
   <form action="" method="post">
     {% csrf_token %}
     <div class="form-group">
       <textarea class="form-control" name="comment-body" rows="3"></textarea>
     </div>
-    <input class="btn btn-primary" type="submit" name="add_comment" value="Add Comment">
+    <input class="btn btn-sm btn-primary" type="submit" name="add_comment" value="Add Comment">
   </form>
 
-  <div class="task_comments">
+  <div class="task_comments mt-4">
     {% if comment_list %}
-      <h3>Comments on this task</h3>
+      <h5>Comments on this task</h5>
       {% for comment in comment_list %}
         <p>
           <strong>{{ comment.author.first_name }}
@@ -70,7 +74,7 @@
         {{ comment.body|safe|urlize|linebreaks }}
       {% endfor %}
     {% else %}
-        <h3>No comments (yet).</h3>
+        <h5>No comments (yet).</h5>
     {% endif %}
   </div>
 
