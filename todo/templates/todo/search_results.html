@@ -18,7 +18,7 @@
         <a href="{% url 'todo:list_detail' f.task_list.id f.task_list.slug %}">
           {{ f.task_list.name }}
         </a>
-        <br /> Assigned to: {% if f.assigned_to %}{{ f.assigned_to }}{% else %}Anyone{% endif %} (created by: {{ f.created_by }})
+        <br /> Assigned to: {% if f.assigned_to %}{{ f.assigned_to }}{% else %}Anyone{% endif %}
         <br /> Complete: {{ f.completed|yesno:"Yes,No" }}
       </span>
     </p>
