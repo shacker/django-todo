@@ -14,7 +14,7 @@ from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 
 from todo import settings
-from todo.forms import AddTaskListForm, AddItemForm, EditItemForm, AddExternalItemForm, SearchForm
+from todo.forms import AddTaskListForm, AddEditItemForm, AddExternalItemForm, SearchForm
 from todo.models import Item, TaskList, Comment
 from todo.utils import (
     toggle_done,
@@ -126,10 +126,11 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
     #  Add New Task Form
     # ######################
 
-    if request.POST.getlist('add_task'):
-        form = AddItemForm(task_list, request.POST, initial={
+    if request.POST.getlist('add_edit_task'):
+        form = AddEditItemForm(request.user, request.POST, initial={
             'assigned_to': request.user.id,
             'priority': 999,
+            'task_list': task_list
         })
 
         if form.is_valid():
@@ -144,9 +145,10 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
     else:
         # Don't allow adding new tasks on some views
         if list_slug not in ["mine", "recent-add", "recent-complete", ]:
-            form = AddItemForm(task_list=task_list, initial={
+            form = AddEditItemForm(request.user, initial={
                 'assigned_to': request.user.id,
                 'priority': 999,
+                'task_list': task_list
             })
 
     context = {
@@ -174,33 +176,33 @@ def task_detail(request, task_id: int) -> HttpResponse:
     if task.task_list.group not in request.user.groups.all() and not request.user.is_staff:
         raise PermissionDenied
 
-    if request.POST:
-        form = EditItemForm(request.POST, instance=task)
+    # Save submitted comments
+    if request.POST.get('add_comment'):
+        Comment.objects.create(
+            author=request.user,
+            task=task,
+            body=request.POST['comment-body'],
+        )
+
+        send_email_to_thread_participants(request, task)
+        messages.success(request, "Comment posted. Notification email sent to thread participants.")
+
+    # Save task edits
+    if request.POST.get('add_edit_task'):
+        form = AddEditItemForm(request.user, request.POST, instance=task, initial={'task_list': task.task_list})
 
         if form.is_valid():
             form.save()
-
-            # Also save submitted comment, if non-empty
-            if request.POST['comment-body']:
-                c = Comment(
-                    author=request.user,
-                    task=task,
-                    body=request.POST['comment-body'],
-                )
-                c.save()
-
-                send_email_to_thread_participants(request, task)
-                messages.success(request, "Notification email sent to thread participants.")
-
             messages.success(request, "The task has been edited.")
 
             return redirect('todo:list_detail', list_id=task.task_list.id, list_slug=task.task_list.slug)
     else:
-        form = EditItemForm(instance=task)
-        if task.due_date:
-            thedate = task.due_date
-        else:
-            thedate = datetime.datetime.now()
+        form = AddEditItemForm(request.user, instance=task, initial={'task_list': task.task_list})
+
+    if task.due_date:
+        thedate = task.due_date
+    else:
+        thedate = datetime.datetime.now()
 
     context = {
         "task": task,

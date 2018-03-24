@@ -6,49 +6,11 @@
 {% block content %}
 
   {% if list_slug != "mine" %}
-    <form action="" name="add_task" method="post">
-      {% csrf_token %}
+    <button class="btn btn-primary" id="AddTaskButton" type="button"
+      data-toggle="collapse" data-target="#AddEditTask">Add Task</button>
 
-      <button class="btn btn-primary" id="AddTaskButton" type="button"
-        data-toggle="collapse" data-target="#AddTask">Add Task</button>
-
-      <div id="AddTask" class="collapse mt-3">
-          <div class="form-group">
-            <label for="id_title" name="title">Task</label>
-            <input type="text" class="form-control" id="id_title" name="title" required placeholder="Task title" value="{{ form.title.text }}">
-          </div>
-
-          <div class="form-group">
-            <label for="id_note">Description</label>
-            <textarea class="form-control" id="id_note" name="note"
-              rows="5" aria-describedby="inputNoteHelp">{{ form.note.text }}</textarea>
-            <small id="inputNoteHelp" class="form-text text-muted">Describe the task or bug. Provide steps to reproduce the issue.</small>
-          </div>
-
-          <div class="form-group">
-              <label for="id_due_date">Due Date</label>
-              <input type="date" class="form-control" id="id_due_date" name="due_date" value="{{ form.due_date.text }}">
-          </div>
-
-          <div class="form-group">
-              <label for="id_assigned_to">Assigned To</label>
-              {# See todo.forms.AddItemForm #}
-              {{form.assigned_to}}
-          </div>
-
-          <div class="form-group">
-              <label for="id_notify">Notify</label>
-              <input type="checkbox" checked="checked" class="form-control" id="id_notify" name="notify" aria-describedby="inputNotifyHelp" value="{{ form.notify.text }}">
-              <small id="inputNotifyHelp" class="form-text text-muted">Email notifications will only be sent if task is assigned to someone other than yourself.</small>
-          </div>
-
-          <input type="hidden" name="priority" value="999" id="id_priority">
-          <input type="hidden" name="created_by" value="{{ request.user.id }}" id="id_created_by">
-          <input type="hidden" name="task_list" value="{{ task_list.id }}" id="id_task_list">
-          <input type="hidden" name="created_date" value="{{ created_date }}" id="id_created_date">
-          <p><input type="submit" name="add_task" value="Submit" class="btn btn-primary"></p>
-      </div>
-    </form>
+    {# Task edit / new task form #}
+    {% include 'todo/include/task_edit.html' %}
     <hr />
   {% endif %}
 
@@ -74,6 +36,7 @@
             <th>Comm</th>
             <th>Del</th>
           </tr>
+
           {% for task in items %}
             <tr id="{{ task.id }}">
               <td>
@@ -112,6 +75,7 @@
         </table>
 
         <input type="submit" name="process_tasks" value="Process selection"  class="btn btn-sm btn-success">
+
         {% include 'todo/include/toggle_delete.html' %}
 
     </form>

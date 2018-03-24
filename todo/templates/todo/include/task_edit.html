@@ -1,0 +1,54 @@
+{# Form used by both Add Task and Edit Task views #}
+
+<form action="" name="add_task" method="post">
+  {% csrf_token %}
+
+  <div id="AddEditTask" class="collapse mt-3">
+    <div class="form-group">
+      <label for="id_title" name="title">Task</label>
+      <input type="text" class="form-control" id="id_title" name="title" required placeholder="Task title"
+        value="{% if form.title.value %}{{ form.title.value }}{% endif %}">
+    </div>
+
+    <div class="form-group">
+      <label for="id_note">Description</label>
+      <textarea class="form-control" id="id_note" name="note" rows="5"
+        aria-describedby="inputNoteHelp">{% if form.note.value %}{{ form.note.value }}{% endif %}</textarea>
+      <small id="inputNoteHelp" class="form-text text-muted">
+        Describe the task or bug. Provide steps to reproduce the issue.
+      </small>
+    </div>
+
+    <div class="form-group">
+      <label for="id_due_date">Due Date</label>
+      <input type="date" class="form-control" id="id_due_date" name="due_date"
+        value="{% if form.due_date.value %}{{ form.due_date.value|date:"Y-m-d" }}{% endif %}">
+    </div>
+
+    <div class="form-group">
+      <label for="id_assigned_to">Assigned To</label>
+      {# See todo.forms.AddItemForm #}
+      {{form.assigned_to}}
+    </div>
+
+    <div class="form-group">
+      <label for="id_notify">Notify</label>
+      <input type="checkbox" checked="checked" class="form-control" id="id_notify" name="notify" aria-describedby="inputNotifyHelp"
+        value="{{ form.notify.text }}">
+      <small id="inputNotifyHelp" class="form-text text-muted">
+        Email notifications will only be sent if task is assigned to someone other than yourself.
+      </small>
+    </div>
+
+    <input type="hidden" name="priority"
+      value="{% if form.priority.value %}{{ form.priority.value }}{% else %}999{% endif %}" id="id_priority">
+    <input type="hidden" name="created_by" value="{{ request.user.id }}" id="id_created_by">
+    <input type="hidden" name="task_list" value="{{ form.task_list.value }}" id="id_task_list">
+    <input type="hidden" name="created_date" value="{{ created_date }}" id="id_created_date">
+
+    <p>
+      <input type="submit" name="add_edit_task" value="Submit" class="btn btn-primary">
+    </p>
+
+  </div>
+</form>

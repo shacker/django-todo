@@ -19,16 +19,17 @@ class AddTaskListForm(ModelForm):
         exclude = []
 
 
-class AddItemForm(ModelForm):
+class AddEditItemForm(ModelForm):
     """The picklist showing the users to which a new task can be assigned
     must find other members of the groups the current list belongs to."""
 
-    def __init__(self, task_list, *args, **kwargs):
+    def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['assigned_to'].queryset = get_user_model().objects.filter(groups__in=[task_list.group])
+        self.fields['assigned_to'].queryset = get_user_model().objects.filter(groups__in=user.groups.all())
         self.fields['assigned_to'].label_from_instance = lambda obj: "%s (%s)" % (obj.get_full_name(), obj.username)
         self.fields['assigned_to'].widget.attrs = {
             'id': 'id_assigned_to', 'class': "custom-select mb-3", 'name': 'assigned_to'}
+        self.fields['task_list'].value = kwargs['initial']['task_list'].id
 
     due_date = forms.DateField(
             widget=forms.DateInput(attrs={'type': 'date'}), required=False)
@@ -42,22 +43,6 @@ class AddItemForm(ModelForm):
     class Meta:
         model = Item
         exclude = []
-
-
-class EditItemForm(ModelForm):
-    """The picklist showing the users to which a new task can be assigned
-    must find other members of the groups the current list belongs to."""
-
-    def __init__(self, *args, **kwargs):
-        super(EditItemForm, self).__init__(*args, **kwargs)
-        self.fields['assigned_to'].queryset = get_user_model().objects.filter(
-            groups__in=[self.instance.task_list.group])
-
-    due_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
-
-    class Meta:
-        model = Item
-        exclude = ('created_date', 'created_by',)
 
 
 class AddExternalItemForm(ModelForm):
