@@ -1,7 +1,9 @@
 import datetime
 
+from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test, login_required
+from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
@@ -13,7 +15,6 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 
-from todo import settings
 from todo.forms import AddTaskListForm, AddEditItemForm, AddExternalItemForm, SearchForm
 from todo.models import Item, TaskList, Comment
 from todo.utils import (
@@ -21,10 +22,10 @@ from todo.utils import (
     toggle_deleted,
     send_notify_mail,
     send_email_to_thread_participants,
-    check_user_allowed)
+    )
 
 
-@user_passes_test(check_user_allowed)
+@login_required
 def list_lists(request) -> HttpResponse:
     """Homepage view - list of lists a user can view, and ability to add a list.
     """
@@ -61,7 +62,8 @@ def list_lists(request) -> HttpResponse:
     return render(request, 'todo/list_lists.html', context)
 
 
-@user_passes_test(check_user_allowed)
+@staff_member_required
+@login_required
 def del_list(request, list_id: int, list_slug: str) -> HttpResponse:
     """Delete an entire list. Danger Will Robinson! Only staff members should be allowed to access this view.
     """
@@ -70,7 +72,7 @@ def del_list(request, list_id: int, list_slug: str) -> HttpResponse:
     # Ensure user has permission to delete list. Admins can delete all lists.
     # Get the group this list belongs to, and check whether current user is a member of that group.
     # FIXME: This means any group member can delete lists, which is probably too permissive.
-    if task_list.group not in request.user.groups.all() or not request.user.is_staff:
+    if task_list.group not in request.user.groups.all() and not request.user.is_staff:
         raise PermissionDenied
 
     if request.method == 'POST':
@@ -92,6 +94,7 @@ def del_list(request, list_id: int, list_slug: str) -> HttpResponse:
     return render(request, 'todo/del_list.html', context)
 
 
+@login_required
 def list_detail(request, list_id=None, list_slug=None, view_completed=False):
     """Display and manage items in a todo list.
     """
@@ -163,7 +166,7 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
     return render(request, 'todo/list_detail.html', context)
 
 
-@user_passes_test(check_user_allowed)
+@login_required
 def task_detail(request, task_id: int) -> HttpResponse:
     """View task details. Allow task details to be edited. Process new comments on task.
     """
@@ -219,28 +222,30 @@ def task_detail(request, task_id: int) -> HttpResponse:
 
 
 @csrf_exempt
-@user_passes_test(check_user_allowed)
+@login_required
 def reorder_tasks(request) -> HttpResponse:
     """Handle task re-ordering (priorities) from JQuery drag/drop in list_detail.html
     """
     newtasklist = request.POST.getlist('tasktable[]')
-    # First item in received list is always empty - remove it
-    del newtasklist[0]
+    if newtasklist:
+        # First item in received list is always empty - remove it
+        del newtasklist[0]
 
-    # Re-prioritize each item in list
-    i = 1
-    for t in newtasklist:
-        newitem = Item.objects.get(pk=t)
-        newitem.priority = i
-        newitem.save()
-        i += 1
+        # Re-prioritize each item in list
+        i = 1
+        for t in newtasklist:
+            newitem = Item.objects.get(pk=t)
+            newitem.priority = i
+            newitem.save()
+            i += 1
 
     # All views must return an httpresponse of some kind ... without this we get
     # error 500s in the log even though things look peachy in the browser.
     return HttpResponse(status=201)
 
 
-@user_passes_test(check_user_allowed)
+@staff_member_required
+@login_required
 def add_list(request) -> HttpResponse:
     """Allow users to add a new todo list to the group they're in.
     """
@@ -271,7 +276,7 @@ def add_list(request) -> HttpResponse:
     return render(request, 'todo/add_list.html', context)
 
 
-@user_passes_test(check_user_allowed)
+@login_required
 def search(request) -> HttpResponse:
     """Search for tasks user has permission to see.
     """
@@ -318,10 +323,10 @@ def external_add(request) -> HttpResponse:
     Publicly filed tickets are unassigned unless settings.DEFAULT_ASSIGNEE exists.
     """
 
-    if not settings.DEFAULT_LIST_ID:
-        raise RuntimeError("This feature requires DEFAULT_LIST_ID in settings. See documentation.")
+    if not settings.TODO_DEFAULT_LIST_ID:
+        raise RuntimeError("This feature requires TODO_DEFAULT_LIST_ID: in settings. See documentation.")
 
-    if not TaskList.objects.filter(id=settings.DEFAULT_LIST_ID).exists():
+    if not TaskList.objects.filter(id=settings.TODO_DEFAULT_LIST_ID).exists():
         raise RuntimeError("There is no TaskList with ID specified for DEFAULT_LIST_ID in settings.")
 
     if request.POST:
@@ -330,10 +335,10 @@ def external_add(request) -> HttpResponse:
         if form.is_valid():
             current_site = Site.objects.get_current()
             item = form.save(commit=False)
-            item.task_list = TaskList.objects.get(id=settings.DEFAULT_LIST_ID)
+            item.task_list = TaskList.objects.get(id=settings.TODO_DEFAULT_LIST_ID)
             item.created_by = request.user
-            if settings.DEFAULT_ASSIGNEE:
-                item.assigned_to = User.objects.get(username=settings.DEFAULT_ASSIGNEE)
+            if settings.TODO_DEFAULT_ASSIGNEE:
+                item.assigned_to = User.objects.get(username=settings.TODO_DEFAULT_ASSIGNEE)
             item.save()
 
             # Send email to assignee if we have one
@@ -349,7 +354,7 @@ def external_add(request) -> HttpResponse:
 
             messages.success(request, "Your trouble ticket has been submitted. We'll get back to you soon.")
 
-            return redirect(settings.PUBLIC_SUBMIT_REDIRECT)
+            return redirect(settings.TODO_PUBLIC_SUBMIT_REDIRECT)
 
     else:
         form = AddExternalItemForm(initial={'priority': 999})

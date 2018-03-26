@@ -56,7 +56,7 @@ class Item(models.Model):
         return reverse('todo:task_detail', kwargs={'task_id': self.id, })
 
     # Auto-set the item creation / completed date
-    def save(self):
+    def save(self, **kwargs):
         # If Item is being marked complete, set the completed_date
         if self.completed:
             self.completed_date = datetime.datetime.now()

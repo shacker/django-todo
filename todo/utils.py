@@ -1,26 +1,11 @@
 import datetime
 
-from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
-from django.http import HttpResponse
 from django.template.loader import render_to_string
 
 from todo.models import Item, Comment
-
-
-def check_user_allowed(user: User) -> HttpResponse:
-    """
-    Verifies user is logged in, and in staff if that setting is enabled.
-    Per-object permission checks (e.g. to view a particular list) are in the views that handle those objects.
-    """
-
-    if hasattr(settings, "STAFF_ONLY") and getattr(settings, "STAFF_ONLY"):
-        return user.is_authenticated and user.is_staff
-    else:
-        return user.is_authenticated
 
 
 def toggle_done(request, items):
