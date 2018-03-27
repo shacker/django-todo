@@ -3,7 +3,6 @@ import datetime
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
@@ -23,6 +22,22 @@ from todo.utils import (
     send_notify_mail,
     send_email_to_thread_participants,
     )
+
+
+def staff_only(function):
+    """
+    Custom view decorator allows us to raise 403 on insufficient permissions,
+    rather than redirect user to login view.
+    """
+    def wrap(request, *args, **kwargs):
+        if request.user.is_staff:
+            return function(request, *args, **kwargs)
+        else:
+            raise PermissionDenied
+
+    wrap.__doc__ = function.__doc__
+    wrap.__name__ = function.__name__
+    return wrap
 
 
 @login_required
@@ -62,7 +77,7 @@ def list_lists(request) -> HttpResponse:
     return render(request, 'todo/list_lists.html', context)
 
 
-@staff_member_required
+@staff_only
 @login_required
 def del_list(request, list_id: int, list_slug: str) -> HttpResponse:
     """Delete an entire list. Danger Will Robinson! Only staff members should be allowed to access this view.
@@ -244,7 +259,7 @@ def reorder_tasks(request) -> HttpResponse:
     return HttpResponse(status=201)
 
 
-@staff_member_required
+@staff_only
 @login_required
 def add_list(request) -> HttpResponse:
     """Allow users to add a new todo list to the group they're in.
