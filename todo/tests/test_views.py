@@ -1,5 +1,6 @@
 import pytest
 
+from django.contrib.auth import get_user_model
 from django.urls import reverse
 
 from todo.models import Item, TaskList
@@ -14,7 +15,7 @@ After that, view contents and behaviors.
 
 @pytest.mark.django_db
 def test_todo_setup(todo_setup):
-    assert Item.objects.all().count() == 3
+    assert Item.objects.all().count() == 6
 
 
 def test_view_list_lists(todo_setup, admin_client):
@@ -87,8 +88,8 @@ def test_view_search(todo_setup, admin_client):
 # ### PERMISSIONS ###
 
 """
-Some views are for staff users only. We've already smoke-tested with Admin user -
-try these with normal user.
+Some views are for staff users only.
+We've already smoke-tested with Admin user - try these with normal user.
 """
 
 
@@ -96,7 +97,7 @@ def test_view_add_list_nonadmin(todo_setup, client):
     url = reverse('todo:add_list')
     client.login(username="you", password="password")
     response = client.get(url)
-    assert response.status_code == 302  # Redirects to login. Would prefer 403...
+    assert response.status_code == 403
 
 
 def test_view_del_list_nonadmin(todo_setup, client):
@@ -104,9 +105,31 @@ def test_view_del_list_nonadmin(todo_setup, client):
     url = reverse('todo:del_list', kwargs={'list_id': tlist.id, 'list_slug': tlist.slug})
     client.login(username="you", password="password")
     response = client.get(url)
-    assert response.status_code == 302  # Redirects to login. Would prefer 403...
+    assert response.status_code == 403
+
+
+def test_view_list_mine(todo_setup, client):
+    """View a list in a group I belong to.
+    """
+    tlist = TaskList.objects.get(slug="zip")  # User u1 is in this group's list
+    url = reverse('todo:list_detail', kwargs={'list_id': tlist.id, 'list_slug': tlist.slug})
+    client.login(username="u1", password="password")
+    response = client.get(url)
+    assert response.status_code == 200
+
+
+def test_view_list_not_mine(todo_setup, client):
+    """View a list in a group I don't belong to.
+    """
+    tlist = TaskList.objects.get(slug="zip")  # User u1 is in this group, user u2 is not.
+    url = reverse('todo:list_detail', kwargs={'list_id': tlist.id, 'list_slug': tlist.slug})
+    client.login(username="u2", password="password")
+    response = client.get(url)
+    assert response.status_code == 403
+
 
 
 # TODO
-# View a task that's not in one of my groups?
+# View a task in a list in a group I do / don't belong to.
 # Mark complete
+# staff_only decorator

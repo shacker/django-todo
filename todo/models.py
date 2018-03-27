@@ -17,15 +17,11 @@ class TaskList(models.Model):
     def __str__(self):
         return self.name
 
-    def list_detail(self):
-        # Count all incomplete tasks on the current list instance
-        return Item.objects.filter(task_list=self, completed=0)
-
     class Meta:
         ordering = ["name"]
         verbose_name_plural = "Task Lists"
 
-        # Prevents (at the database level) creation of two lists with the same name in the same group
+        # Prevents (at the database level) creation of two lists with the same slug in the same group
         unique_together = ("group", "slug")
 
 
