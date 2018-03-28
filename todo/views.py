@@ -137,8 +137,13 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
 
     if request.POST:
         # Process completed and deleted items on each POST
-        toggle_done(request, request.POST.getlist('toggle_done_tasks'))
-        toggle_deleted(request, request.POST.getlist('toggle_deleted_tasks'))
+        results_changed = toggle_done(request.POST.getlist('toggle_done_tasks'))
+        for res in results_changed:
+            messages.success(request, res)
+
+        results_changed = toggle_deleted(request, request.POST.getlist('toggle_deleted_tasks'))
+        for res in results_changed:
+            messages.success(request, res)
 
     # ######################
     #  Add New Task Form
@@ -156,7 +161,7 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
 
             # Send email alert only if Notify checkbox is checked AND assignee is not same as the submitter
             if "notify" in request.POST and new_task.assigned_to != request.user:
-                send_notify_mail(request, new_task)
+                send_notify_mail(new_task)
 
             messages.success(request, "New task \"{t}\" has been added.".format(t=new_task.title))
             return redirect(request.path)
@@ -202,7 +207,7 @@ def task_detail(request, task_id: int) -> HttpResponse:
             body=request.POST['comment-body'],
         )
 
-        send_email_to_thread_participants(request, task)
+        send_email_to_thread_participants(task, request.POST['comment-body'], request.user)
         messages.success(request, "Comment posted. Notification email sent to thread participants.")
 
     # Save task edits
@@ -218,7 +223,10 @@ def task_detail(request, task_id: int) -> HttpResponse:
 
     # Mark complete
     if request.POST.get('toggle_done'):
-        toggle_done(request, [task.id, ])
+        results_changed = toggle_done([task.id, ])
+        for res in results_changed:
+            messages.success(request, res)
+
         return redirect('todo:task_detail', task_id=task.id,)
 
     if task.due_date:
