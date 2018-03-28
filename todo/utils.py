@@ -42,7 +42,7 @@ def send_notify_mail(new_task):
     # Send email to assignee if task is assigned to someone other than submittor.
     # Unassigned tasks should not try to notify.
 
-    if new_task.assigned_to:
+    if not new_task.assigned_to == new_task.created_by:
         current_site = Site.objects.get_current()
         email_subject = render_to_string("todo/email/assigned_subject.txt", {'task': new_task})
         email_body = render_to_string(
