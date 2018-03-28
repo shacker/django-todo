@@ -14,7 +14,7 @@ def todo_setup(django_user_model):
     u1.groups.add(g1)
     tlist1 = TaskList.objects.create(group=g1, name="Zip", slug="zip")
     Item.objects.create(created_by=u1, title="Task 1", task_list=tlist1, priority=1)
-    Item.objects.create(created_by=u1, title="Task 2", task_list=tlist1, priority=2)
+    Item.objects.create(created_by=u1, title="Task 2", task_list=tlist1, priority=2, completed=True)
     Item.objects.create(created_by=u1, title="Task 3", task_list=tlist1, priority=3)
 
     g2 = Group.objects.create(name="Workgroup Two")
@@ -22,5 +22,5 @@ def todo_setup(django_user_model):
     u2.groups.add(g2)
     tlist2 = TaskList.objects.create(group=g2, name="Zap", slug="zap")
     Item.objects.create(created_by=u2, title="Task 1", task_list=tlist2, priority=1)
-    Item.objects.create(created_by=u2, title="Task 2", task_list=tlist2, priority=2)
+    Item.objects.create(created_by=u2, title="Task 2", task_list=tlist2, priority=2, completed=True)
     Item.objects.create(created_by=u2, title="Task 3", task_list=tlist2, priority=3)

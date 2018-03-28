@@ -1,6 +1,6 @@
 import pytest
 
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.urls import reverse
 
 from todo.models import Item, TaskList
@@ -90,6 +90,7 @@ def test_view_search(todo_setup, admin_client):
 """
 Some views are for staff users only.
 We've already smoke-tested with Admin user - try these with normal user.
+These exercise our custom @staff_only decorator without calling that function explicitly.
 """
 
 
@@ -128,8 +129,36 @@ def test_view_list_not_mine(todo_setup, client):
     assert response.status_code == 403
 
 
+def test_view_task_mine(todo_setup, client):
+    # Users can always view their own tasks
+    task = Item.objects.filter(created_by__username="u1").first()
+    client.login(username="u1", password="password")
+    url = reverse('todo:task_detail', kwargs={'task_id': task.id})
+    response = client.get(url)
+    assert response.status_code == 200
 
-# TODO
-# View a task in a list in a group I do / don't belong to.
-# Mark complete
-# staff_only decorator
+
+def test_view_task_my_group(todo_setup, client, django_user_model):
+    # User can always view tasks that are NOT theirs IF the task is in a shared group.
+    # u1 and u2 are in different groups in the fixture -
+    # Put them in the same group.
+    g1 = Group.objects.get(name="Workgroup One")
+    u2 = django_user_model.objects.get(username="u2")
+    u2.groups.add(g1)
+
+    # Now u2 should be able to view one of u1's tasks.
+    task = Item.objects.filter(created_by__username="u1").first()
+    url = reverse('todo:task_detail', kwargs={'task_id': task.id})
+    client.login(username="u2", password="password")
+    response = client.get(url)
+    assert response.status_code == 200
+
+
+def test_view_task_not_in_my_group(todo_setup, client):
+    # User canNOT view a task that isn't theirs if the two users are not in a shared group.
+    # For this we can use the fixture data as-is.
+    task = Item.objects.filter(created_by__username="u1").first()
+    url = reverse('todo:task_detail', kwargs={'task_id': task.id})
+    client.login(username="u2", password="password")
+    response = client.get(url)
+    assert response.status_code == 403
