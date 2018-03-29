@@ -4,35 +4,35 @@ from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 
-from todo.models import Item, Comment
+from todo.models import Task, Comment
 
 
-def toggle_done(item_ids):
-    """Check for items in the mark_done POST array. If present, change status to complete.
+def toggle_done(task_ids):
+    """Check for tasks in the mark_done POST array. If present, change status to complete.
     Takes a list of task IDs. Returns list of status change strings.
     """
 
     _ret = []
-    for item_id in item_ids:
-        i = Item.objects.get(id=item_id)
+    for task_id in task_ids:
+        i = Task.objects.get(id=task_id)
         old_state = "completed" if i.completed else "incomplete"
         i.completed = not i.completed  # Invert the done state, either way
         new_state = "completed" if i.completed else "incomplete"
         i.completed_date = datetime.datetime.now()
         i.save()
-        _ret.append("Item \"{i}\" changed from {o} to {n}.".format(i=i.title, o=old_state, n=new_state))
+        _ret.append("Task \"{i}\" changed from {o} to {n}.".format(i=i.title, o=old_state, n=new_state))
 
     return _ret
 
 
-def toggle_deleted(deleted_item_ids):
-    """Delete selected items. Returns list of status change strings.
+def toggle_deleted(deleted_task_ids):
+    """Delete selected tasks. Returns list of status change strings.
     """
 
     _ret = []
-    for item_id in deleted_item_ids:
-        i = Item.objects.get(id=item_id)
-        _ret.append("Item \"{i}\" deleted.".format(i=i.title))
+    for task_id in deleted_task_ids:
+        i = Task.objects.get(id=task_id)
+        _ret.append("Task \"{i}\" deleted.".format(i=i.title))
         i.delete()
 
     return _ret

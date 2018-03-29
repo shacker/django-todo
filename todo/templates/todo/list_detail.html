@@ -14,7 +14,7 @@
     <hr />
   {% endif %}
 
-  {% if items %}
+  {% if tasks %}
     {% if list_slug == "mine" %}
       <h1>Tasks assigned to me (in all groups)</h1>
     {% else %}
@@ -37,7 +37,7 @@
             <th>Del</th>
           </tr>
 
-          {% for task in items %}
+          {% for task in tasks %}
             <tr id="{{ task.id }}">
               <td>
                   <input type="checkbox" name="toggle_done_tasks"
@@ -80,7 +80,7 @@
 
     </form>
   {% else %}
-    <h4>No items on this list yet (add one!)</h4>
+    <h4>No tasks on this list yet (add one!)</h4>
     {% include 'todo/include/toggle_delete.html' %}
 
   {% endif %}

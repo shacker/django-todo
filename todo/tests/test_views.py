@@ -3,7 +3,7 @@ import pytest
 from django.contrib.auth.models import Group
 from django.urls import reverse
 
-from todo.models import Item, TaskList
+from todo.models import Task, TaskList
 
 """
 First the "smoketests" - do they respond at all for a logged in admin user?
@@ -15,7 +15,7 @@ After that, view contents and behaviors.
 
 @pytest.mark.django_db
 def test_todo_setup(todo_setup):
-    assert Item.objects.all().count() == 6
+    assert Task.objects.all().count() == 6
 
 
 def test_view_list_lists(todo_setup, admin_client):
@@ -73,7 +73,7 @@ def test_view_add_list(todo_setup, admin_client):
 
 
 def test_view_task_detail(todo_setup, admin_client):
-    task = Item.objects.first()
+    task = Task.objects.first()
     url = reverse('todo:task_detail', kwargs={'task_id': task.id})
     response = admin_client.get(url)
     assert response.status_code == 200
@@ -131,7 +131,7 @@ def test_view_list_not_mine(todo_setup, client):
 
 def test_view_task_mine(todo_setup, client):
     # Users can always view their own tasks
-    task = Item.objects.filter(created_by__username="u1").first()
+    task = Task.objects.filter(created_by__username="u1").first()
     client.login(username="u1", password="password")
     url = reverse('todo:task_detail', kwargs={'task_id': task.id})
     response = client.get(url)
@@ -147,7 +147,7 @@ def test_view_task_my_group(todo_setup, client, django_user_model):
     u2.groups.add(g1)
 
     # Now u2 should be able to view one of u1's tasks.
-    task = Item.objects.filter(created_by__username="u1").first()
+    task = Task.objects.filter(created_by__username="u1").first()
     url = reverse('todo:task_detail', kwargs={'task_id': task.id})
     client.login(username="u2", password="password")
     response = client.get(url)
@@ -157,7 +157,7 @@ def test_view_task_my_group(todo_setup, client, django_user_model):
 def test_view_task_not_in_my_group(todo_setup, client):
     # User canNOT view a task that isn't theirs if the two users are not in a shared group.
     # For this we can use the fixture data as-is.
-    task = Item.objects.filter(created_by__username="u1").first()
+    task = Task.objects.filter(created_by__username="u1").first()
     url = reverse('todo:task_detail', kwargs={'task_id': task.id})
     client.login(username="u2", password="password")
     response = client.get(url)

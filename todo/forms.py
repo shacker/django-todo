@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.models import Group
-from todo.models import Item, TaskList
+from todo.models import Task, TaskList
 from django.contrib.auth import get_user_model
 
 
@@ -21,7 +21,7 @@ class AddTaskListForm(ModelForm):
         exclude = []
 
 
-class AddEditItemForm(ModelForm):
+class AddEditTaskForm(ModelForm):
     """The picklist showing the users to which a new task can be assigned
     must find other members of the groups the current list belongs to."""
 
@@ -43,11 +43,11 @@ class AddEditItemForm(ModelForm):
         widget=forms.Textarea(), required=False)
 
     class Meta:
-        model = Item
+        model = Task
         exclude = []
 
 
-class AddExternalItemForm(ModelForm):
+class AddExternalTaskForm(ModelForm):
     """Form to allow users who are not part of the GTD system to file a ticket."""
 
     title = forms.CharField(
@@ -63,7 +63,7 @@ class AddExternalItemForm(ModelForm):
     )
 
     class Meta:
-        model = Item
+        model = Task
         exclude = (
             'task_list', 'created_date', 'due_date', 'created_by', 'assigned_to', 'completed', 'completed_date', )
 

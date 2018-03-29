@@ -14,8 +14,8 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 
-from todo.forms import AddTaskListForm, AddEditItemForm, AddExternalItemForm, SearchForm
-from todo.models import Item, TaskList, Comment
+from todo.forms import AddTaskListForm, AddEditTaskForm, AddExternalTaskForm, SearchForm
+from todo.models import Task, TaskList, Comment
 from todo.utils import (
     toggle_done,
     toggle_deleted,
@@ -62,16 +62,16 @@ def list_lists(request) -> HttpResponse:
 
     # superusers see all lists, so count shouldn't filter by just lists the admin belongs to
     if request.user.is_superuser:
-        item_count = Item.objects.filter(completed=0).count()
+        task_count = Task.objects.filter(completed=0).count()
     else:
-        item_count = Item.objects.filter(completed=0).filter(task_list__group__in=request.user.groups.all()).count()
+        task_count = Task.objects.filter(completed=0).filter(task_list__group__in=request.user.groups.all()).count()
 
     context = {
        "lists": lists,
        "thedate": thedate,
        "searchform": searchform,
        "list_count": list_count,
-       "item_count": item_count,
+       "task_count": task_count,
     }
 
     return render(request, 'todo/list_lists.html', context)
@@ -95,15 +95,15 @@ def del_list(request, list_id: int, list_slug: str) -> HttpResponse:
         messages.success(request, "{list_name} is gone.".format(list_name=task_list.name))
         return redirect('todo:lists')
     else:
-        item_count_done = Item.objects.filter(task_list=task_list.id, completed=True).count()
-        item_count_undone = Item.objects.filter(task_list=task_list.id, completed=False).count()
-        item_count_total = Item.objects.filter(task_list=task_list.id).count()
+        task_count_done = Task.objects.filter(task_list=task_list.id, completed=True).count()
+        task_count_undone = Task.objects.filter(task_list=task_list.id, completed=False).count()
+        task_count_total = Task.objects.filter(task_list=task_list.id).count()
 
     context = {
         "task_list": task_list,
-        "item_count_done": item_count_done,
-        "item_count_undone": item_count_undone,
-        "item_count_total": item_count_total,
+        "task_count_done": task_count_done,
+        "task_count_undone": task_count_undone,
+        "task_count_total": task_count_total,
     }
 
     return render(request, 'todo/del_list.html', context)
@@ -111,37 +111,37 @@ def del_list(request, list_id: int, list_slug: str) -> HttpResponse:
 
 @login_required
 def list_detail(request, list_id=None, list_slug=None, view_completed=False):
-    """Display and manage items in a todo list.
+    """Display and manage tasks in a todo list.
     """
 
     # Defaults
     task_list = None
     form = None
 
-    # Which items to show on this list view?
+    # Which tasks to show on this list view?
     if list_slug == "mine":
-        items = Item.objects.filter(assigned_to=request.user)
+        tasks =Task.objects.filter(assigned_to=request.user)
 
     else:
         # Show a specific list, ensuring permissions.
         task_list = get_object_or_404(TaskList, id=list_id)
         if task_list.group not in request.user.groups.all() and not request.user.is_staff:
             raise PermissionDenied
-        items = Item.objects.filter(task_list=task_list.id)
+        tasks = Task.objects.filter(task_list=task_list.id)
 
     # Additional filtering
     if view_completed:
-        items = items.filter(completed=True)
+        tasks = tasks.filter(completed=True)
     else:
-        items = items.filter(completed=False)
+        tasks = tasks.filter(completed=False)
 
     if request.POST:
-        # Process completed and deleted items on each POST
+        # Process completed and deleted tasks on each POST
         results_changed = toggle_done(request.POST.getlist('toggle_done_tasks'))
         for res in results_changed:
             messages.success(request, res)
 
-        results_changed = toggle_deleted(request, request.POST.getlist('toggle_deleted_tasks'))
+        results_changed = toggle_deleted(request.POST.getlist('toggle_deleted_tasks'))
         for res in results_changed:
             messages.success(request, res)
 
@@ -150,7 +150,7 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
     # ######################
 
     if request.POST.getlist('add_edit_task'):
-        form = AddEditItemForm(request.user, request.POST, initial={
+        form = AddEditTaskForm(request.user, request.POST, initial={
             'assigned_to': request.user.id,
             'priority': 999,
             'task_list': task_list
@@ -168,7 +168,7 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
     else:
         # Don't allow adding new tasks on some views
         if list_slug not in ["mine", "recent-add", "recent-complete", ]:
-            form = AddEditItemForm(request.user, initial={
+            form = AddEditTaskForm(request.user, initial={
                 'assigned_to': request.user.id,
                 'priority': 999,
                 'task_list': task_list
@@ -179,7 +179,7 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
         "list_slug": list_slug,
         "task_list": task_list,
         "form": form,
-        "items": items,
+        "tasks": tasks,
         "view_completed": view_completed,
     }
 
@@ -191,10 +191,10 @@ def task_detail(request, task_id: int) -> HttpResponse:
     """View task details. Allow task details to be edited. Process new comments on task.
     """
 
-    task = get_object_or_404(Item, pk=task_id)
+    task = get_object_or_404(Task, pk=task_id)
     comment_list = Comment.objects.filter(task=task_id)
 
-    # Ensure user has permission to view item. Admins can view all tasks.
+    # Ensure user has permission to view task. Admins can view all tasks.
     # Get the group this task belongs to, and check whether current user is a member of that group.
     if task.task_list.group not in request.user.groups.all() and not request.user.is_staff:
         raise PermissionDenied
@@ -212,14 +212,14 @@ def task_detail(request, task_id: int) -> HttpResponse:
 
     # Save task edits
     if request.POST.get('add_edit_task'):
-        form = AddEditItemForm(request.user, request.POST, instance=task, initial={'task_list': task.task_list})
+        form = AddEditTaskForm(request.user, request.POST, instance=task, initial={'task_list': task.task_list})
 
         if form.is_valid():
             form.save()
             messages.success(request, "The task has been edited.")
             return redirect('todo:list_detail', list_id=task.task_list.id, list_slug=task.task_list.slug)
     else:
-        form = AddEditItemForm(request.user, instance=task, initial={'task_list': task.task_list})
+        form = AddEditTaskForm(request.user, instance=task, initial={'task_list': task.task_list})
 
     # Mark complete
     if request.POST.get('toggle_done'):
@@ -251,15 +251,15 @@ def reorder_tasks(request) -> HttpResponse:
     """
     newtasklist = request.POST.getlist('tasktable[]')
     if newtasklist:
-        # First item in received list is always empty - remove it
+        # First task in received list is always empty - remove it
         del newtasklist[0]
 
-        # Re-prioritize each item in list
+        # Re-prioritize each task in list
         i = 1
         for t in newtasklist:
-            newitem = Item.objects.get(pk=t)
-            newitem.priority = i
-            newitem.save()
+            newtask = Task.objects.get(pk=t)
+            newtask.priority = i
+            newtask.save()
             i += 1
 
     # All views must return an httpresponse of some kind ... without this we get
@@ -306,33 +306,33 @@ def search(request) -> HttpResponse:
     if request.GET:
 
         query_string = ''
-        found_items = None
+        found_tasks = None
         if ('q' in request.GET) and request.GET['q'].strip():
             query_string = request.GET['q']
 
-            found_items = Item.objects.filter(
+            found_tasks = Task.objects.filter(
                 Q(title__icontains=query_string) |
                 Q(note__icontains=query_string)
             )
         else:
             # What if they selected the "completed" toggle but didn't enter a query string?
-            # We still need found_items in a queryset so it can be "excluded" below.
-            found_items = Item.objects.all()
+            # We still need found_tasks in a queryset so it can be "excluded" below.
+            found_tasks = Task.objects.all()
 
         if 'inc_complete' in request.GET:
-            found_items = found_items.exclude(completed=True)
+            found_tasks = found_tasks.exclude(completed=True)
 
     else:
         query_string = None
-        found_items = None
+        found_tasks =None
 
-    # Only include items that are in groups of which this user is a member:
+    # Only include tasks that are in groups of which this user is a member:
     if not request.user.is_superuser:
-        found_items = found_items.filter(task_list__group__in=request.user.groups.all())
+        found_tasks = found_tasks.filter(task_list__group__in=request.user.groups.all())
 
     context = {
         'query_string': query_string,
-        'found_items': found_items
+        'found_tasks': found_tasks
     }
     return render(request, 'todo/search_results.html', context)
 
@@ -353,25 +353,25 @@ def external_add(request) -> HttpResponse:
         raise RuntimeError("There is no TaskList with ID specified for DEFAULT_LIST_ID in settings.")
 
     if request.POST:
-        form = AddExternalItemForm(request.POST)
+        form = AddExternalTaskForm(request.POST)
 
         if form.is_valid():
             current_site = Site.objects.get_current()
-            item = form.save(commit=False)
-            item.task_list = TaskList.objects.get(id=settings.TODO_DEFAULT_LIST_ID)
-            item.created_by = request.user
+            task = form.save(commit=False)
+            task.task_list = TaskList.objects.get(id=settings.TODO_DEFAULT_LIST_ID)
+            task.created_by = request.user
             if settings.TODO_DEFAULT_ASSIGNEE:
-                item.assigned_to = User.objects.get(username=settings.TODO_DEFAULT_ASSIGNEE)
-            item.save()
+                task.assigned_to = User.objects.get(username=settings.TODO_DEFAULT_ASSIGNEE)
+            task.save()
 
             # Send email to assignee if we have one
-            if item.assigned_to:
-                email_subject = render_to_string("todo/email/assigned_subject.txt", {'task': item.title})
-                email_body = render_to_string("todo/email/assigned_body.txt", {'task': item, 'site': current_site, })
+            if task.assigned_to:
+                email_subject = render_to_string("todo/email/assigned_subject.txt", {'task': task.title})
+                email_body = render_to_string("todo/email/assigned_body.txt", {'task': task, 'site': current_site, })
                 try:
                     send_mail(
-                        email_subject, email_body, item.created_by.email,
-                        [item.assigned_to.email, ], fail_silently=False)
+                        email_subject, email_body, task.created_by.email,
+                        [task.assigned_to.email, ], fail_silently=False)
                 except ConnectionRefusedError:
                     messages.error(request, "Task saved but mail not sent. Contact your administrator.")
 
@@ -380,7 +380,7 @@ def external_add(request) -> HttpResponse:
             return redirect(settings.TODO_PUBLIC_SUBMIT_REDIRECT)
 
     else:
-        form = AddExternalItemForm(initial={'priority': 999})
+        form = AddExternalTaskForm(initial={'priority': 999})
 
     context = {
         "form": form,

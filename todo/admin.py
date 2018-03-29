@@ -1,8 +1,8 @@
 from django.contrib import admin
-from todo.models import Item, TaskList, Comment
+from todo.models import Task, TaskList, Comment
 
 
-class ItemAdmin(admin.ModelAdmin):
+class TaskAdmin(admin.ModelAdmin):
     list_display = ('title', 'task_list', 'completed', 'priority', 'due_date')
     list_filter = ('task_list',)
     ordering = ('priority',)
@@ -15,4 +15,4 @@ class CommentAdmin(admin.ModelAdmin):
 
 admin.site.register(TaskList)
 admin.site.register(Comment, CommentAdmin)
-admin.site.register(Item, ItemAdmin)
+admin.site.register(Task, TaskAdmin)

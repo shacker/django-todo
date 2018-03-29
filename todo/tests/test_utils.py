@@ -2,7 +2,7 @@ import pytest
 
 from django.core import mail
 
-from todo.models import Item, Comment
+from todo.models import Task, Comment
 from todo.utils import toggle_done, toggle_deleted, send_notify_mail, send_email_to_thread_participants
 
 
@@ -15,7 +15,7 @@ def email_backend_setup(settings):
 def test_toggle_done(todo_setup):
     """Utility function takes an array of POSTed IDs and changes their `completed` status.
     """
-    u1_tasks = Item.objects.filter(created_by__username="u1")
+    u1_tasks = Task.objects.filter(created_by__username="u1")
     completed = u1_tasks.filter(completed=True)
     incomplete = u1_tasks.filter(completed=False)
 
@@ -38,13 +38,13 @@ def test_toggle_done(todo_setup):
 def test_toggle_deleted(todo_setup):
     """Unlike toggle_done, delete means delete, so it's not really a toggle.
     """
-    u1_tasks = Item.objects.filter(created_by__username="u1")
+    u1_tasks = Task.objects.filter(created_by__username="u1")
     assert u1_tasks.count() == 3
     t1 = u1_tasks.first()
     t2 = u1_tasks.last()
 
     toggle_deleted([t1.id, t2.id, ])
-    u1_tasks = Item.objects.filter(created_by__username="u1")
+    u1_tasks = Task.objects.filter(created_by__username="u1")
     assert u1_tasks.count() == 1
 
 
@@ -56,7 +56,7 @@ def test_send_notify_mail_not_me(todo_setup, django_user_model, email_backend_se
     u1 = django_user_model.objects.get(username="u1")
     u2 = django_user_model.objects.get(username="u2")
 
-    task = Item.objects.filter(created_by=u1).first()
+    task = Task.objects.filter(created_by=u1).first()
     task.assigned_to = u2
     task.save()
     send_notify_mail(task)
@@ -68,7 +68,7 @@ def test_send_notify_mail_myself(todo_setup, django_user_model, email_backend_se
     """
 
     u1 = django_user_model.objects.get(username="u1")
-    task = Item.objects.filter(created_by=u1).first()
+    task = Task.objects.filter(created_by=u1).first()
     task.assigned_to = u1
     task.save()
     send_notify_mail(task)
@@ -80,7 +80,7 @@ def test_send_email_to_thread_participants(todo_setup, django_user_model, email_
     Notification email should be sent to all three users."""
 
     u1 = django_user_model.objects.get(username="u1")
-    task = Item.objects.filter(created_by=u1).first()
+    task = Task.objects.filter(created_by=u1).first()
 
     u3 = django_user_model.objects.create_user(username="u3", password="zzz", email="u3@example.com")
     u4 = django_user_model.objects.create_user(username="u4", password="zzz", email="u4@example.com")
