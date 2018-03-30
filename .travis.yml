@@ -1,5 +1,27 @@
-language: python
+sudo: true
+
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq build-essential gettext python-dev zlib1g-dev libpq-dev xvfb libjpeg8-dev
+  - sudo apt-get install -qq python-setuptools python3-dev python-virtualenv python-pip
+
+addons:
+  postgresql: "9.6"
+
 install:
-  - pip install virtualenv
-script:
-  - python setup.py test
+  - "pip3 install -e . --upgrade"
+  - "pip3 install git+https://github.com/pypa/pipenv.git"
+  - "pipenv install --dev"
+
+language: python
+python:
+  - "3.6"
+
+# Attempt to use cached versions of python deps
+cache: pip
+
+cache:
+    directories:
+        - $HOME/.cache/pip
+
+script: pipenv run pytest -x -v

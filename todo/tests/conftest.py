@@ -5,6 +5,7 @@ from django.contrib.auth.models import Group
 from todo.models import Task, TaskList
 
 
+
 @pytest.fixture
 def todo_setup(django_user_model):
     # Two groups with different users, two sets of tasks.
