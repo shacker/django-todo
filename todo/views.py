@@ -13,6 +13,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
 
 from todo.forms import AddTaskListForm, AddEditTaskForm, AddExternalTaskForm, SearchForm
 from todo.models import Task, TaskList, Comment
@@ -120,7 +121,7 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
 
     # Which tasks to show on this list view?
     if list_slug == "mine":
-        tasks =Task.objects.filter(assigned_to=request.user)
+        tasks = Task.objects.filter(assigned_to=request.user)
 
     else:
         # Show a specific list, ensuring permissions.
@@ -157,10 +158,12 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
         })
 
         if form.is_valid():
-            new_task = form.save()
+            new_task = form.save(commit=False)
+            new_task.created_date = timezone.now()
+            form.save()
 
             # Send email alert only if Notify checkbox is checked AND assignee is not same as the submitter
-            if "notify" in request.POST and new_task.assigned_to != request.user:
+            if "notify" in request.POST and new_task.assigned_to and new_task.assigned_to != request.user:
                 send_notify_mail(new_task)
 
             messages.success(request, "New task \"{t}\" has been added.".format(t=new_task.title))
@@ -171,7 +174,7 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
             form = AddEditTaskForm(request.user, initial={
                 'assigned_to': request.user.id,
                 'priority': 999,
-                'task_list': task_list
+                'task_list': task_list,
             })
 
     context = {

@@ -1,8 +1,7 @@
 from django import forms
-from django.forms import ModelForm
 from django.contrib.auth.models import Group
+from django.forms import ModelForm
 from todo.models import Task, TaskList
-from django.contrib.auth import get_user_model
 
 
 class AddTaskListForm(ModelForm):
@@ -18,16 +17,18 @@ class AddTaskListForm(ModelForm):
 
     class Meta:
         model = TaskList
-        exclude = []
+        exclude = ['created_date', ]
 
 
 class AddEditTaskForm(ModelForm):
     """The picklist showing the users to which a new task can be assigned
-    must find other members of the groups the current list belongs to."""
+    must find other members of the group this TaskList is attached to."""
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['assigned_to'].queryset = get_user_model().objects.filter(groups__in=user.groups.all()).distinct()
+        task_list = kwargs.get('initial').get('task_list')
+        members = task_list.group.user_set.all()
+        self.fields['assigned_to'].queryset = members
         self.fields['assigned_to'].label_from_instance = lambda obj: "%s (%s)" % (obj.get_full_name(), obj.username)
         self.fields['assigned_to'].widget.attrs = {
             'id': 'id_assigned_to', 'class': "custom-select mb-3", 'name': 'assigned_to'}

@@ -34,9 +34,17 @@
         <li class="list-group-item">
           <strong>Due date:</strong> {{ task.due_date }}
         </li>
-        <li class="list-group-item">
-          <strong>Completed:</strong> {{ task.completed|yesno:"Yes,No" }}
-        </li>
+        
+        {% if task.completed %}
+          <li class="list-group-item">
+            <strong>Completed on:</strong> {{ task.completed_date}}
+          </li>
+        {% else %}
+          <li class="list-group-item">
+            <strong>Completed:</strong> {{ task.completed|yesno:"Yes,No" }}
+          </li>
+        {% endif %}
+          
         <li class="list-group-item">
           <strong>In list:</strong>
           <a href="{% url 'todo:list_detail' task.task_list.id task.task_list.slug %}">

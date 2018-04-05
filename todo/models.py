@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth.models import Group
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 
 
 class TaskList(models.Model):
@@ -26,7 +27,7 @@ class TaskList(models.Model):
 class Task(models.Model):
     title = models.CharField(max_length=140)
     task_list = models.ForeignKey(TaskList, on_delete=models.CASCADE, null=True)
-    created_date = models.DateField(auto_now=True)
+    created_date = models.DateField(default=timezone.now, blank=True, null=True)
     due_date = models.DateField(blank=True, null=True, )
     completed = models.BooleanField(default=False)
     completed_date = models.DateField(blank=True, null=True)
