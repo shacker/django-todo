@@ -12,7 +12,6 @@ from todo.models import Task, TaskList
 
 
 num_lists = 5
-num_tasks_per_list = 10
 
 
 def gen_title(tc=True):
@@ -39,12 +38,20 @@ def gen_content():
 class Command(BaseCommand):
     help = """Create random list and task data for a few fake users."""
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "-d",
+            "--delete",
+            help="Wipe out existing content before generating new.",
+            action="store_true")
+
     def handle(self, *args, **options):
 
-        # Wipe out previous contents. Cascade deletes the Tasks from the TaskLists.
-        TaskList.objects.all().delete()
-        print("Content from previous run deleted.")
-        print("Working...")
+        if options.get('delete'):
+            # Wipe out previous contents? Cascade deletes the Tasks from the TaskLists.
+            TaskList.objects.all().delete()
+            print("Content from previous run deleted.")
+            print("Working...")
 
         fake = Faker()  # Use to create user's names
 
@@ -83,9 +90,7 @@ class Command(BaseCommand):
         TaskListFactory.create_batch(5, group=bw_group)
         TaskListFactory.create_batch(5, group=sd_group)
 
-        print("For each of two groups, created {} fake tasks in each of {} fake lists.".format(
-            num_lists, num_tasks_per_list)
-        )
+        print("For each of two groups, created fake tasks in each of {} fake lists.".format(num_lists))
 
 
 class TaskListFactory(factory.django.DjangoModelFactory):
@@ -100,7 +105,8 @@ class TaskListFactory(factory.django.DjangoModelFactory):
 
     @factory.post_generation
     def add_tasks(self, build, extracted, **kwargs):
-        TaskFactory.create_batch(num_tasks_per_list, task_list=self)
+        num = random.randint(5, 25)
+        TaskFactory.create_batch(num, task_list=self)
 
 
 class TaskFactory(factory.django.DjangoModelFactory):
