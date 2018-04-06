@@ -121,7 +121,7 @@ class TaskFactory(factory.django.DjangoModelFactory):
     note = factory.LazyAttribute(lambda o: gen_content())
     priority = factory.LazyAttribute(lambda o: random.randint(1, 100))
     completed = factory.Faker('boolean', chance_of_getting_true=30)
-    created_by = get_user_model().objects.get(username='staffer')  # Randomized in post
+    created_by = factory.LazyAttribute(lambda o: get_user_model().objects.get(username='staffer'))  # Randomized in post
     created_date = factory.Faker('date_this_year')
 
     @factory.post_generation
