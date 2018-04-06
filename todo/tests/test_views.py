@@ -32,8 +32,8 @@ def test_view_reorder(todo_setup, admin_client):
 
 def test_view_external_add(todo_setup, admin_client, settings):
     default_list = TaskList.objects.first()
-    settings.TODO_DEFAULT_LIST_ID = default_list.id
-    assert settings.TODO_DEFAULT_LIST_ID == default_list.id
+    settings.TODO_DEFAULT_LIST_SLUG = default_list.slug
+    assert settings.TODO_DEFAULT_LIST_SLUG == default_list.slug
     url = reverse('todo:external_add')
     response = admin_client.get(url)
     assert response.status_code == 200

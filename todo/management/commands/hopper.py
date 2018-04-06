@@ -86,9 +86,10 @@ class Command(BaseCommand):
                 user.groups.add(bw_group)
                 user.groups.add(sd_group)
 
-        # Create lists with tasks
+        # Create lists with tasks, plus one with fixed name for externally added tasks
         TaskListFactory.create_batch(5, group=bw_group)
         TaskListFactory.create_batch(5, group=sd_group)
+        TaskListFactory.create(name="Public Tickets", slug="tickets", group=bw_group)
 
         print("For each of two groups, created fake tasks in each of {} fake lists.".format(num_lists))
 

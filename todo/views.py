@@ -349,11 +349,11 @@ def external_add(request) -> HttpResponse:
     Publicly filed tickets are unassigned unless settings.DEFAULT_ASSIGNEE exists.
     """
 
-    if not settings.TODO_DEFAULT_LIST_ID:
-        raise RuntimeError("This feature requires TODO_DEFAULT_LIST_ID: in settings. See documentation.")
+    if not settings.TODO_DEFAULT_LIST_SLUG:
+        raise RuntimeError("This feature requires TODO_DEFAULT_LIST_SLUG: in settings. See documentation.")
 
-    if not TaskList.objects.filter(id=settings.TODO_DEFAULT_LIST_ID).exists():
-        raise RuntimeError("There is no TaskList with ID specified for DEFAULT_LIST_ID in settings.")
+    if not TaskList.objects.filter(slug=settings.TODO_DEFAULT_LIST_SLUG).exists():
+        raise RuntimeError("There is no TaskList with slug specified for TODO_DEFAULT_LIST_SLUG in settings.")
 
     if request.POST:
         form = AddExternalTaskForm(request.POST)
@@ -361,7 +361,7 @@ def external_add(request) -> HttpResponse:
         if form.is_valid():
             current_site = Site.objects.get_current()
             task = form.save(commit=False)
-            task.task_list = TaskList.objects.get(id=settings.TODO_DEFAULT_LIST_ID)
+            task.task_list = TaskList.objects.get(slug=settings.TODO_DEFAULT_LIST_SLUG)
             task.created_by = request.user
             if settings.TODO_DEFAULT_ASSIGNEE:
                 task.assigned_to = User.objects.get(username=settings.TODO_DEFAULT_ASSIGNEE)
