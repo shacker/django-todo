@@ -1,7 +1,7 @@
 """
 A multi-user, multi-group task management and assignment system for Django.
 """
-__version__ = '1.6.2'
+__version__ = '2.0'
 
 __author__ = 'Scot Hacker'
 __email__ = 'shacker@birdhouse.org'
