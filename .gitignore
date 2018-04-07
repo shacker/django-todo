@@ -10,3 +10,4 @@ settings.json
 
 # Django and Python
 *.py[cod]
+.pytest_cache/*
