@@ -17,7 +17,7 @@ class AddTaskListForm(ModelForm):
 
     class Meta:
         model = TaskList
-        exclude = ['created_date', ]
+        exclude = ['created_date', 'slug', ]
 
 
 class AddEditTaskForm(ModelForm):

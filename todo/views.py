@@ -12,8 +12,9 @@ from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.template.loader import render_to_string
-from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from django.utils.text import slugify
+from django.views.decorators.csrf import csrf_exempt
 
 from todo.forms import AddTaskListForm, AddEditTaskForm, AddExternalTaskForm, SearchForm
 from todo.models import Task, TaskList, Comment
@@ -280,7 +281,9 @@ def add_list(request) -> HttpResponse:
         form = AddTaskListForm(request.user, request.POST)
         if form.is_valid():
             try:
-                form.save()
+                newlist = form.save(commit=False)
+                newlist.slug = slugify(newlist.name)
+                newlist.save()
                 messages.success(request, "A new list has been added.")
                 return redirect('todo:lists')
 
