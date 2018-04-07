@@ -51,7 +51,7 @@ def list_lists(request) -> HttpResponse:
 
     # Make sure user belongs to at least one group.
     if request.user.groups.all().count() == 0:
-        messages.error(request, "You do not yet belong to any groups. Ask your administrator to add you to one.")
+        messages.warning(request, "You do not yet belong to any groups. Ask your administrator to add you to one.")
 
     # Superusers see all lists
     if request.user.is_superuser:
@@ -285,7 +285,7 @@ def add_list(request) -> HttpResponse:
                 return redirect('todo:lists')
 
             except IntegrityError:
-                messages.error(
+                messages.warning(
                     request,
                     "There was a problem saving the new list. "
                     "Most likely a list with the same name in the same group already exists.")
@@ -376,7 +376,7 @@ def external_add(request) -> HttpResponse:
                         email_subject, email_body, task.created_by.email,
                         [task.assigned_to.email, ], fail_silently=False)
                 except ConnectionRefusedError:
-                    messages.error(request, "Task saved but mail not sent. Contact your administrator.")
+                    messages.warning(request, "Task saved but mail not sent. Contact your administrator.")
 
             messages.success(request, "Your trouble ticket has been submitted. We'll get back to you soon.")
 
