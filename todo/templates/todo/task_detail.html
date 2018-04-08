@@ -20,8 +20,11 @@
             <button class="btn btn-sm btn-primary" id="EditTaskButton" type="button"
             data-toggle="collapse" data-target="#AddEditTask">Edit Task</button>
 
-            <input class="btn btn-sm btn-info" id="CompleteTaskButton" type="submit" name="toggle_done"
-              value="{% if task.completed %}Mark Incomplete{% else %}Mark Done{% endif %}">
+            <a href="{% url "todo:task_toggle_done" task.id %}" class="btn btn-info btn-sm">
+              {% if task.completed %} Mark Not Done {% else %} Mark Done {% endif %}
+            </a>
+
+            <a href="{% url "todo:delete_task" task.id %}" class="btn btn-danger btn-sm">Delete</a>
           </form>
         </li>
         <li class="list-group-item">

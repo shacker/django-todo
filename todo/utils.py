@@ -1,41 +1,8 @@
-import datetime
-
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 
-from todo.models import Task, Comment
-
-
-def toggle_done(task_ids):
-    """Check for tasks in the mark_done POST array. If present, change status to complete.
-    Takes a list of task IDs. Returns list of status change strings.
-    """
-
-    _ret = []
-    for task_id in task_ids:
-        i = Task.objects.get(id=task_id)
-        old_state = "completed" if i.completed else "incomplete"
-        i.completed = not i.completed  # Invert the done state, either way
-        new_state = "completed" if i.completed else "incomplete"
-        i.completed_date = datetime.datetime.now()
-        i.save()
-        _ret.append("Task \"{i}\" changed from {o} to {n}.".format(i=i.title, o=old_state, n=new_state))
-
-    return _ret
-
-
-def toggle_deleted(deleted_task_ids):
-    """Delete selected tasks. Returns list of status change strings.
-    """
-
-    _ret = []
-    for task_id in deleted_task_ids:
-        i = Task.objects.get(id=task_id)
-        _ret.append("Task \"{i}\" deleted.".format(i=i.title))
-        i.delete()
-
-    return _ret
+from todo.models import Comment
 
 
 def send_notify_mail(new_task):

@@ -22,63 +22,50 @@
       <p><small><i>In workgroup "{{ task_list.group }}" - drag rows to set priorities.</i></small></p>
     {% endif %}
 
-    <form action="" name="show_tasks" method="post">
-        {% csrf_token %}
-        <table class="table" id="tasktable">
-          <tr class="nodrop">
-            <th>Done</th>
-            <th>Task</th>
-            <th>Created</th>
-            <th>Due on</th>
-            <th>Owner</th>
-            <th>Assigned</th>
-            <th>Note</th>
-            <th>Comm</th>
-            <th>Del</th>
+      <table class="table" id="tasktable">
+        <tr class="nodrop">
+          <th>Task</th>
+          <th>Created</th>
+          <th>Due on</th>
+          <th>Owner</th>
+          <th>Assigned</th>
+          <th>Mark</th>
+        </tr>
+
+        {% for task in tasks %}
+          <tr id="{{ task.id }}">
+            <td>
+                <a href="{% url 'todo:task_detail' task.id %}">{{ task.title|truncatewords:10 }}</a>
+            </td>
+            <td>
+                {{ task.created_date|date:"m/d/Y" }}
+            </td>
+            <td>
+              <span {% if task.overdue_status %}class="overdue"{% endif %}>
+                {{ task.due_date|date:"m/d/Y" }}
+              </span>
+            </td>
+            <td>
+              {{ task.created_by }}
+            </td>
+            <td>
+              {% if task.assigned_to %}{{ task.assigned_to }}{% else %}Anyone{% endif %}
+            </td>
+            <td>
+                <a href="{% url "todo:task_toggle_done" task.id %}" class="btn btn-info btn-sm">
+                  {% if view_completed %}
+                    Not Done
+                  {% else %}
+                    Done
+                  {% endif %}
+                </a>
+              </td>
           </tr>
+        {% endfor %}
+      </table>
 
-          {% for task in tasks %}
-            <tr id="{{ task.id }}">
-              <td>
-                  <input type="checkbox" name="toggle_done_tasks"
-                  value="{{ task.id }}" id="{{ task.id }}"
-                  {% if task.completed %}checked{% endif %}>
-              </td>
-              <td>
-                  <a href="{% url 'todo:task_detail' task.id %}">{{ task.title|truncatewords:10 }}</a>
-              </td>
-              <td>
-                  {{ task.created_date|date:"m/d/Y" }}
-              </td>
-              <td>
-                <span {% if task.overdue_status %}class="overdue"{% endif %}>
-                  {{ task.due_date|date:"m/d/Y" }}
-                </span>
-              </td>
-              <td>
-                {{ task.created_by }}
-              </td>
-              <td>
-                {% if task.assigned_to %}{{ task.assigned_to }}{% else %}Anyone{% endif %}
-              </td>
-              <td>
-                 {% if task.note %}&asymp;{% endif %}
-              </td>
-              <td>
-                {% if task.comment_set.all.count > 0 %}{{ task.comment_set.all.count }}{% endif %}
-              </td>
-              <td>
-                <input type="checkbox" name="toggle_deleted_tasks" value="{{ task.id }}" id="{{ task.id }}">
-              </td>
-            </tr>
-          {% endfor %}
-        </table>
+      {% include 'todo/include/toggle_delete.html' %}
 
-        <input type="submit" name="process_tasks" value="Process selection"  class="btn btn-sm btn-success">
-
-        {% include 'todo/include/toggle_delete.html' %}
-
-    </form>
   {% else %}
     <h4>No tasks on this list yet (add one!)</h4>
     {% include 'todo/include/toggle_delete.html' %}
