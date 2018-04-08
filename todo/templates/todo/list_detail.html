@@ -25,7 +25,7 @@
     <form action="" name="show_tasks" method="post">
         {% csrf_token %}
         <table class="table" id="tasktable">
-          <tr>
+          <tr class="nodrop">
             <th>Done</th>
             <th>Task</th>
             <th>Created</th>
@@ -93,8 +93,8 @@
   <script type="text/javascript">
     function order_tasks(data) {
       // The JQuery plugin tableDnD provides a serialize() function which provides the re-ordered
-      // data in a list. We pass that list as an object called "data" to a Django view
-      // to save the re-ordered data into the database.
+      // data in a list. We pass that list as an object ("data") to a Django view
+      // to save new priorities on each task in the list.
       $.post("{% url 'todo:reorder_tasks' %}", data, "json");
       return false;
     };

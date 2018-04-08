@@ -260,10 +260,10 @@ def reorder_tasks(request) -> HttpResponse:
 
         # Re-prioritize each task in list
         i = 1
-        for t in newtasklist:
-            newtask = Task.objects.get(pk=t)
-            newtask.priority = i
-            newtask.save()
+        for id in newtasklist:
+            task = Task.objects.get(pk=id)
+            task.priority = i
+            task.save()
             i += 1
 
     # All views must return an httpresponse of some kind ... without this we get
