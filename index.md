@@ -166,6 +166,8 @@ The previous `tox` system was removed with the v2 release, since we no longer ai
 
 # Version History
 
+**2.0.2** April 2018: Improve notification email subjects and bodies
+
 **2.0.1** April 2018: Refactored "toggle done" and "delete" actions from list view.
 
 **2.0** April 2018: Major project refactor, with almost completely rewritten views, templates, and todo's first real test suite.
