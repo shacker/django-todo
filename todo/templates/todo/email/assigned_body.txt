@@ -1,6 +1,6 @@
 {{ task.assigned_to.first_name }} -
 
-A new task on the list {{ task.task_list.name }} has been assigned to you by {{ task.created_by.get_full_name }:
+A new task on the list {{ task.task_list.name }} has been assigned to you by {{ task.created_by.get_full_name }}:
 
 {{ task.title }}
 

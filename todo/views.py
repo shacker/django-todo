@@ -200,7 +200,9 @@ def task_detail(request, task_id: int) -> HttpResponse:
             body=request.POST['comment-body'],
         )
 
-        send_email_to_thread_participants(task, request.POST['comment-body'], request.user)
+        send_email_to_thread_participants(
+            task, request.POST['comment-body'], request.user,
+            subject='New comment posted on task "{}"'.format(task.title))
         messages.success(request, "Comment posted. Notification email sent to thread participants.")
 
     # Save task edits

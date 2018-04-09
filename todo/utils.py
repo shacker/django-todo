@@ -21,11 +21,11 @@ def send_notify_mail(new_task):
             [new_task.assigned_to.email], fail_silently=False)
 
 
-def send_email_to_thread_participants(task, msg_body, user):
+def send_email_to_thread_participants(task, msg_body, user, subject=None):
     # Notify all previous commentors on a Task about a new comment.
 
     current_site = Site.objects.get_current()
-    email_subject = render_to_string("todo/email/assigned_subject.txt", {'task': task})
+    email_subject = subject if subject else render_to_string("todo/email/assigned_subject.txt", {'task': task})
     email_body = render_to_string(
         "todo/email/newcomment_body.txt",
         {'task': task, 'body': msg_body, 'site': current_site, 'user': user}
