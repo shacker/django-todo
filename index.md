@@ -166,6 +166,8 @@ The previous `tox` system was removed with the v2 release, since we no longer ai
 
 # Version History
 
+**2.0.3** April 2018: Bump production status in setup.py
+
 **2.0.2** April 2018: Improve notification email subjects and bodies
 
 **2.0.1** April 2018: Refactored "toggle done" and "delete" actions from list view.
