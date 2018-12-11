@@ -83,7 +83,7 @@ def list_lists(request) -> HttpResponse:
 def del_list(request, list_id: int, list_slug: str) -> HttpResponse:
     """Delete an entire list. Danger Will Robinson! Only staff members should be allowed to access this view.
     """
-    task_list = get_object_or_404(TaskList, slug=list_slug)
+    task_list = get_object_or_404(TaskList, id=list_id)
 
     # Ensure user has permission to delete list. Admins can delete all lists.
     # Get the group this list belongs to, and check whether current user is a member of that group.
