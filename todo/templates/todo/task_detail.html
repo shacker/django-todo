@@ -7,7 +7,7 @@
     <div class="col-sm-8">
       <h3 class="card-title">{{ task.title }}</h3>
       {% if task.note %}
-        <p class="card-text">{{ task.note|safe|urlize|linebreaks }}</p>
+        <p class="card-text">{{ task.note|urlize|linebreaks }}</p>
       {% endif %}
     </div>
 
@@ -82,7 +82,7 @@
             {{ comment.date|date:"F d Y P" }}
           </strong>
         </p>
-        {{ comment.body|safe|urlize|linebreaks }}
+        {{ comment.body|urlize|linebreaks }}
       {% endfor %}
     {% else %}
         <h5>No comments (yet).</h5>
