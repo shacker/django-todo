@@ -96,8 +96,7 @@
       <h5>Comments on this task</h5>
       {% for comment in comment_list %}
         <p>
-          <strong>{{ comment.author.first_name }}
-            {{ comment.author.last_name }},
+          <strong>{{ comment.author_text }},
             {{ comment.date|date:"F d Y P" }}
           </strong>
         </p>

@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import datetime
+import textwrap
 
 from django.conf import settings
 from django.contrib.auth.models import Group
@@ -32,7 +33,10 @@ class Task(models.Model):
     completed = models.BooleanField(default=False)
     completed_date = models.DateField(blank=True, null=True)
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, related_name="todo_created_by", on_delete=models.CASCADE
+        settings.AUTH_USER_MODEL,
+        null=True,
+        related_name="todo_created_by",
+        on_delete=models.CASCADE,
     )
     assigned_to = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -73,14 +77,35 @@ class Comment(models.Model):
     a comment and change task details at the same time. Rolling our own since it's easy.
     """
 
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True
+    )
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     date = models.DateTimeField(default=datetime.datetime.now)
+    email_from = models.CharField(max_length=320, blank=True, null=True)
+    email_message_id = models.TextField(blank=True, null=True)
+
     body = models.TextField(blank=True)
 
+    class Meta:
+        # an email should only appear once per task
+        unique_together = ("task", "email_message_id")
+
+    @property
+    def author_text(self):
+        if self.author is not None:
+            return str(self.author)
+
+        assert self.email_message_id is not None
+        return str(self.email_from)
+
+    @property
     def snippet(self):
+        body_snippet = textwrap.shorten(self.body, width=35, placeholder="...")
         # Define here rather than in __str__ so we can use it in the admin list_display
-        return "{author} - {snippet}...".format(author=self.author, snippet=self.body[:35])
+        return "{author} - {snippet}...".format(
+            author=self.author_text, snippet=body_snippet
+        )
 
     def __str__(self):
         return self.snippet()
