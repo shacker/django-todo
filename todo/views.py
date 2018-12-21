@@ -20,10 +20,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from todo.forms import AddTaskListForm, AddEditTaskForm, AddExternalTaskForm, SearchForm
 from todo.models import Task, TaskList, Comment
-from todo.utils import (
-    send_notify_mail,
-    send_email_to_thread_participants,
-    )
+from todo.utils import send_notify_mail, send_email_to_thread_participants
 
 
 def staff_only(function):
@@ -31,6 +28,7 @@ def staff_only(function):
     Custom view decorator allows us to raise 403 on insufficient permissions,
     rather than redirect user to login view.
     """
+
     def wrap(request, *args, **kwargs):
         if request.user.is_staff:
             return function(request, *args, **kwargs)
@@ -52,13 +50,18 @@ def list_lists(request) -> HttpResponse:
 
     # Make sure user belongs to at least one group.
     if request.user.groups.all().count() == 0:
-        messages.warning(request, "You do not yet belong to any groups. Ask your administrator to add you to one.")
+        messages.warning(
+            request,
+            "You do not yet belong to any groups. Ask your administrator to add you to one.",
+        )
 
     # Superusers see all lists
     if request.user.is_superuser:
-        lists = TaskList.objects.all().order_by('group', 'name')
+        lists = TaskList.objects.all().order_by("group", "name")
     else:
-        lists = TaskList.objects.filter(group__in=request.user.groups.all()).order_by('group', 'name')
+        lists = TaskList.objects.filter(group__in=request.user.groups.all()).order_by(
+            "group", "name"
+        )
 
     list_count = lists.count()
 
@@ -66,17 +69,21 @@ def list_lists(request) -> HttpResponse:
     if request.user.is_superuser:
         task_count = Task.objects.filter(completed=0).count()
     else:
-        task_count = Task.objects.filter(completed=0).filter(task_list__group__in=request.user.groups.all()).count()
+        task_count = (
+            Task.objects.filter(completed=0)
+            .filter(task_list__group__in=request.user.groups.all())
+            .count()
+        )
 
     context = {
-       "lists": lists,
-       "thedate": thedate,
-       "searchform": searchform,
-       "list_count": list_count,
-       "task_count": task_count,
+        "lists": lists,
+        "thedate": thedate,
+        "searchform": searchform,
+        "list_count": list_count,
+        "task_count": task_count,
     }
 
-    return render(request, 'todo/list_lists.html', context)
+    return render(request, "todo/list_lists.html", context)
 
 
 @staff_only
@@ -92,10 +99,10 @@ def del_list(request, list_id: int, list_slug: str) -> HttpResponse:
     if task_list.group not in request.user.groups.all() and not request.user.is_staff:
         raise PermissionDenied
 
-    if request.method == 'POST':
+    if request.method == "POST":
         TaskList.objects.get(id=task_list.id).delete()
         messages.success(request, "{list_name} is gone.".format(list_name=task_list.name))
-        return redirect('todo:lists')
+        return redirect("todo:lists")
     else:
         task_count_done = Task.objects.filter(task_list=task_list.id, completed=True).count()
         task_count_undone = Task.objects.filter(task_list=task_list.id, completed=False).count()
@@ -108,7 +115,7 @@ def del_list(request, list_id: int, list_slug: str) -> HttpResponse:
         "task_count_total": task_count_total,
     }
 
-    return render(request, 'todo/del_list.html', context)
+    return render(request, "todo/del_list.html", context)
 
 
 @login_required
@@ -141,33 +148,36 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
     #  Add New Task Form
     # ######################
 
-    if request.POST.getlist('add_edit_task'):
-        form = AddEditTaskForm(request.user, request.POST, initial={
-            'assigned_to': request.user.id,
-            'priority': 999,
-            'task_list': task_list
-        })
+    if request.POST.getlist("add_edit_task"):
+        form = AddEditTaskForm(
+            request.user,
+            request.POST,
+            initial={"assigned_to": request.user.id, "priority": 999, "task_list": task_list},
+        )
 
         if form.is_valid():
             new_task = form.save(commit=False)
             new_task.created_date = timezone.now()
-            new_task.note = bleach.clean(form.cleaned_data['note'], strip=True)
+            new_task.note = bleach.clean(form.cleaned_data["note"], strip=True)
             form.save()
 
             # Send email alert only if Notify checkbox is checked AND assignee is not same as the submitter
-            if "notify" in request.POST and new_task.assigned_to and new_task.assigned_to != request.user:
+            if (
+                "notify" in request.POST
+                and new_task.assigned_to
+                and new_task.assigned_to != request.user
+            ):
                 send_notify_mail(new_task)
 
-            messages.success(request, "New task \"{t}\" has been added.".format(t=new_task.title))
+            messages.success(request, 'New task "{t}" has been added.'.format(t=new_task.title))
             return redirect(request.path)
     else:
         # Don't allow adding new tasks on some views
-        if list_slug not in ["mine", "recent-add", "recent-complete", ]:
-            form = AddEditTaskForm(request.user, initial={
-                'assigned_to': request.user.id,
-                'priority': 999,
-                'task_list': task_list,
-            })
+        if list_slug not in ["mine", "recent-add", "recent-complete"]:
+            form = AddEditTaskForm(
+                request.user,
+                initial={"assigned_to": request.user.id, "priority": 999, "task_list": task_list},
+            )
 
     context = {
         "list_id": list_id,
@@ -178,7 +188,7 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
         "view_completed": view_completed,
     }
 
-    return render(request, 'todo/list_detail.html', context)
+    return render(request, "todo/list_detail.html", context)
 
 
 @login_required
@@ -195,52 +205,54 @@ def task_detail(request, task_id: int) -> HttpResponse:
         raise PermissionDenied
 
     # Save submitted comments
-    if request.POST.get('add_comment'):
+    if request.POST.get("add_comment"):
         Comment.objects.create(
             author=request.user,
             task=task,
-            body=bleach.clean(request.POST['comment-body'], strip=True),
+            body=bleach.clean(request.POST["comment-body"], strip=True),
         )
 
         send_email_to_thread_participants(
-            task, request.POST['comment-body'], request.user,
-            subject='New comment posted on task "{}"'.format(task.title))
+            task,
+            request.POST["comment-body"],
+            request.user,
+            subject='New comment posted on task "{}"'.format(task.title),
+        )
         messages.success(request, "Comment posted. Notification email sent to thread participants.")
 
     # Save task edits
-    if request.POST.get('add_edit_task'):
-        form = AddEditTaskForm(request.user, request.POST, instance=task, initial={'task_list': task.task_list})
+    if request.POST.get("add_edit_task"):
+        form = AddEditTaskForm(
+            request.user, request.POST, instance=task, initial={"task_list": task.task_list}
+        )
 
         if form.is_valid():
             item = form.save(commit=False)
-            item.note = bleach.clean(form.cleaned_data['note'], strip=True)
+            item.note = bleach.clean(form.cleaned_data["note"], strip=True)
             item.save()
             messages.success(request, "The task has been edited.")
-            return redirect('todo:list_detail', list_id=task.task_list.id, list_slug=task.task_list.slug)
+            return redirect(
+                "todo:list_detail", list_id=task.task_list.id, list_slug=task.task_list.slug
+            )
     else:
-        form = AddEditTaskForm(request.user, instance=task, initial={'task_list': task.task_list})
+        form = AddEditTaskForm(request.user, instance=task, initial={"task_list": task.task_list})
 
     # Mark complete
-    if request.POST.get('toggle_done'):
-        results_changed = toggle_done([task.id, ])
+    if request.POST.get("toggle_done"):
+        results_changed = toggle_done([task.id])
         for res in results_changed:
             messages.success(request, res)
 
-        return redirect('todo:task_detail', task_id=task.id,)
+        return redirect("todo:task_detail", task_id=task.id)
 
     if task.due_date:
         thedate = task.due_date
     else:
         thedate = datetime.datetime.now()
 
-    context = {
-        "task": task,
-        "comment_list": comment_list,
-        "form": form,
-        "thedate": thedate,
-    }
+    context = {"task": task, "comment_list": comment_list, "form": form, "thedate": thedate}
 
-    return render(request, 'todo/task_detail.html', context)
+    return render(request, "todo/task_detail.html", context)
 
 
 @csrf_exempt
@@ -248,7 +260,7 @@ def task_detail(request, task_id: int) -> HttpResponse:
 def reorder_tasks(request) -> HttpResponse:
     """Handle task re-ordering (priorities) from JQuery drag/drop in list_detail.html
     """
-    newtasklist = request.POST.getlist('tasktable[]')
+    newtasklist = request.POST.getlist("tasktable[]")
     if newtasklist:
         # First task in received list is always empty - remove it
         del newtasklist[0]
@@ -280,24 +292,23 @@ def add_list(request) -> HttpResponse:
                 newlist.slug = slugify(newlist.name)
                 newlist.save()
                 messages.success(request, "A new list has been added.")
-                return redirect('todo:lists')
+                return redirect("todo:lists")
 
             except IntegrityError:
                 messages.warning(
                     request,
                     "There was a problem saving the new list. "
-                    "Most likely a list with the same name in the same group already exists.")
+                    "Most likely a list with the same name in the same group already exists.",
+                )
     else:
         if request.user.groups.all().count() == 1:
             form = AddTaskListForm(request.user, initial={"group": request.user.groups.all()[0]})
         else:
             form = AddTaskListForm(request.user)
 
-    context = {
-        "form": form,
-    }
+    context = {"form": form}
 
-    return render(request, 'todo/add_list.html', context)
+    return render(request, "todo/add_list.html", context)
 
 
 @login_required
@@ -306,36 +317,32 @@ def search(request) -> HttpResponse:
     """
     if request.GET:
 
-        query_string = ''
+        query_string = ""
         found_tasks = None
-        if ('q' in request.GET) and request.GET['q'].strip():
-            query_string = request.GET['q']
+        if ("q" in request.GET) and request.GET["q"].strip():
+            query_string = request.GET["q"]
 
             found_tasks = Task.objects.filter(
-                Q(title__icontains=query_string) |
-                Q(note__icontains=query_string)
+                Q(title__icontains=query_string) | Q(note__icontains=query_string)
             )
         else:
             # What if they selected the "completed" toggle but didn't enter a query string?
             # We still need found_tasks in a queryset so it can be "excluded" below.
             found_tasks = Task.objects.all()
 
-        if 'inc_complete' in request.GET:
+        if "inc_complete" in request.GET:
             found_tasks = found_tasks.exclude(completed=True)
 
     else:
         query_string = None
-        found_tasks =None
+        found_tasks = None
 
     # Only include tasks that are in groups of which this user is a member:
     if not request.user.is_superuser:
         found_tasks = found_tasks.filter(task_list__group__in=request.user.groups.all())
 
-    context = {
-        'query_string': query_string,
-        'found_tasks': found_tasks
-    }
-    return render(request, 'todo/search_results.html', context)
+    context = {"query_string": query_string, "found_tasks": found_tasks}
+    return render(request, "todo/search_results.html", context)
 
 
 @login_required
@@ -348,10 +355,14 @@ def external_add(request) -> HttpResponse:
     """
 
     if not settings.TODO_DEFAULT_LIST_SLUG:
-        raise RuntimeError("This feature requires TODO_DEFAULT_LIST_SLUG: in settings. See documentation.")
+        raise RuntimeError(
+            "This feature requires TODO_DEFAULT_LIST_SLUG: in settings. See documentation."
+        )
 
     if not TaskList.objects.filter(slug=settings.TODO_DEFAULT_LIST_SLUG).exists():
-        raise RuntimeError("There is no TaskList with slug specified for TODO_DEFAULT_LIST_SLUG in settings.")
+        raise RuntimeError(
+            "There is no TaskList with slug specified for TODO_DEFAULT_LIST_SLUG in settings."
+        )
 
     if request.POST:
         form = AddExternalTaskForm(request.POST)
@@ -367,26 +378,36 @@ def external_add(request) -> HttpResponse:
 
             # Send email to assignee if we have one
             if task.assigned_to:
-                email_subject = render_to_string("todo/email/assigned_subject.txt", {'task': task.title})
-                email_body = render_to_string("todo/email/assigned_body.txt", {'task': task, 'site': current_site, })
+                email_subject = render_to_string(
+                    "todo/email/assigned_subject.txt", {"task": task.title}
+                )
+                email_body = render_to_string(
+                    "todo/email/assigned_body.txt", {"task": task, "site": current_site}
+                )
                 try:
                     send_mail(
-                        email_subject, email_body, task.created_by.email,
-                        [task.assigned_to.email, ], fail_silently=False)
+                        email_subject,
+                        email_body,
+                        task.created_by.email,
+                        [task.assigned_to.email],
+                        fail_silently=False,
+                    )
                 except ConnectionRefusedError:
-                    messages.warning(request, "Task saved but mail not sent. Contact your administrator.")
+                    messages.warning(
+                        request, "Task saved but mail not sent. Contact your administrator."
+                    )
 
-            messages.success(request, "Your trouble ticket has been submitted. We'll get back to you soon.")
+            messages.success(
+                request, "Your trouble ticket has been submitted. We'll get back to you soon."
+            )
             return redirect(settings.TODO_PUBLIC_SUBMIT_REDIRECT)
 
     else:
-        form = AddExternalTaskForm(initial={'priority': 999})
+        form = AddExternalTaskForm(initial={"priority": 999})
 
-    context = {
-        "form": form,
-    }
+    context = {"form": form}
 
-    return render(request, 'todo/add_task_external.html', context)
+    return render(request, "todo/add_task_external.html", context)
 
 
 @login_required
@@ -399,9 +420,9 @@ def toggle_done(request, task_id: int) -> HttpResponse:
 
     # Permissions
     if not (
-        (task.created_by == request.user) or
-        (task.assigned_to == request.user) or
-        (task.task_list.group in request.user.groups.all())
+        (task.created_by == request.user)
+        or (task.assigned_to == request.user)
+        or (task.task_list.group in request.user.groups.all())
     ):
         raise PermissionDenied
 
@@ -410,8 +431,9 @@ def toggle_done(request, task_id: int) -> HttpResponse:
     task.save()
 
     messages.success(request, "Task status changed for '{}'".format(task.title))
-    return redirect(reverse('todo:list_detail', kwargs={"list_id": tlist.id, "list_slug": tlist.slug}))
-
+    return redirect(
+        reverse("todo:list_detail", kwargs={"list_id": tlist.id, "list_slug": tlist.slug})
+    )
 
 
 @login_required
@@ -424,9 +446,9 @@ def delete_task(request, task_id: int) -> HttpResponse:
 
     # Permissions
     if not (
-        (task.created_by == request.user) or
-        (task.assigned_to == request.user) or
-        (task.task_list.group in request.user.groups.all())
+        (task.created_by == request.user)
+        or (task.assigned_to == request.user)
+        or (task.task_list.group in request.user.groups.all())
     ):
         raise PermissionDenied
 
@@ -434,4 +456,7 @@ def delete_task(request, task_id: int) -> HttpResponse:
     task.delete()
 
     messages.success(request, "Task '{}' has been deleted".format(task.title))
-    return redirect(reverse('todo:list_detail', kwargs={"list_id": tlist.id, "list_slug": tlist.slug}))
+    return redirect(
+        reverse("todo:list_detail", kwargs={"list_id": tlist.id, "list_slug": tlist.slug})
+    )
+

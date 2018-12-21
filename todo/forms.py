@@ -11,13 +11,16 @@ class AddTaskListForm(ModelForm):
 
     def __init__(self, user, *args, **kwargs):
         super(AddTaskListForm, self).__init__(*args, **kwargs)
-        self.fields['group'].queryset = Group.objects.filter(user=user)
-        self.fields['group'].widget.attrs = {
-            'id': 'id_group', 'class': "custom-select mb-3", 'name': 'group'}
+        self.fields["group"].queryset = Group.objects.filter(user=user)
+        self.fields["group"].widget.attrs = {
+            "id": "id_group",
+            "class": "custom-select mb-3",
+            "name": "group",
+        }
 
     class Meta:
         model = TaskList
-        exclude = ['created_date', 'slug', ]
+        exclude = ["created_date", "slug"]
 
 
 class AddEditTaskForm(ModelForm):
@@ -26,22 +29,25 @@ class AddEditTaskForm(ModelForm):
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        task_list = kwargs.get('initial').get('task_list')
+        task_list = kwargs.get("initial").get("task_list")
         members = task_list.group.user_set.all()
-        self.fields['assigned_to'].queryset = members
-        self.fields['assigned_to'].label_from_instance = lambda obj: "%s (%s)" % (obj.get_full_name(), obj.username)
-        self.fields['assigned_to'].widget.attrs = {
-            'id': 'id_assigned_to', 'class': "custom-select mb-3", 'name': 'assigned_to'}
-        self.fields['task_list'].value = kwargs['initial']['task_list'].id
+        self.fields["assigned_to"].queryset = members
+        self.fields["assigned_to"].label_from_instance = lambda obj: "%s (%s)" % (
+            obj.get_full_name(),
+            obj.username,
+        )
+        self.fields["assigned_to"].widget.attrs = {
+            "id": "id_assigned_to",
+            "class": "custom-select mb-3",
+            "name": "assigned_to",
+        }
+        self.fields["task_list"].value = kwargs["initial"]["task_list"].id
 
-    due_date = forms.DateField(
-            widget=forms.DateInput(attrs={'type': 'date'}), required=False)
+    due_date = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}), required=False)
 
-    title = forms.CharField(
-        widget=forms.widgets.TextInput())
+    title = forms.CharField(widget=forms.widgets.TextInput())
 
-    note = forms.CharField(
-        widget=forms.Textarea(), required=False)
+    note = forms.CharField(widget=forms.Textarea(), required=False)
 
     class Meta:
         model = Task
@@ -51,27 +57,24 @@ class AddEditTaskForm(ModelForm):
 class AddExternalTaskForm(ModelForm):
     """Form to allow users who are not part of the GTD system to file a ticket."""
 
-    title = forms.CharField(
-        widget=forms.widgets.TextInput(attrs={'size': 35}),
-        label="Summary"
-    )
-    note = forms.CharField(
-        widget=forms.widgets.Textarea(),
-        label='Problem Description',
-    )
-    priority = forms.IntegerField(
-        widget=forms.HiddenInput(),
-    )
+    title = forms.CharField(widget=forms.widgets.TextInput(attrs={"size": 35}), label="Summary")
+    note = forms.CharField(widget=forms.widgets.Textarea(), label="Problem Description")
+    priority = forms.IntegerField(widget=forms.HiddenInput())
 
     class Meta:
         model = Task
         exclude = (
-            'task_list', 'created_date', 'due_date', 'created_by', 'assigned_to', 'completed', 'completed_date', )
+            "task_list",
+            "created_date",
+            "due_date",
+            "created_by",
+            "assigned_to",
+            "completed",
+            "completed_date",
+        )
 
 
 class SearchForm(forms.Form):
     """Search."""
 
-    q = forms.CharField(
-        widget=forms.widgets.TextInput(attrs={'size': 35})
-    )
+    q = forms.CharField(widget=forms.widgets.TextInput(attrs={"size": 35}))

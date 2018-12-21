@@ -3,14 +3,14 @@ from todo.models import Task, TaskList, Comment
 
 
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ('title', 'task_list', 'completed', 'priority', 'due_date')
-    list_filter = ('task_list',)
-    ordering = ('priority',)
-    search_fields = ('name',)
+    list_display = ("title", "task_list", "completed", "priority", "due_date")
+    list_filter = ("task_list",)
+    ordering = ("priority",)
+    search_fields = ("name",)
 
 
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('author', 'date', 'snippet')
+    list_display = ("author", "date", "snippet")
 
 
 admin.site.register(TaskList)

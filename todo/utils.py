@@ -11,24 +11,30 @@ def send_notify_mail(new_task):
 
     if not new_task.assigned_to == new_task.created_by:
         current_site = Site.objects.get_current()
-        email_subject = render_to_string("todo/email/assigned_subject.txt", {'task': new_task})
+        email_subject = render_to_string("todo/email/assigned_subject.txt", {"task": new_task})
         email_body = render_to_string(
-            "todo/email/assigned_body.txt",
-            {'task': new_task, 'site': current_site, })
+            "todo/email/assigned_body.txt", {"task": new_task, "site": current_site}
+        )
 
         send_mail(
-            email_subject, email_body, new_task.created_by.email,
-            [new_task.assigned_to.email], fail_silently=False)
+            email_subject,
+            email_body,
+            new_task.created_by.email,
+            [new_task.assigned_to.email],
+            fail_silently=False,
+        )
 
 
 def send_email_to_thread_participants(task, msg_body, user, subject=None):
     # Notify all previous commentors on a Task about a new comment.
 
     current_site = Site.objects.get_current()
-    email_subject = subject if subject else render_to_string("todo/email/assigned_subject.txt", {'task': task})
+    email_subject = (
+        subject if subject else render_to_string("todo/email/assigned_subject.txt", {"task": task})
+    )
     email_body = render_to_string(
         "todo/email/newcomment_body.txt",
-        {'task': task, 'body': msg_body, 'site': current_site, 'user': user}
+        {"task": task, "body": msg_body, "site": current_site, "user": user},
     )
 
     # Get list of all thread participants - everyone who has commented, plus task creator.

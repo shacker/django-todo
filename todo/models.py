@@ -10,7 +10,7 @@ from django.utils import timezone
 
 class TaskList(models.Model):
     name = models.CharField(max_length=60)
-    slug = models.SlugField(default='',)
+    slug = models.SlugField(default="")
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -28,12 +28,19 @@ class Task(models.Model):
     title = models.CharField(max_length=140)
     task_list = models.ForeignKey(TaskList, on_delete=models.CASCADE, null=True)
     created_date = models.DateField(default=timezone.now, blank=True, null=True)
-    due_date = models.DateField(blank=True, null=True, )
+    due_date = models.DateField(blank=True, null=True)
     completed = models.BooleanField(default=False)
     completed_date = models.DateField(blank=True, null=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='todo_created_by', on_delete=models.CASCADE)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name="todo_created_by", on_delete=models.CASCADE
+    )
     assigned_to = models.ForeignKey(
-        settings.AUTH_USER_MODEL, blank=True, null=True, related_name='todo_assigned_to', on_delete=models.CASCADE)
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        null=True,
+        related_name="todo_assigned_to",
+        on_delete=models.CASCADE,
+    )
     note = models.TextField(blank=True, null=True)
     priority = models.PositiveIntegerField()
 
@@ -47,7 +54,7 @@ class Task(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return reverse('todo:task_detail', kwargs={'task_id': self.id, })
+        return reverse("todo:task_detail", kwargs={"task_id": self.id})
 
     # Auto-set the Task creation / completed date
     def save(self, **kwargs):
@@ -65,6 +72,7 @@ class Comment(models.Model):
     Not using Django's built-in comments because we want to be able to save
     a comment and change task details at the same time. Rolling our own since it's easy.
     """
+
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     date = models.DateTimeField(default=datetime.datetime.now)
