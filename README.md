@@ -167,6 +167,8 @@ The previous `tox` system was removed with the v2 release, since we no longer ai
 
 # Version History
 
+**2.1.1** Split up views into separate modules.
+
 **2.1.0** December 2018: No longer allowing Javascript in task or comment bodies. Misc bug fixes.
 
 **2.0.3** April 2018: Bump production status in setup.py

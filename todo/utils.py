@@ -1,8 +1,26 @@
 from django.contrib.sites.models import Site
+from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 
-from todo.models import Comment
+from todo.models import Comment, Task
+
+
+def staff_only(function):
+    """
+    Custom view decorator allows us to raise 403 on insufficient permissions,
+    rather than redirect user to login view.
+    """
+
+    def wrap(request, *args, **kwargs):
+        if request.user.is_staff:
+            return function(request, *args, **kwargs)
+        else:
+            raise PermissionDenied
+
+    wrap.__doc__ = function.__doc__
+    wrap.__name__ = function.__name__
+    return wrap
 
 
 def send_notify_mail(new_task):
@@ -44,3 +62,15 @@ def send_email_to_thread_participants(task, msg_body, user, subject=None):
     recip_list = list(set(recip_list))  # Eliminate duplicates
 
     send_mail(email_subject, email_body, task.created_by.email, recip_list, fail_silently=False)
+
+
+def toggle_task_completed(task_id: int) -> bool:
+    try:
+        task = Task.objects.get(id=task_id)
+        task.completed = not task.completed
+        task.save()
+        return True
+    except Task.DoesNotExist:
+        # FIXME proper log message
+        print("task not found")
+        return False
