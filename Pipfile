@@ -12,8 +12,11 @@ pytest-django = "*"
 "flake8" = "*"
 factory-boy = "*"
 titlecase = "*"
+bleach = "*"
 
 [dev-packages]
+pylint = "*"
+mypy = "*"
 
 [requires]
 python_version = "3.6"

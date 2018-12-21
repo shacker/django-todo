@@ -1,5 +1,8 @@
+import bleach
+import json
 import pytest
 
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.urls import reverse
 
@@ -85,6 +88,60 @@ def test_view_search(todo_setup, admin_client):
     assert response.status_code == 200
 
 
+@pytest.mark.django_db
+def test_no_javascript_in_task_note(todo_setup, client):
+    task_list = TaskList.objects.first()
+    user = get_user_model().objects.get(username="u2")
+    title = "Some Unique String"
+    note = "foo <script>alert('oh noez');</script> bar"
+    data = {
+        "task_list": task_list.id,
+        "created_by": user.id,
+        "priority": 10,
+        "title": title,
+        "note": note,
+        'add_edit_task': 'Submit'
+    }
+
+    client.login(username='u2', password="password")
+    url = reverse('todo:list_detail', kwargs={"list_id": task_list.id, "list_slug": task_list.slug})
+
+    response = client.post(url, data)
+    assert response.status_code == 302
+
+    # Retrieve new task and compare notes field
+    task = Task.objects.get(title=title)
+    assert task.note != note  # Should have been modified by bleach since note included javascript!
+    assert task.note == bleach.clean(note, strip=True)
+
+
+@pytest.mark.django_db
+def test_no_javascript_in_comments(todo_setup, client):
+    user = get_user_model().objects.get(username="u2")
+    client.login(username='u2', password="password")
+
+    task = Task.objects.first()
+    task.created_by = user
+    task.save()
+
+    user.groups.add(task.task_list.group)
+
+    comment = "foo <script>alert('oh noez');</script> bar"
+    data = {
+        "comment-body": comment,
+        "add_comment": 'Submit'
+    }
+    url = reverse('todo:task_detail', kwargs={"task_id": task.id})
+
+    response = client.post(url, data)
+    assert response.status_code == 200
+
+    task.refresh_from_db()
+    newcomment = task.comment_set.last()
+    assert newcomment != comment  # Should have been modified by bleach
+    assert newcomment.body == bleach.clean(comment, strip=True)
+
+
 # ### PERMISSIONS ###
 
 """
@@ -139,9 +196,9 @@ def test_view_task_mine(todo_setup, client):
 
 
 def test_view_task_my_group(todo_setup, client, django_user_model):
-    # User can always view tasks that are NOT theirs IF the task is in a shared group.
-    # u1 and u2 are in different groups in the fixture -
-    # Put them in the same group.
+    """User can always view tasks that are NOT theirs IF the task is in a shared group.
+    u1 and u2 are in different groups in the fixture -
+    Put them in the same group."""
     g1 = Group.objects.get(name="Workgroup One")
     u2 = django_user_model.objects.get(username="u2")
     u2.groups.add(g1)

@@ -75,4 +75,4 @@ class Comment(models.Model):
         return "{author} - {snippet}...".format(author=self.author, snippet=self.body[:35])
 
     def __str__(self):
-        return self.snippet
+        return self.snippet()

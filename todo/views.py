@@ -1,4 +1,5 @@
 import datetime
+import bleach
 
 from django.conf import settings
 from django.contrib import messages
@@ -150,6 +151,7 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False):
         if form.is_valid():
             new_task = form.save(commit=False)
             new_task.created_date = timezone.now()
+            new_task.note = bleach.clean(form.cleaned_data['note'], strip=True)
             form.save()
 
             # Send email alert only if Notify checkbox is checked AND assignee is not same as the submitter
@@ -197,7 +199,7 @@ def task_detail(request, task_id: int) -> HttpResponse:
         Comment.objects.create(
             author=request.user,
             task=task,
-            body=request.POST['comment-body'],
+            body=bleach.clean(request.POST['comment-body'], strip=True),
         )
 
         send_email_to_thread_participants(
@@ -210,7 +212,9 @@ def task_detail(request, task_id: int) -> HttpResponse:
         form = AddEditTaskForm(request.user, request.POST, instance=task, initial={'task_list': task.task_list})
 
         if form.is_valid():
-            form.save()
+            item = form.save(commit=False)
+            item.note = bleach.clean(form.cleaned_data['note'], strip=True)
+            item.save()
             messages.success(request, "The task has been edited.")
             return redirect('todo:list_detail', list_id=task.task_list.id, list_slug=task.task_list.slug)
     else:
