@@ -34,10 +34,18 @@ def message_text(message):
     if html_part is not None:
         return html2text(part_decode(html_part))
 
+    # TODO: find something smart to do when no text if found
     return ""
 
 
-def insert_message(task_list, message, priority):
+def format_task_title(format_string, message):
+    return format_string.format(
+        subject=message["subject"],
+        author=message["from"],
+    )
+
+
+def insert_message(task_list, message, priority, task_title_format):
     if "message-id" not in message:
         logger.warning("missing message id, ignoring message")
         return
@@ -80,7 +88,9 @@ def insert_message(task_list, message, priority):
     with transaction.atomic():
         if best_task is None:
             best_task = Task.objects.create(
-                priority=priority, title=message["subject"], task_list=task_list
+                priority=priority,
+                title=format_task_title(task_title_format, message),
+                task_list=task_list
             )
         logger.info(f"using task: {repr(best_task)}")
 
@@ -92,11 +102,12 @@ def insert_message(task_list, message, priority):
         logger.info(f"created comment: {repr(comment)}")
 
 
-def tracker_consumer(producer, group=None, task_list_slug=None, priority=1):
+def tracker_consumer(producer, group=None, task_list_slug=None,
+                     priority=1, task_title_format="[MAIL] {subject}"):
     task_list = TaskList.objects.get(group__name=group, slug=task_list_slug)
     for message in producer:
         try:
-            insert_message(task_list, message, priority)
+            insert_message(task_list, message, priority, title_format)
         except Exception:
             # ignore exceptions during insertion, in order to avoid
             logger.exception("got exception while inserting message")
