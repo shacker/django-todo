@@ -73,6 +73,16 @@
             {{ task.task_list }}
           </a>
         </li>
+        <li class="list-group-item">
+        <h5>Merge task into</h5>
+        <form action="" method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            <textarea class="form-control" name="merge-target" rows="3"></textarea>
+          </div>
+          <input class="btn btn-sm btn-primary" type="submit" name="merge_task_into" value="Merge task">
+        </form>
+        </li>
       </ul>
     </div>
   </div>
@@ -81,6 +91,7 @@
     {# Task edit / new task form #}
     {% include 'todo/include/task_edit.html' %}
   </div>
+
 
   <h5>Add comment</h5>
   <form action="" method="post">

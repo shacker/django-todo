@@ -1,6 +1,6 @@
+import bleach
 import datetime
 
-import bleach
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
@@ -25,6 +25,12 @@ def task_detail(request, task_id: int) -> HttpResponse:
     # Get the group this task belongs to, and check whether current user is a member of that group.
     if task.task_list.group not in request.user.groups.all() and not request.user.is_staff:
         raise PermissionDenied
+
+    if request.POST.get("merge_task_into"):
+        target_task_id = int(request.POST.get("merge-target"))
+        merge_target = Task.objects.get(pk=target_task_id)
+        task.merge_into(merge_target)
+        return redirect("todo:task_detail", task_id=merge_target.id)
 
     # Save submitted comments
     if request.POST.get("add_comment"):
