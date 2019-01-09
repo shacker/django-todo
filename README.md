@@ -19,7 +19,7 @@ assignment application for Django, designed to be dropped into an existing site 
 ## Requirements
 
 * Django 2.0+
-* Python 3.3+
+* Python 3.6+
 * jQuery (full version, not "slim", for drag/drop prioritization)
 * Bootstrap (to work with provided templates, though you can override them)
 * bleach (`pip install bleach`)
@@ -166,6 +166,8 @@ django-todo uses pytest exclusively for testing. The best way to run the suite i
 The previous `tox` system was removed with the v2 release, since we no longer aim to support older Python or Django versions.
 
 # Version History
+
+**2.1.1** Correct Python version requirement in documentation to Python 3.6
 
 **2.1.1** Split up views into separate modules.
 

@@ -1,4 +1,4 @@
-# django-todo 
+# django-todo
 
 django-todo is a pluggable, multi-user, multi-group task management and
 assignment application for Django, designed to be dropped into an existing site as a reusable app. django-todo can be used as a personal to-do tracker, or a group task management system, or a ticketing system for organizations (or all of these at once!)
@@ -19,7 +19,7 @@ assignment application for Django, designed to be dropped into an existing site 
 ## Requirements
 
 * Django 2.0+
-* Python 3.3+
+* Python 3.6+
 * jQuery (full version, not "slim", for drag/drop prioritization)
 * Bootstrap (to work with provided templates, though you can override them)
 
@@ -27,13 +27,13 @@ assignment application for Django, designed to be dropped into an existing site 
 
 The assumption is that your organization/publication/company has multiple groups of employees, each with multiple users (where actual users and groups map to Django Users and Groups). Users may belong to multiple groups, and each group can have multiple todo lists.
 
-You must have at least one Group set up in Django admin, and that group must have at least one User as a member. This is true even if you're the sole user of django-todo. 
+You must have at least one Group set up in Django admin, and that group must have at least one User as a member. This is true even if you're the sole user of django-todo.
 
-Users can view and modify all to-do lists belonging to their group(s). Only users with `is_staff()` can add or delete lists. 
+Users can view and modify all to-do lists belonging to their group(s). Only users with `is_staff()` can add or delete lists.
 
 Identical list names can exist in different groups, but not in the same group.
 
-Emails are generated to the assigned-to person when new tasks are created. 
+Emails are generated to the assigned-to person when new tasks are created.
 
 Comment threads can be added to tasks. Each participant in a thread receives email when new comments are added.
 
@@ -45,7 +45,7 @@ django-todo v2 makes use of features only available in Django 2.0. It will not w
 
 # Installation
 
-django-todo is a Django app, not a project site. It needs a site to live in. You can either install it into an existing Django project site, or clone the django-todo [demo site (GTD)](https://github.com/shacker/gtd). 
+django-todo is a Django app, not a project site. It needs a site to live in. You can either install it into an existing Django project site, or clone the django-todo [demo site (GTD)](https://github.com/shacker/gtd).
 
 If using your own site, be sure you have jQuery and Bootstrap wired up and working.
 
@@ -63,7 +63,7 @@ django-todo comes with its own `todo/base.html`, which extends your master `base
 
 If you use some other name for your main content area, you'll need to override and alter the provided templates.
 
-All views are login-required. Therefore, you must have a working user authentication system. 
+All views are login-required. Therefore, you must have a working user authentication system.
 
 For email notifications to work, make sure your site/project is [set up to send email](https://docs.djangoproject.com/en/2.0/topics/email/).
 
@@ -79,7 +79,7 @@ Add to your settings:
     INSTALLED_APPS = (
         ...
         'todo',
-    )    
+    )
 
 Create database tables:
 
@@ -98,7 +98,7 @@ django-todo makes use of the Django `messages` system. Make sure you have someth
 
 Log in and access `/todo`!
 
-The provided templates are fairly bare-bones, and are meant as starting points only. Unlike previous versions of django-todo, they now ship as Bootstrap examples, but feel free to override them - there is no hard dependency on Bootstrap. To override a template, create a `todo` folder in your project's `templates` dir, then copy the template you want to override from django-todo source and into that dir. 
+The provided templates are fairly bare-bones, and are meant as starting points only. Unlike previous versions of django-todo, they now ship as Bootstrap examples, but feel free to override them - there is no hard dependency on Bootstrap. To override a template, create a `todo` folder in your project's `templates` dir, then copy the template you want to override from django-todo source and into that dir.
 
 If you wish to use the public ticket-filing system, first create the list into which those tickets should be filed, then add its slug to `TODO_DEFAULT_LIST_SLUG` in settings (more on settings below).
 
