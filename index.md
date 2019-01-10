@@ -22,6 +22,7 @@ assignment application for Django, designed to be dropped into an existing site 
 * Python 3.6+
 * jQuery (full version, not "slim", for drag/drop prioritization)
 * Bootstrap (to work with provided templates, though you can override them)
+* bleach (`pip install bleach`)
 
 ## Overview
 
@@ -29,7 +30,7 @@ The assumption is that your organization/publication/company has multiple groups
 
 You must have at least one Group set up in Django admin, and that group must have at least one User as a member. This is true even if you're the sole user of django-todo.
 
-Users can view and modify all to-do lists belonging to their group(s). Only users with `is_staff()` can add or delete lists.
+Users can view and modify all to-do lists belonging to their group(s). Only users with `is_staff` can add or delete lists.
 
 Identical list names can exist in different groups, but not in the same group.
 
@@ -94,7 +95,7 @@ Add links to your site's navigation system:
     <a href="{% url 'todo:lists' %}">Todo Lists</a>
     <a href="{% url 'todo:mine' %}">My Tasks</a>
 
-django-todo makes use of the Django `messages` system. Make sure you have something like [this](https://docs.djangoproject.com/en/2.0/ref/contrib/messages/#displaying-messages) in your `base.html`.
+django-todo makes use of the Django `messages` system. Make sure you have something like [this](https://docs.djangoproject.com/en/2.0/ref/contrib/messages/#displaying-messages) (link) in your `base.html`.
 
 Log in and access `/todo`!
 
@@ -107,8 +108,9 @@ If you wish to use the public ticket-filing system, first create the list into w
 Optional configuration options:
 
 ```
-# Restrict access to todo lists/views to `is_staff()` users.
-# False here falls back to `is_authenticated()` users.
+# Restrict access to ALL todo lists/views to `is_staff` users.
+# If False or unset, all users can see all views (but more granular permissions are still enforced
+# within views, such as requiring staff for adding and deleting lists).
 TODO_STAFF_ONLY = True
 
 # If you use the "public" ticket filing option, to whom should these tickets be assigned?
@@ -166,6 +168,14 @@ The previous `tox` system was removed with the v2 release, since we no longer ai
 
 # Version History
 
+**2.2.0** Re-instate enforcement of TODO_STAFF_ONLY setting
+
+**2.1.1** Correct Python version requirement in documentation to Python 3.6
+
+**2.1.1** Split up views into separate modules.
+
+**2.1.0** December 2018: No longer allowing Javascript in task or comment bodies. Misc bug fixes.
+
 **2.0.3** April 2018: Bump production status in setup.py
 
 **2.0.2** April 2018: Improve notification email subjects and bodies
@@ -215,5 +225,3 @@ ALL groups, not just the groups they "belong" to)
 **0.9.1** - Removed context_processors.py - leftover turdlet
 
 **0.9** - First release
-
-
