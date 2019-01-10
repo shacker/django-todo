@@ -16,7 +16,7 @@ def add_list(request) -> HttpResponse:
     """Allow users to add a new todo list to the group they're in.
     """
 
-    # Only staffers can add lists.
+    # Only staffers can add lists, regardless of TODO_STAFF_USER setting.
     if not request.user.is_staff:
         raise PermissionDenied
 
