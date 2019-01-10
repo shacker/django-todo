@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
@@ -10,9 +10,11 @@ from django.template.loader import render_to_string
 
 from todo.forms import AddExternalTaskForm
 from todo.models import TaskList
+from todo.utils import staff_check
 
 
 @login_required
+@user_passes_test(staff_check)
 def external_add(request) -> HttpResponse:
     """Allow authenticated users who don't have access to the rest of the ticket system to file a ticket
     in the list specified in settings (e.g. django-todo can be used a ticket filing system for a school, where

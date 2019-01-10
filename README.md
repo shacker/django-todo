@@ -30,7 +30,7 @@ The assumption is that your organization/publication/company has multiple groups
 
 You must have at least one Group set up in Django admin, and that group must have at least one User as a member. This is true even if you're the sole user of django-todo.
 
-Users can view and modify all to-do lists belonging to their group(s). Only users with `is_staff()` can add or delete lists.
+Users can view and modify all to-do lists belonging to their group(s). Only users with `is_staff` can add or delete lists.
 
 Identical list names can exist in different groups, but not in the same group.
 
@@ -108,8 +108,9 @@ If you wish to use the public ticket-filing system, first create the list into w
 Optional configuration options:
 
 ```
-# Restrict access to todo lists/views to `is_staff()` users.
-# False here falls back to `is_authenticated()` users.
+# Restrict access to ALL todo lists/views to `is_staff` users.
+# If False or unset, all users can see all views (but more granular permissions are still enforced
+# within views, such as requiring staff for adding and deleting lists).
 TODO_STAFF_ONLY = True
 
 # If you use the "public" ticket filing option, to whom should these tickets be assigned?
@@ -166,6 +167,8 @@ django-todo uses pytest exclusively for testing. The best way to run the suite i
 The previous `tox` system was removed with the v2 release, since we no longer aim to support older Python or Django versions.
 
 # Version History
+
+**2.2.0** Re-instate enforcement of TODO_STAFF_ONLY setting
 
 **2.1.1** Correct Python version requirement in documentation to Python 3.6
 

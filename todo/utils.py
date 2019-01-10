@@ -1,26 +1,22 @@
+from django.conf import settings
 from django.contrib.sites.models import Site
-from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 
 from todo.models import Comment, Task
 
 
-def staff_only(function):
-    """
-    Custom view decorator allows us to raise 403 on insufficient permissions,
-    rather than redirect user to login view.
+def staff_check(user):
+    """If TODO_STAFF_ONLY is set to True, limit view access to staff users only.
+        # FIXME: More granular access control is needed... but need to do it generically,
+        # to satisfy all possible todo implementations.
     """
 
-    def wrap(request, *args, **kwargs):
-        if request.user.is_staff:
-            return function(request, *args, **kwargs)
-        else:
-            raise PermissionDenied
-
-    wrap.__doc__ = function.__doc__
-    wrap.__name__ = function.__name__
-    return wrap
+    if hasattr(settings, "TODO_STAFF_ONLY") and settings.TODO_STAFF_ONLY:
+        return user.is_staff
+    else:
+        # If unset or False, allow all logged in users
+        return True
 
 
 def send_notify_mail(new_task):

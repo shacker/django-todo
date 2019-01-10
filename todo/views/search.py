@@ -1,18 +1,22 @@
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
 
 from todo.models import Task
+from todo.utils import staff_check
 
 
 @login_required
+@user_passes_test(staff_check)
 def search(request) -> HttpResponse:
     """Search for tasks user has permission to see.
     """
+
+    query_string = ""
+
     if request.GET:
 
-        query_string = ""
         found_tasks = None
         if ("q" in request.GET) and request.GET["q"].strip():
             query_string = request.GET["q"]
@@ -29,7 +33,6 @@ def search(request) -> HttpResponse:
             found_tasks = found_tasks.exclude(completed=True)
 
     else:
-        query_string = None
         found_tasks = None
 
     # Only include tasks that are in groups of which this user is a member:

@@ -1,15 +1,17 @@
 import datetime
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse
 from django.shortcuts import render
 
 from todo.forms import SearchForm
 from todo.models import Task, TaskList
+from todo.utils import staff_check
 
 
 @login_required
+@user_passes_test(staff_check)
 def list_lists(request) -> HttpResponse:
     """Homepage view - list of lists a user can view, and ability to add a list.
     """

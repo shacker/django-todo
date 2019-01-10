@@ -1,12 +1,14 @@
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 
 from todo.models import Task
-from django.views.decorators.csrf import csrf_exempt
+from todo.utils import staff_check
 
 
 @csrf_exempt
 @login_required
+@user_passes_test(staff_check)
 def reorder_tasks(request) -> HttpResponse:
     """Handle task re-ordering (priorities) from JQuery drag/drop in list_detail.html
     """

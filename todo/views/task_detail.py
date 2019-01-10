@@ -2,17 +2,18 @@ import datetime
 
 import bleach
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from todo.forms import AddEditTaskForm
 from todo.models import Comment, Task
-from todo.utils import send_email_to_thread_participants, toggle_task_completed
+from todo.utils import send_email_to_thread_participants, toggle_task_completed, staff_check
 
 
 @login_required
+@user_passes_test(staff_check)
 def task_detail(request, task_id: int) -> HttpResponse:
     """View task details. Allow task details to be edited. Process new comments on task.
     """

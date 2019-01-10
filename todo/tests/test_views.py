@@ -144,18 +144,11 @@ def test_no_javascript_in_comments(todo_setup, client):
 
 # ### PERMISSIONS ###
 
-"""
-Some views are for staff users only.
-We've already smoke-tested with Admin user - try these with normal user.
-These exercise our custom @staff_only decorator without calling that function explicitly.
-"""
-
-
 def test_view_add_list_nonadmin(todo_setup, client):
     url = reverse("todo:add_list")
     client.login(username="you", password="password")
     response = client.get(url)
-    assert response.status_code == 403
+    assert response.status_code == 302  # Redirected to login
 
 
 def test_view_del_list_nonadmin(todo_setup, client):
@@ -163,7 +156,7 @@ def test_view_del_list_nonadmin(todo_setup, client):
     url = reverse("todo:del_list", kwargs={"list_id": tlist.id, "list_slug": tlist.slug})
     client.login(username="you", password="password")
     response = client.get(url)
-    assert response.status_code == 403
+    assert response.status_code == 302  # Fedirected to login
 
 
 def test_view_list_mine(todo_setup, client):
@@ -220,3 +213,22 @@ def test_view_task_not_in_my_group(todo_setup, client):
     response = client.get(url)
     assert response.status_code == 403
 
+
+def test_setting_TODO_STAFF_ONLY_False(todo_setup, client, settings):
+    # We use Django's user_passes_test to call `staff_check` utility function on all views.
+    # Just testing one view here; if it works, it works for all of them.
+    settings.TODO_STAFF_ONLY = False
+    url = reverse("todo:lists")
+    client.login(username="u2", password="password")
+    response = client.get(url)
+    assert response.status_code == 200
+
+
+def test_setting_TODO_STAFF_ONLY_True(todo_setup, client, settings):
+    # We use Django's user_passes_test to call `staff_check` utility function on all views.
+    # Just testing one view here; if it works, it works for all of them.
+    settings.TODO_STAFF_ONLY = True
+    url = reverse("todo:lists")
+    client.login(username="u2", password="password")
+    response = client.get(url)
+    assert response.status_code == 302  # Redirected to login view
