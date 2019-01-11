@@ -1,1 +1,1 @@
-html_theme = "classic"
+html_theme = "Windmill"
