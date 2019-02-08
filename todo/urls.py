@@ -57,6 +57,11 @@ urlpatterns = [
         name='task_detail'),
 
     path(
+        'task/<int:task_id>/autocomplete/',
+        views.TaskAutocomplete.as_view(),
+        name='task_autocomplete'),
+
+    path(
         'toggle_done/<int:task_id>/',
         views.toggle_done,
         name='task_toggle_done'),

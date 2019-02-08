@@ -8,3 +8,5 @@ __email__ = 'shacker@birdhouse.org'
 
 __url__ = 'https://github.com/shacker/django-todo'
 __license__ = 'BSD License'
+
+from . import check

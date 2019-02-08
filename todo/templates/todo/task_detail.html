@@ -2,6 +2,22 @@
 
 {% block title %}Task:{{ task.title }}{% endblock %}
 
+{% block extrahead %}
+<style>
+.select2 {
+    width: 100% !important;
+}
+
+.select2-container {
+    min-width: 0 !important;
+}
+</style>
+{{ form.media }}
+{{ merge_form.media }}
+{% endblock %}
+
+
+
 {% block content %}
   <div class="row">
     <div class="col-sm-8">
@@ -74,14 +90,16 @@
           </a>
         </li>
         <li class="list-group-item">
-        <h5>Merge task into</h5>
-        <form action="" method="post">
-          {% csrf_token %}
-          <div class="form-group">
-            <textarea class="form-control" name="merge-target" rows="3"></textarea>
-          </div>
-          <input class="btn btn-sm btn-primary" type="submit" name="merge_task_into" value="Merge task">
-        </form>
+          <form action="" method="post">
+            {% csrf_token %}
+            {% for field in merge_form.visible_fields %}
+            <p>
+              {{ field.errors }}
+              {{ field }}
+            </p>
+            {% endfor %}
+            <input class="btn btn-sm btn-primary" type="submit" name="merge_task_into" value="Merge task">
+          </form>
         </li>
       </ul>
     </div>
