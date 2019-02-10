@@ -17,23 +17,27 @@ def toggle_done(request, task_id: int) -> HttpResponse:
     Redirect to the list from which the task came.
     """
 
-    task = get_object_or_404(Task, pk=task_id)
+    if request.method == "POST":
+        task = get_object_or_404(Task, pk=task_id)
 
-    # Permissions
-    if not (
-        (request.user.is_superuser)
-        or (task.created_by == request.user)
-        or (task.assigned_to == request.user)
-        or (task.task_list.group in request.user.groups.all())
-    ):
-        raise PermissionDenied
-
-    toggle_task_completed(task.id)
-    messages.success(request, "Task status changed for '{}'".format(task.title))
-
-    return redirect(
-        reverse(
+        redir_url = reverse(
             "todo:list_detail",
             kwargs={"list_id": task.task_list.id, "list_slug": task.task_list.slug},
         )
-    )
+
+        # Permissions
+        if not (
+            (task.created_by == request.user)
+            or (request.user.is_superuser)
+            or (task.assigned_to == request.user)
+            or (task.task_list.group in request.user.groups.all())
+        ):
+            raise PermissionDenied
+
+        toggle_task_completed(task.id)
+        messages.success(request, "Task status changed for '{}'".format(task.title))
+
+        return redirect(redir_url)
+
+    else:
+        raise PermissionDenied

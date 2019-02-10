@@ -168,6 +168,8 @@ The previous `tox` system was removed with the v2 release, since we no longer ai
 
 # Version History
 
+**2.2.1** Convert task delete and toggle_done views to POST only
+
 **2.2.0** Re-instate enforcement of TODO_STAFF_ONLY setting
 
 **2.1.1** Correct Python version requirement in documentation to Python 3.6

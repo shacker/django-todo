@@ -20,7 +20,7 @@ def list_lists(request) -> HttpResponse:
     searchform = SearchForm(auto_id=False)
 
     # Make sure user belongs to at least one group.
-    if request.user.groups.all().count() == 0:
+    if not request.user.groups.all().exists():
         messages.warning(
             request,
             "You do not yet belong to any groups. Ask your administrator to add you to one.",

@@ -1,5 +1,4 @@
 import bleach
-import json
 import pytest
 
 from django.contrib.auth import get_user_model
@@ -13,8 +12,6 @@ First the "smoketests" - do they respond at all for a logged in admin user?
 Next permissions tests - some views should respond for staffers only.
 After that, view contents and behaviors.
 """
-
-# ### SMOKETESTS ###
 
 
 @pytest.mark.django_db
@@ -83,6 +80,31 @@ def test_view_task_detail(todo_setup, admin_client):
     url = reverse("todo:task_detail", kwargs={"task_id": task.id})
     response = admin_client.get(url)
     assert response.status_code == 200
+
+
+def test_del_task(todo_setup, admin_user, client):
+    task = Task.objects.first()
+    url = reverse("todo:delete_task", kwargs={"task_id": task.id})
+    # View accepts POST, not GET
+    client.login(username="admin", password="password")
+    response = client.get(url)
+    assert response.status_code == 403
+    response = client.post(url)
+    assert not Task.objects.filter(id=task.id).exists()
+
+
+def test_task_toggle_done(todo_setup, admin_user, client):
+    task = Task.objects.first()
+    assert not task.completed
+    url = reverse("todo:task_toggle_done", kwargs={"task_id": task.id})
+    # View accepts POST, not GET
+    client.login(username="admin", password="password")
+    response = client.get(url)
+    assert response.status_code == 403
+
+    client.post(url)
+    task.refresh_from_db()
+    assert task.completed
 
 
 def test_view_search(todo_setup, admin_client):

@@ -52,14 +52,17 @@
               {% if task.assigned_to %}{{ task.assigned_to }}{% else %}Anyone{% endif %}
             </td>
             <td>
-                <a href="{% url "todo:task_toggle_done" task.id %}" class="btn btn-info btn-sm">
+              <form method="post" action="{% url "todo:task_toggle_done" task.id %}" role="form">
+                {% csrf_token %}
+                <button class="btn btn-info btn-sm" type="submit" name="toggle_done">
                   {% if view_completed %}
                     Not Done
                   {% else %}
                     Done
                   {% endif %}
-                </a>
-              </td>
+                </button>
+              </form>
+            </td>
           </tr>
         {% endfor %}
       </table>

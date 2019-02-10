@@ -12,21 +12,40 @@
     </div>
 
     <div class="col-sm-4">
-      <ul class="list-group">
-        <li class="list-group-item">
-          <form action="" method="post">
-            {% csrf_token %}
+      <div class="mb-2">
 
-            <button class="btn btn-sm btn-primary" id="EditTaskButton" type="button"
-            data-toggle="collapse" data-target="#AddEditTask">Edit Task</button>
+        <button
+          class="btn btn-sm btn-primary"
+          id="EditTaskButton"
+          type="button"
+          data-toggle="collapse"
+          data-target="#AddEditTask"
+        >
+            Edit Task
+        </button>
 
-            <a href="{% url "todo:task_toggle_done" task.id %}" class="btn btn-info btn-sm">
+        <form method="post" action="{% url "todo:task_toggle_done" task.id %}" role="form" style="display:inline;">
+          {% csrf_token %}
+          <div style="display:inline;">
+            <button class="btn btn-info btn-sm" type="submit" name="toggle_done">
               {% if task.completed %} Mark Not Done {% else %} Mark Done {% endif %}
-            </a>
+            </button>
+          </div>
+        </form>
 
-            <a href="{% url "todo:delete_task" task.id %}" class="btn btn-danger btn-sm">Delete</a>
-          </form>
-        </li>
+        <form method="post" action="{% url "todo:delete_task" task.id %}" role="form" style="display:inline;">
+          {% csrf_token %}
+          <div style="display:inline;">
+            <button class="btn btn-danger btn-sm" type="submit" name="submit_delete">
+              Delete
+            </button>
+          </div>
+        </form>
+
+      </div>
+
+      <ul class="list-group">
+
         <li class="list-group-item">
           <strong>Assigned to:</strong>
           {% if task.assigned_to %} {{ task.assigned_to.get_full_name }} {% else %} Anyone {% endif %}
@@ -37,7 +56,7 @@
         <li class="list-group-item">
           <strong>Due date:</strong> {{ task.due_date }}
         </li>
-        
+
         {% if task.completed %}
           <li class="list-group-item">
             <strong>Completed on:</strong> {{ task.completed_date}}
@@ -47,7 +66,7 @@
             <strong>Completed:</strong> {{ task.completed|yesno:"Yes,No" }}
           </li>
         {% endif %}
-          
+
         <li class="list-group-item">
           <strong>In list:</strong>
           <a href="{% url 'todo:list_detail' task.task_list.id task.task_list.slug %}">
