@@ -74,7 +74,10 @@ def task_detail(request, task_id: int) -> HttpResponse:
                 raise PermissionDenied
 
             task.merge_into(merge_target)
-            return redirect(reverse("todo:task_detail", kwargs={"task_id": task_id}))
+            return redirect(reverse(
+                "todo:task_detail",
+                kwargs={"task_id": merge_target.pk}
+            ))
     else:
         merge_form = MergeForm()
 
