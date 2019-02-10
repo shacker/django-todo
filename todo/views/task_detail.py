@@ -66,7 +66,7 @@ def task_detail(request, task_id: int) -> HttpResponse:
         )
 
     # Handle task merging
-    if request.method == "POST":
+    if request.POST.get("merge_task_into"):
         merge_form = MergeForm(request.POST)
         if merge_form.is_valid():
             merge_target = merge_form.cleaned_data["merge_target"]
