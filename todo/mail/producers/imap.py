@@ -16,9 +16,9 @@ def imap_check(command_tuple):
 
 
 @contextmanager
-def imap_connect(host, port, user, password):
+def imap_connect(host, port, username, password):
     conn = imaplib.IMAP4_SSL(host=host, port=port)
-    conn.login(user, password)
+    conn.login(username, password)
     imap_check(conn.list())
     try:
         yield conn
@@ -49,7 +49,7 @@ def imap_producer(
     preserve=False,
     host=None,
     port=993,
-    user=None,
+    username=None,
     password=None,
     nap_duration=1,
     input_folder="INBOX",
@@ -60,7 +60,7 @@ def imap_producer(
     def process_batch():
         logger.debug("starting to process batch")
         # reconnect each time to avoid repeated failures due to a lost connection
-        with imap_connect(host, port, user, password) as conn:
+        with imap_connect(host, port, username, password) as conn:
             # select the requested folder
             imap_check(conn.select(input_folder, readonly=False))
 
