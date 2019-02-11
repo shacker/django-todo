@@ -93,6 +93,7 @@
   <div id="TaskEdit" class="collapse">
     {# Task edit / new task form #}
     {% include 'todo/include/task_edit.html' %}
+    {% if merge_form is not None %}
     <form action="" method="post">
       <div class="card border-danger">
       <div class="card-header">Merge task</div>
@@ -111,6 +112,7 @@
       </div>
       </div>
     </form>
+    {% endif %}
   </div>
 
   <div class="mt-3">

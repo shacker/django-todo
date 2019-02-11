@@ -23,6 +23,10 @@ def staff_check(user):
         return True
 
 
+def user_can_read_task(task, user):
+    return task.task_list.group in user.groups.all() or user.is_staff
+
+
 def todo_get_backend(task):
     '''returns a mail backend for some task'''
     mail_backends = getattr(settings, "TODO_MAIL_BACKENDS", None)
@@ -148,8 +152,9 @@ def send_email_to_thread_participants(task, msg_body, user, subject=None):
         for ca in commenters
         if ca.author is not None
     )
-    for user_email in (task.created_by.email, task.assigned_to.email):
-        recip_list.add(user_email)
+    for related_user in (task.created_by, task.assigned_to):
+        if related_user is not None:
+            recip_list.add(related_user.email)
     recip_list = list(m for m in recip_list if m)
 
     todo_send_mail(user, task, email_subject, email_body, recip_list)

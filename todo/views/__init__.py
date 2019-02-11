@@ -6,5 +6,5 @@ from todo.views.list_detail import list_detail  # noqa: F401
 from todo.views.list_lists import list_lists  # noqa: F401
 from todo.views.reorder_tasks import reorder_tasks  # noqa: F401
 from todo.views.search import search  # noqa: F401
-from todo.views.task_detail import task_detail, TaskAutocomplete  # noqa: F401
+from todo.views.task_detail import task_detail  # noqa: F401
 from todo.views.toggle_done import toggle_done  # noqa: F401

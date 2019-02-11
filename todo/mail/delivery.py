@@ -18,3 +18,4 @@ def _declare_backend(backend_path):
 
 smtp_backend = _declare_backend('django.core.mail.backends.smtp.EmailBackend')
 console_backend = _declare_backend('django.core.mail.backends.console.EmailBackend')
+locmem_backend = _declare_backend('django.core.mail.backends.locmem.EmailBackend')
