@@ -6,12 +6,6 @@ from todo.models import Task, Comment
 from todo.utils import send_notify_mail, send_email_to_thread_participants
 
 
-@pytest.fixture()
-# Set up an in-memory mail server to receive test emails
-def email_backend_setup(settings):
-    settings.EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
-
-
 def test_send_notify_mail_not_me(todo_setup, django_user_model, email_backend_setup):
     """Assign a task to someone else, mail should be sent.
     TODO: Future tests could check for email contents.
