@@ -2,6 +2,7 @@ import bleach
 import datetime
 
 from django import forms
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
@@ -131,6 +132,7 @@ def task_detail(request, task_id: int) -> HttpResponse:
         "form": form,
         "merge_form": merge_form,
         "thedate": thedate,
+        "comment_classes": getattr(settings, 'TODO_COMMENT_CLASSES', []),
     }
 
     return render(request, "todo/task_detail.html", context)

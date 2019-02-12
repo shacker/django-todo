@@ -142,7 +142,7 @@
             {{ comment.date|date:"F d Y P" }}
           </span>
         </div>
-        <div class="text-monospace card-body">
+        <div class="{{ comment_classes | join:" " }} card-body">
           {{ comment.body|safe|urlize|linebreaks }}
         </div>
       </div>

@@ -127,6 +127,9 @@ TODO_DEFAULT_LIST_SLUG = 'tickets'
 # Defaults to "/"
 TODO_PUBLIC_SUBMIT_REDIRECT = 'dashboard'
 
+# additionnal classes the comment body should hold
+# adding "text-monospace" makes comment monospace
+TODO_COMMENT_CLASSES = []
 ```
 
 The current django-todo version number is available from the [todo package](https://github.com/shacker/django-todo/blob/master/todo/__init__.py):
