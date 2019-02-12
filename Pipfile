@@ -11,6 +11,8 @@ django-extensions = "*"
 factory-boy = "*"
 titlecase = "*"
 bleach = "*"
+django-autocomplete-light = "*"
+html2text = "*"
 
 [dev-packages]
 mypy = "*"
