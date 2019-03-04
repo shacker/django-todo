@@ -7,16 +7,15 @@ name = "pypi"
 django = "*"
 django-extensions = "*"
 "psycopg2-binary" = "*"
-pytest = "*"
-pytest-django = "*"
 "flake8" = "*"
 factory-boy = "*"
 titlecase = "*"
 bleach = "*"
 
 [dev-packages]
-pylint = "*"
 mypy = "*"
+pytest = "*"
+pytest-django = "*"
 
 [requires]
 python_version = "3.6"
