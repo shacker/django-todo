@@ -10,6 +10,10 @@ def _declare_backend(backend_path):
             backend_module = importlib.import_module(backend_module_name)
             backend = getattr(backend_module, class_name)
             return backend(*args, **kwargs)
+
+        if from_address is None:
+            raise ValueError("missing from_address")
+
         _backend.from_address = from_address
         _backend.headers = headers
         return _backend

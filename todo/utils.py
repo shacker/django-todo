@@ -46,11 +46,7 @@ def todo_get_mailer(user, task):
     if task_backend is None:
         return (None, mail.get_connection)
 
-    from_address = getattr(task_backend, "from_address", None)
-    if from_address is None:
-        # worst fallback ever
-        from_address = user.email
-
+    from_address = getattr(task_backend, "from_address")
     from_address = email.utils.formataddr((user.username, from_address))
     return (from_address, task_backend)
 
