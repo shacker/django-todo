@@ -139,11 +139,19 @@ The current django-todo version number is available from the [todo package](http
 
 ## Mail tracking
 
-What if you could turn django-todo into a shared mailbox ?
+What if you could turn django-todo into a shared mailbox?
+Django-todo includes an optional feature that allows emails sent to a
+dedicated mailbox to be pushed into todo as new tasks, and responses to
+be added as comments on that original tasks.
 
- - incoming emails create a new task
- - thread answers create task comments
+This allows support teams to work with a fully unified email + bug
+tracking system to avoid confusion over who's seen or responded to what.
 
+To enable the feature, you need to:
+
+ - define an email backend for outgoing emails
+ - define an email backend for incoming emails
+ - start a worker, which will wait for new emails
 
 ```python
 from todo.mail.producers import imap_producer

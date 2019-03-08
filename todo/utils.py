@@ -83,8 +83,6 @@ def todo_send_mail(user, task, subject, body, recip_list):
         epoch=int(time.time())
     )
 
-    import sys
-    print("sending mail", file=sys.stderr)
     # the thread message id is used as a common denominator between all
     # notifications for some task. This message doesn't actually exist,
     # it's just there to make threading possible
@@ -106,7 +104,6 @@ def todo_send_mail(user, task, subject, body, recip_list):
             },
             connection=connection,
         )
-        # import pdb; pdb.set_trace();
         message.send()
 
 
