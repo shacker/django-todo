@@ -27,4 +27,5 @@ class Command(BaseCommand):
             # Don't check validity of filepath here; upserter will do that.
             filepath = str(options.get("file"))
 
-        CSVImporter.upsert(filepath)
+        importer = CSVImporter()
+        importer.upsert(filepath)
