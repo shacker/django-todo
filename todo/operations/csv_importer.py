@@ -30,7 +30,7 @@ class CSVImporter:
             print(f"Sorry, couldn't find file: {filepath}")
             sys.exit(1)
 
-        with open(filepath, mode="r") as csv_file:
+        with open(filepath, mode="r", encoding="utf-8-sig") as csv_file:
             # Have arg and good file path -- read in rows as dicts.
             # Header row is:
             # Title, Group, Task List, Created Date, Due Date, Completed, Created By, Assigned To, Note, Priority
