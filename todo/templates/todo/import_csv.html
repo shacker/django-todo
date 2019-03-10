@@ -1,0 +1,80 @@
+{% extends "todo/base.html" %}
+{% load static %}
+
+{% block title %}Import CSV{% endblock %}
+
+{% block content %}
+  <h2>
+    Import CSV
+  </h2>
+
+  <p>
+    Batch-import tasks by uploading a specifically-formatted CSV.
+    See documentation for formatting rules.
+    Successs and failures will be reported here.
+  </p>
+
+  {% if results %}
+    <div class="card mb-4">
+      <div class="card-header">
+        Results of CSV upload
+      </div>
+      <div class="card-body">
+
+        <p>
+          <b>Summary:</b>
+        </p>
+        <ul>
+          {% for line in results.summaries %}
+            <li>{{ line }}</li>
+          {% endfor %}
+        </ul>
+
+        <p>
+          <b>Upserts (tasks created or updated):</b>
+        </p>
+        <ul>
+          {% for line in results.upserts %}
+            <li>{{ line }}</li>
+          {% endfor %}
+        </ul>
+
+        <p>
+          <b>Errors (tasks NOT created or updated):</b>
+        </p>
+        <ul>
+          {% for error_row in results.errors %}
+            {% for k, error_list in error_row.items  %}
+              <li>CSV row {{ k }}</li>
+              <ul>
+                {% for err in error_list %}
+                  <li>{{ err }}</li>
+                {% endfor %}
+              </ul>
+            {% endfor %}
+
+          {% endfor %}
+        </ul>
+
+
+      </div>
+    </div>
+  {% endif %}
+
+
+  <div class="card">
+    <div class="card-header">
+      Upload Tasks
+    </div>
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div>
+          <input type="file" name="csvfile" accept="text/csv">
+        </div>
+        <button type="submit" class="btn btn-primary mt-4">Upload</button>
+      </form>
+    </div>
+  </div>
+
+{% endblock %}

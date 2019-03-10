@@ -68,6 +68,7 @@ class CSVImporter:
 
         self.summary_msgs.append(f"\nProcessed {self.line_count} CSV rows")
         self.summary_msgs.append(f"Upserted {self.upsert_count} rows")
+        self.summary_msgs.append(f"Skipped {self.line_count - self.upsert_count} rows")
 
         _res = {
             "errors": self.error_msgs,

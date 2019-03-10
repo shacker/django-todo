@@ -70,4 +70,9 @@ urlpatterns = [
         'search/',
         views.search,
         name="search"),
+
+    path(
+        'import_csv/',
+        views.import_csv,
+        name="import_csv"),
 ]
