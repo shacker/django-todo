@@ -17,9 +17,11 @@ class CSVImporter:
     """
 
     def __init__(self):
-        self.error_msgs = []
-        self.upsert_msgs = []
-        self.summary_msgs = []
+        self.results = {
+            "errors": [],
+            "upserts": [],
+            "summaries": [],
+        }
         self.line_count = 0
         self.upsert_count = 0
 
@@ -38,6 +40,13 @@ class CSVImporter:
         else:
             # fileobj comes from browser upload (in-memory)
             csv_reader = csv.DictReader(codecs.iterdecode(fileobj, "utf-8"))
+
+        # DI check: Do we have expected header row?
+        header = csv_reader.fieldnames
+        expected = ['Title', 'Group', 'Task List', 'Created Date', 'Due Date', 'Completed', 'Created By', 'Assigned To', 'Note', 'Priority']
+        if not header == expected:
+            self.results.get('summaries').append(f"Inbound data does not have expected columns.\nShould be: {expected}")
+            return self.results
 
         for row in csv_reader:
             self.line_count += 1
@@ -64,18 +73,13 @@ class CSVImporter:
                     f'Upserted task {obj.id}: "{obj.title}"'
                     f' in list "{obj.task_list}" (group "{obj.task_list.group}")'
                 )
-                self.upsert_msgs.append(msg)
+                self.results.get("upserts").append(msg)
 
-        self.summary_msgs.append(f"\nProcessed {self.line_count} CSV rows")
-        self.summary_msgs.append(f"Upserted {self.upsert_count} rows")
-        self.summary_msgs.append(f"Skipped {self.line_count - self.upsert_count} rows")
+        self.results.get('summaries').append(f"\nProcessed {self.line_count} CSV rows")
+        self.results.get('summaries').append(f"Upserted {self.upsert_count} rows")
+        self.results.get('summaries').append(f"Skipped {self.line_count - self.upsert_count} rows")
 
-        _res = {
-            "errors": self.error_msgs,
-            "upserts": self.upsert_msgs,
-            "summaries": self.summary_msgs,
-        }
-        return _res
+        return self.results
 
     def validate_row(self, row):
         """Perform data integrity checks and set default values. Returns a valid object for insertion, or False.
@@ -174,7 +178,7 @@ class CSVImporter:
 
         # #######################
         if row_errors:
-            self.error_msgs.append({self.line_count: row_errors})
+            self.results.get("errors").append({self.line_count: row_errors})
             return False
 
         # No errors:

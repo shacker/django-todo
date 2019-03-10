@@ -21,40 +21,45 @@
       </div>
       <div class="card-body">
 
-        <p>
-          <b>Summary:</b>
-        </p>
-        <ul>
-          {% for line in results.summaries %}
-            <li>{{ line }}</li>
-          {% endfor %}
-        </ul>
-
-        <p>
-          <b>Upserts (tasks created or updated):</b>
-        </p>
-        <ul>
-          {% for line in results.upserts %}
-            <li>{{ line }}</li>
-          {% endfor %}
-        </ul>
-
-        <p>
-          <b>Errors (tasks NOT created or updated):</b>
-        </p>
-        <ul>
-          {% for error_row in results.errors %}
-            {% for k, error_list in error_row.items  %}
-              <li>CSV row {{ k }}</li>
-              <ul>
-                {% for err in error_list %}
-                  <li>{{ err }}</li>
-                {% endfor %}
-              </ul>
+        {% if results.summaries %}
+          <p>
+            <b>Summary:</b>
+          </p>
+          <ul>
+            {% for line in results.summaries %}
+              <li>{{ line }}</li>
             {% endfor %}
+          </ul>
+        {% endif %}
 
-          {% endfor %}
-        </ul>
+        {% if results.upserts %}
+          <p>
+            <b>Upserts (tasks created or updated):</b>
+          </p>
+          <ul>
+            {% for line in results.upserts %}
+              <li>{{ line }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+
+        {% if results.errors %}
+          <p>
+            <b>Errors (tasks NOT created or updated):</b>
+          </p>
+          <ul>
+            {% for error_row in results.errors %}
+              {% for k, error_list in error_row.items  %}
+                <li>CSV row {{ k }}</li>
+                <ul>
+                  {% for err in error_list %}
+                    <li>{{ err }}</li>
+                  {% endfor %}
+                </ul>
+              {% endfor %}
+            {% endfor %}
+          </ul>
+        {% endif %}
 
 
       </div>
