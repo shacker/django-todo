@@ -15,21 +15,13 @@ log = logging.getLogger(__name__)
 
 class CSVImporter:
     """Core upsert functionality for CSV import, for re-use by `import_csv` management command, web UI and tests.
-    For each row processed, first we try and get the correct related objects or set default values, then decide
-    on our upsert logic - create or update? We must enforce internal rules during object creation and take a SAFE
-    approache - for example
-    we shouldn't add a task if it specifies that a user is not a specified group. For that reason, it also doesn't
-    make sense to create new groups from here. In other words, the ingested CSV must accurately represent the current
-    database. Non-conforming rows are skipped and logged. Unlike manual task creation, we won't assume that the person
-    running this ingestion is the task creator - the creator must be specified, and a blank cell is an error. We also
-    do not create new lists - they must already exist (because if we did create new lists we'd also have to add the user to it,
-    etc.)
-
-    Supplies a detailed log of what was and was not imported at the end."""
+    Supplies a detailed log of what was and was not imported at the end. See README for usage notes.
+    """
 
     def __init__(self):
         self.errors = []
         self.line_count = 0
+        self.upsert_count = 0
 
     def upsert(self, filepath):
 
@@ -38,29 +30,49 @@ class CSVImporter:
             sys.exit(1)
 
         with open(filepath, mode="r") as csv_file:
-            # Have arg and good file path -- read rows
-            # Inbound columns:
+            # Have arg and good file path -- read in rows as dicts.
+            # Header row is:
             # Title, Group, Task List, Created Date, Due Date, Completed, Created By, Assigned To, Note, Priority
 
+            print("\n")
             csv_reader = csv.DictReader(csv_file)
             for row in csv_reader:
                 self.line_count += 1
 
-                newrow = self.validate_row(row)  # Copy so we can modify  properties
+                newrow = self.validate_row(row)
                 if newrow:
-                    ic(newrow)
-                    print("\n")
+                    # newrow at this point is fully validated, and all FK relations exist,
+                    # e.g. `newrow.get("Assigned To")`, is a Django User instance.
+                    obj, created = Task.objects.update_or_create(
+                        created_by=newrow.get("Created By"),
+                        task_list=newrow.get("Task List"),
+                        title=newrow.get("Title"),
+                        defaults={
+                            "assigned_to": newrow.get("Assigned To"),
+                            "completed": newrow.get("Completed"),
+                            "created_date": newrow.get("Created Date"),
+                            "due_date": newrow.get("Due Date"),
+                            "note": newrow.get("Note"),
+                            "priority": newrow.get("Priority"),
+                        },
+                    )
+                    self.upsert_count += 1
+                    print(
+                        f"Upserted task {obj.id}: \"{obj.title}\""
+                        f"in list \"{obj.task_list}\" (group \"{obj.task_list.group}\")"
+                    )
 
             # Report. Stored errors has the form:
             # self.errors = [{3: ["Incorrect foo", "Non-existent bar"]}, {7: [...]}]
+            print("\n")
             for error_dict in self.errors:
                 for k, error_list in error_dict.items():
-                    print(f"Skipped row {k}:")
+                    print(f"Skipped CSV row {k}:")
                     for msg in error_list:
                         print(f"\t{msg}")
 
-            print(f"\nProcessed {self.line_count} rows")
-            print(f"Inserted xxx rows")
+            print(f"\nProcessed {self.line_count} CSV rows")
+            print(f"Upserted {self.upsert_count} rows")
 
     def validate_row(self, row):
         """Perform data integrity checks and set default values. Returns a valid object for insertion, or False.
@@ -68,6 +80,7 @@ class CSVImporter:
 
         row_errors = []
 
+        # #######################
         # Task creator must exist
         if not row.get("Created By"):
             msg = f"Missing required task creator."
@@ -81,6 +94,7 @@ class CSVImporter:
             msg = f"Invalid task creator {row.get('Created By')}"
             row_errors.append(msg)
 
+        # #######################
         # If specified, Assignee must exist
         if row.get("Assigned To"):
             assigned = get_user_model().objects.filter(username=row.get("Assigned To"))
@@ -92,6 +106,7 @@ class CSVImporter:
         else:
             assignee = None  # Perfectly valid
 
+        # #######################
         # Group must exist
         try:
             target_group = Group.objects.get(name=row.get("Group"))
@@ -99,53 +114,63 @@ class CSVImporter:
             msg = f"Could not find group {row.get('Group')}."
             row_errors.append(msg)
 
+        # #######################
         # Task creator must be in the target group
         if creator and target_group not in creator.groups.all():
             msg = f"{creator} is not in group {target_group}"
             row_errors.append(msg)
 
+        # #######################
         # Assignee must be in the target group
         if assignee and target_group not in assignee.groups.all():
             msg = f"{assignee} is not in group {target_group}"
             row_errors.append(msg)
 
+        # #######################
+        # Task list must exist in the target group
+        try:
+            tasklist = TaskList.objects.get(name=row.get("Task List"), group=target_group)
+            row["Task List"] = tasklist
+        except TaskList.DoesNotExist:
+            msg = f"Task list {row.get('Task List')} in group {target_group} does not exist"
+            row_errors.append(msg)
+
+        # #######################
+        # Validate Due Date
+        dd = row.get("Due Date")
+        if dd:
+            try:
+                row["Due Date"] = datetime.datetime.strptime(dd, "%Y-%m-%d")
+            except ValueError:
+                msg = f"Could not convert Due Date {dd} to python date"
+                row_errors.append(msg)
+        else:
+            row["Created Date"] = None  # Override default empty string '' value
+
+
+        # #######################
+        # Validate Created Date
+        cd = row.get("Created Date")
+        if cd:
+            try:
+                row["Created Date"] = datetime.datetime.strptime(cd, "%Y-%m-%d")
+            except ValueError:
+                msg = f"Could not convert Created Date {cd} to python date"
+                row_errors.append(msg)
+        else:
+            row["Created Date"] = None  # Override default empty string '' value
+
+        # #######################
         # Group membership checks have passed
         row["Created By"] = creator
         row["Group"] = target_group
         if assignee:
             row["Assigned To"] = assignee
 
-        # Task list must exist in the target group
-        try:
-            tasklist = TaskList.objects.get(name=row.get("Task List"), group=target_group)
-            row["Task List"] = tasklist
-        except TaskList.DoesNotExist:
-            msg = (
-                f"Task list {row.get('Task List')} in group {target_group} does not exist"
-            )
-            row_errors.append(msg)
-
-        # Validate Due Date
-        dd = row.get("Due Date")
-        if dd:
-            try:
-                row["Due Date"] = datetime.datetime.strptime(dd, '%Y-%m-%d')
-            except ValueError:
-                msg = f"Could not convert Due Date {dd} to python date"
-                row_errors.append(msg)
-
-        # Validate Created Date
-        cd = row.get("Created Date")
-        if cd:
-            try:
-                row["Created Date"] = datetime.datetime.strptime(cd, '%Y-%m-%d')
-            except ValueError:
-                msg = f"Could not convert Created Date {cd} to python date"
-                row_errors.append(msg)
-
-        # Set Completed default
+        # Set Completed
         row["Completed"] = True if row.get("Completed") == "Yes" else False
 
+        # #######################
         if row_errors:
             self.errors.append({self.line_count: row_errors})
             return False

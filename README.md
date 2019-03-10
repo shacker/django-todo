@@ -132,7 +132,6 @@ The current django-todo version number is available from the [todo package](http
 
     python -c "import todo; print(todo.__version__)"
 
-
 ## Upgrade Notes
 
 django-todo 2.0 was rebuilt almost from the ground up, and included some radical changes, including model name changes. As a result, it is *not compatible* with data from django-todo 1.x. If you would like to upgrade an existing installation, try this:
@@ -165,6 +164,43 @@ django-todo uses pytest exclusively for testing. The best way to run the suite i
 	pytest -x -v
 
 The previous `tox` system was removed with the v2 release, since we no longer aim to support older Python or Django versions.
+
+
+# Importing Tasks via CSV
+
+django-todo has the ability to batch-import ("upsert") tasks from a specifically formatted CSV spreadsheet. This ability is provided through both a management command or the web interface.
+
+## Management Command
+
+`./manage.py import_csv -f /path/to/file.csv`
+
+## Web Importer
+
+Link from your navigation to `{url todo:import_csv}`
+
+## Import Logic
+
+Because data entered via CSV is not going through the same view permissions enforced in the rest of django-todo, and to simplify the logic of when to update vs create a record, etc., the importer will *not* create new users, groups, or task lists. All users, groups, and task lists referenced i your CSV must already exist, and memberships must be correct (if you have a row specifying a user in an incorrect group, the importer will skip that row).
+
+Any validation error (e.g. unparse-able dates) results in that row being skipped.
+
+A report of rows upserted and rows skipped (with line numbers and reasons) is provided at the end of the run.
+
+## CSV Formatting
+
+Copy `todo/data/import_example.csv` to another location on your system and edit in a spreadsheet or directly.
+
+The "Created By", "Task List" and "Group" columns are required -- all others are optional and should work pretty much exactly like manual task entry via the web UI.
+
+Note: Internally, Tasks are keyed to TaskLists, not to Groups (TaskLists are in Gruops). However, we request the Group in the CSV
+because it's possible to have multiple TaskLists with the same name in different groups; i.e. we need it for namespacing and permissions.
+
+## Upsert Logic:
+
+For each valid row, we need to decide whether to create a new task or update an existing one. django-todo matches on the unique combination of Task List, Task Title, and Created By. If we find a task that matches those three, we *update* the rest of the columns. In other words, if you import a CSV once, then edit the Assigned To for a task and import it again, the original task will be updated with a new assignee (and same for the other columns).
+
+Otherwise we create a new task.
+
 
 # Version History
 
