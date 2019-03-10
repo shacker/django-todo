@@ -1,5 +1,6 @@
 import sys
 from typing import Any
+from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandParser
 
@@ -24,11 +25,15 @@ class Command(BaseCommand):
             print("Sorry, we need a file name to work from.")
             sys.exit(1)
         else:
-            # Don't check validity of filepath here; upserter will do that.
             filepath = str(options.get("file"))
+            if not Path(filepath).exists():
+                print(f"Sorry, couldn't find file: {filepath}")
+                sys.exit(1)
 
-        importer = CSVImporter()
-        results = importer.upsert(filepath)
+        with open(filepath, mode="r", encoding="utf-8-sig") as fileobj:
+            # Pass in a file *object*, not a path
+            importer = CSVImporter()
+            results = importer.upsert(fileobj, as_string_obj=True)
 
         # Report successes, failures and summaries
         print()

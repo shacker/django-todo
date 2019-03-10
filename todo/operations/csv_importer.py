@@ -1,8 +1,7 @@
+import codecs
 import csv
 import datetime
 import logging
-import sys
-from pathlib import Path
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
@@ -24,44 +23,48 @@ class CSVImporter:
         self.line_count = 0
         self.upsert_count = 0
 
-    def upsert(self, filepath):
+    def upsert(self, fileobj, as_string_obj=False):
+        """Expects a file *object*, not a file path. This is important because this has to work for both
+        the management command and the web uploader; the web uploader will pass in in-memory file
+        with no path!
 
-        if not Path(filepath).exists():
-            print(f"Sorry, couldn't find file: {filepath}")
-            sys.exit(1)
+        Header row is:
+        Title, Group, Task List, Created Date, Due Date, Completed, Created By, Assigned To, Note, Priority
+        """
 
-        with open(filepath, mode="r", encoding="utf-8-sig") as csv_file:
-            # Have arg and good file path -- read in rows as dicts.
-            # Header row is:
-            # Title, Group, Task List, Created Date, Due Date, Completed, Created By, Assigned To, Note, Priority
+        if as_string_obj:
+            # fileobj comes from mgmt command
+            csv_reader = csv.DictReader(fileobj)
+        else:
+            # fileobj comes from browser upload (in-memory)
+            csv_reader = csv.DictReader(codecs.iterdecode(fileobj, "utf-8"))
 
-            csv_reader = csv.DictReader(csv_file)
-            for row in csv_reader:
-                self.line_count += 1
+        for row in csv_reader:
+            self.line_count += 1
 
-                newrow = self.validate_row(row)
-                if newrow:
-                    # newrow at this point is fully validated, and all FK relations exist,
-                    # e.g. `newrow.get("Assigned To")`, is a Django User instance.
-                    obj, created = Task.objects.update_or_create(
-                        created_by=newrow.get("Created By"),
-                        task_list=newrow.get("Task List"),
-                        title=newrow.get("Title"),
-                        defaults={
-                            "assigned_to": newrow.get("Assigned To"),
-                            "completed": newrow.get("Completed"),
-                            "created_date": newrow.get("Created Date"),
-                            "due_date": newrow.get("Due Date"),
-                            "note": newrow.get("Note"),
-                            "priority": newrow.get("Priority"),
-                        },
-                    )
-                    self.upsert_count += 1
-                    msg = (
-                        f'Upserted task {obj.id}: "{obj.title}"'
-                        f' in list "{obj.task_list}" (group "{obj.task_list.group}")'
-                    )
-                    self.upsert_msgs.append(msg)
+            newrow = self.validate_row(row)
+            if newrow:
+                # newrow at this point is fully validated, and all FK relations exist,
+                # e.g. `newrow.get("Assigned To")`, is a Django User instance.
+                obj, created = Task.objects.update_or_create(
+                    created_by=newrow.get("Created By"),
+                    task_list=newrow.get("Task List"),
+                    title=newrow.get("Title"),
+                    defaults={
+                        "assigned_to": newrow.get("Assigned To"),
+                        "completed": newrow.get("Completed"),
+                        "created_date": newrow.get("Created Date"),
+                        "due_date": newrow.get("Due Date"),
+                        "note": newrow.get("Note"),
+                        "priority": newrow.get("Priority"),
+                    },
+                )
+                self.upsert_count += 1
+                msg = (
+                    f'Upserted task {obj.id}: "{obj.title}"'
+                    f' in list "{obj.task_list}" (group "{obj.task_list.group}")'
+                )
+                self.upsert_msgs.append(msg)
 
         self.summary_msgs.append(f"\nProcessed {self.line_count} CSV rows")
         self.summary_msgs.append(f"Upserted {self.upsert_count} rows")
