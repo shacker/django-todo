@@ -60,10 +60,10 @@ class CSVImporter:
                     task_list=newrow.get("Task List"),
                     title=newrow.get("Title"),
                     defaults={
-                        "assigned_to": newrow.get("Assigned To"),
+                        "assigned_to": newrow.get("Assigned To") if newrow.get("Assigned To") else None,
                         "completed": newrow.get("Completed"),
-                        "created_date": newrow.get("Created Date"),
-                        "due_date": newrow.get("Due Date"),
+                        "created_date": newrow.get("Created Date") if newrow.get("Created Date") else None,
+                        "due_date": newrow.get("Due Date") if newrow.get("Due Date") else None,
                         "note": newrow.get("Note"),
                         "priority": newrow.get("Priority"),
                     },
