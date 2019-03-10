@@ -43,7 +43,7 @@ class CSVImporter:
 
         # DI check: Do we have expected header row?
         header = csv_reader.fieldnames
-        expected = ['Title', 'Group', 'Task List', 'Created Date', 'Due Date', 'Completed', 'Created By', 'Assigned To', 'Note', 'Priority']
+        expected = ['Title', 'Group', 'Task List', 'Created By', 'Created Date', 'Due Date', 'Completed', 'Assigned To', 'Note', 'Priority']
         if not header == expected:
             self.results.get('summaries').append(f"Inbound data does not have expected columns.\nShould be: {expected}")
             return self.results
