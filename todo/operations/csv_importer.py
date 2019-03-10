@@ -1,12 +1,11 @@
 import csv
+import datetime
 import logging
 import sys
 from pathlib import Path
-import datetime
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from icecream import ic
 
 from todo.models import Task, TaskList
 
@@ -19,7 +18,9 @@ class CSVImporter:
     """
 
     def __init__(self):
-        self.errors = []
+        self.error_msgs = []
+        self.upsert_msgs = []
+        self.summary_msgs = []
         self.line_count = 0
         self.upsert_count = 0
 
@@ -34,7 +35,6 @@ class CSVImporter:
             # Header row is:
             # Title, Group, Task List, Created Date, Due Date, Completed, Created By, Assigned To, Note, Priority
 
-            print("\n")
             csv_reader = csv.DictReader(csv_file)
             for row in csv_reader:
                 self.line_count += 1
@@ -57,22 +57,21 @@ class CSVImporter:
                         },
                     )
                     self.upsert_count += 1
-                    print(
-                        f"Upserted task {obj.id}: \"{obj.title}\""
-                        f"in list \"{obj.task_list}\" (group \"{obj.task_list.group}\")"
+                    msg = (
+                        f'Upserted task {obj.id}: "{obj.title}"'
+                        f' in list "{obj.task_list}" (group "{obj.task_list.group}")'
                     )
+                    self.upsert_msgs.append(msg)
 
-            # Report. Stored errors has the form:
-            # self.errors = [{3: ["Incorrect foo", "Non-existent bar"]}, {7: [...]}]
-            print("\n")
-            for error_dict in self.errors:
-                for k, error_list in error_dict.items():
-                    print(f"Skipped CSV row {k}:")
-                    for msg in error_list:
-                        print(f"\t{msg}")
+        self.summary_msgs.append(f"\nProcessed {self.line_count} CSV rows")
+        self.summary_msgs.append(f"Upserted {self.upsert_count} rows")
 
-            print(f"\nProcessed {self.line_count} CSV rows")
-            print(f"Upserted {self.upsert_count} rows")
+        _res = {
+            "errors": self.error_msgs,
+            "upserts": self.upsert_msgs,
+            "summaries": self.summary_msgs,
+        }
+        return _res
 
     def validate_row(self, row):
         """Perform data integrity checks and set default values. Returns a valid object for insertion, or False.
@@ -147,7 +146,6 @@ class CSVImporter:
         else:
             row["Created Date"] = None  # Override default empty string '' value
 
-
         # #######################
         # Validate Created Date
         cd = row.get("Created Date")
@@ -172,7 +170,7 @@ class CSVImporter:
 
         # #######################
         if row_errors:
-            self.errors.append({self.line_count: row_errors})
+            self.error_msgs.append({self.line_count: row_errors})
             return False
 
         # No errors:

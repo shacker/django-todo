@@ -28,4 +28,21 @@ class Command(BaseCommand):
             filepath = str(options.get("file"))
 
         importer = CSVImporter()
-        importer.upsert(filepath)
+        results = importer.upsert(filepath)
+
+        # Report successes, failures and summaries
+        print()
+        for upsert_msg in results.get("upserts"):
+            print(upsert_msg)
+
+        # Stored errors has the form:
+        # self.errors = [{3: ["Incorrect foo", "Non-existent bar"]}, {7: [...]}]
+        for error_dict in results.get("errors"):
+            for k, error_list in error_dict.items():
+                print(f"\nSkipped CSV row {k}:")
+                for msg in error_list:
+                    print(f"- {msg}")
+
+        print()
+        for summary_msg in results.get("summaries"):
+            print(summary_msg)
