@@ -130,28 +130,31 @@ TODO_PUBLIC_SUBMIT_REDIRECT = 'dashboard'
 # additionnal classes the comment body should hold
 # adding "text-monospace" makes comment monospace
 TODO_COMMENT_CLASSES = []
+
+# The following two settings are relevant only if you want todo to track a support mailbox -
+# see Mail Tracking below.
+TODO_MAIL_BACKENDS
+TODO_MAIL_TRACKERS
 ```
 
 The current django-todo version number is available from the [todo package](https://github.com/shacker/django-todo/blob/master/todo/__init__.py):
 
     python -c "import todo; print(todo.__version__)"
 
+## Mail Tracking
 
-## Mail tracking
+What if you could turn django-todo into a shared mailbox? Django-todo includes an optional feature that allows emails
+sent to a dedicated mailbox to be pushed into todo as new tasks, and responses to be added as comments on those tasks.
+This allows support teams to work with a fully unified email + bug tracking system to avoid confusion over who's seen or
+responded to what.
 
-What if you could turn django-todo into a shared mailbox?
-Django-todo includes an optional feature that allows emails sent to a
-dedicated mailbox to be pushed into todo as new tasks, and responses to
-be added as comments on that original tasks.
+To enable mail tracking, you need to:
 
-This allows support teams to work with a fully unified email + bug
-tracking system to avoid confusion over who's seen or responded to what.
+ - Define an email backend for outgoing emails
+ - Define an email backend for incoming emails
+ - Start a worker, which will wait for new emails
 
-To enable the feature, you need to:
-
- - define an email backend for outgoing emails
- - define an email backend for incoming emails
- - start a worker, which will wait for new emails
+In settings:
 
 ```python
 from todo.mail.producers import imap_producer
@@ -199,7 +202,7 @@ TODO_MAIL_TRACKERS = {
 }
 ```
 
-A mail worker can be started this way:
+A mail worker can be started with:
 
 ```sh
 ./manage.py mail_worker test_tracker
@@ -226,28 +229,6 @@ LOGGING = {
 }
 ```
 
-## Upgrade Notes
-
-django-todo 2.0 was rebuilt almost from the ground up, and included some radical changes, including model name changes. As a result, it is *not compatible* with data from django-todo 1.x. If you would like to upgrade an existing installation, try this:
-
-*  Use `./manage.py dumpdata todo --indent 4 > todo.json` to export your old todo data
-*  Edit the dump file, replacing the old model names `Item` and `List` with the new model names (`Task` and `TaskList`)
-*  Delete your existing todo data
-*  Uninstall the old todo app and reinstall
-*  Migrate, then use `./manage.py loaddata todo.json` to import the edited data
-
-### Why not provide migrations?
-
-That was the plan, but unfortunately, `makemigrations` created new tables and dropped the old ones, making this a destructive update. Renaming models is unfortunately not something `makemigrations` can do, and I really didn't want to keep the badly named original models. Sorry!
-
-### Datepicker
-
-django-todo no longer references a jQuery datepicker, but defaults to native html5 browser datepicker (not supported by Safari, unforunately). Feel free to implement one of your choosing.
-
-### URLs
-
-Some views and URLs were renamed for logical consistency. If this affects you, see source code and the demo GTD site for reference to the new URL names.
-
 
 ## Running Tests
 
@@ -260,6 +241,8 @@ django-todo uses pytest exclusively for testing. The best way to run the suite i
 The previous `tox` system was removed with the v2 release, since we no longer aim to support older Python or Django versions.
 
 # Version History
+
+**2.3.0** Implement mail tracking system
 
 **2.2.2** Update dependencies
 
@@ -322,3 +305,25 @@ ALL groups, not just the groups they "belong" to)
 **0.9.1** - Removed context_processors.py - leftover turdlet
 
 **0.9** - First release
+
+## Todo 2.0 Upgrade Notes
+
+django-todo 2.0 was rebuilt almost from the ground up, and included some radical changes, including model name changes. As a result, it is *not compatible* with data from django-todo 1.x. If you would like to upgrade an existing installation, try this:
+
+*  Use `./manage.py dumpdata todo --indent 4 > todo.json` to export your old todo data
+*  Edit the dump file, replacing the old model names `Item` and `List` with the new model names (`Task` and `TaskList`)
+*  Delete your existing todo data
+*  Uninstall the old todo app and reinstall
+*  Migrate, then use `./manage.py loaddata todo.json` to import the edited data
+
+### Why not provide migrations?
+
+That was the plan, but unfortunately, `makemigrations` created new tables and dropped the old ones, making this a destructive update. Renaming models is unfortunately not something `makemigrations` can do, and I really didn't want to keep the badly named original models. Sorry!
+
+### Datepicker
+
+django-todo no longer references a jQuery datepicker, but defaults to native html5 browser datepicker (not supported by Safari, unforunately). Feel free to implement one of your choosing.
+
+### URLs
+
+Some views and URLs were renamed for logical consistency. If this affects you, see source code and the demo GTD site for reference to the new URL names.
