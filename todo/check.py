@@ -8,7 +8,7 @@ def dal_check(app_configs, **kwargs):
     from todo.features import HAS_AUTOCOMPLETE
 
     if not HAS_AUTOCOMPLETE:
-        return
+        return []
 
     errors = []
     missing_apps = {'dal', 'dal_select2'} - set(settings.INSTALLED_APPS)
