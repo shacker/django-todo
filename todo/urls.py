@@ -1,11 +1,12 @@
 from django.urls import path
 
 from todo import views
-
+from todo.features import HAS_TASK_MERGE
 app_name = 'todo'
 
-urlpatterns = [
+from django.conf import settings
 
+urlpatterns = [
     path(
         '',
         views.list_lists,
@@ -55,7 +56,19 @@ urlpatterns = [
         'task/<int:task_id>/',
         views.task_detail,
         name='task_detail'),
+]
 
+if HAS_TASK_MERGE:
+    # ensure autocomplete is optional
+    from todo.views.task_autocomplete import TaskAutocomplete
+    urlpatterns.append(
+        path(
+            'task/<int:task_id>/autocomplete/',
+            TaskAutocomplete.as_view(),
+            name='task_autocomplete')
+    )
+
+urlpatterns.extend([
     path(
         'toggle_done/<int:task_id>/',
         views.toggle_done,
@@ -70,4 +83,4 @@ urlpatterns = [
         'search/',
         views.search,
         name="search"),
-]
+])

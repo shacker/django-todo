@@ -23,6 +23,7 @@ assignment application for Django, designed to be dropped into an existing site 
 * jQuery (full version, not "slim", for drag/drop prioritization)
 * Bootstrap (to work with provided templates, though you can override them)
 * bleach (`pip install bleach`)
+* django-autocomplete-light (optional, required for task merging)
 
 ## Overview
 
@@ -53,7 +54,7 @@ If using your own site, be sure you have jQuery and Bootstrap wired up and worki
 django-todo pages that require it will insert additional CSS/JavaScript into page heads,
 so your project's base templates must include:
 
-```
+```jinja
 {% block extrahead %}{% endblock extrahead %}
 {% block extra_js %}{% endblock extra_js %}
 ```
@@ -107,7 +108,7 @@ If you wish to use the public ticket-filing system, first create the list into w
 
 Optional configuration options:
 
-```
+```python
 # Restrict access to ALL todo lists/views to `is_staff` users.
 # If False or unset, all users can see all views (but more granular permissions are still enforced
 # within views, such as requiring staff for adding and deleting lists).
@@ -126,12 +127,104 @@ TODO_DEFAULT_LIST_SLUG = 'tickets'
 # Defaults to "/"
 TODO_PUBLIC_SUBMIT_REDIRECT = 'dashboard'
 
+# additionnal classes the comment body should hold
+# adding "text-monospace" makes comment monospace
+TODO_COMMENT_CLASSES = []
 ```
 
 The current django-todo version number is available from the [todo package](https://github.com/shacker/django-todo/blob/master/todo/__init__.py):
 
     python -c "import todo; print(todo.__version__)"
 
+
+## Mail tracking
+
+What if you could turn django-todo into a shared mailbox?
+Django-todo includes an optional feature that allows emails sent to a
+dedicated mailbox to be pushed into todo as new tasks, and responses to
+be added as comments on that original tasks.
+
+This allows support teams to work with a fully unified email + bug
+tracking system to avoid confusion over who's seen or responded to what.
+
+To enable the feature, you need to:
+
+ - define an email backend for outgoing emails
+ - define an email backend for incoming emails
+ - start a worker, which will wait for new emails
+
+```python
+from todo.mail.producers import imap_producer
+from todo.mail.consumers import tracker_consumer
+from todo.mail.delivery import smtp_backend, console_backend
+
+# email notifications configuration
+# each task list can get its own delivery method
+TODO_MAIL_BACKENDS = {
+    # mail-queue is the name of the task list, not the worker name
+    "mail-queue": smtp_backend(
+        host="smtp.example.com",
+        port=465,
+        use_ssl=True,
+        username="test@example.com",
+        password="foobar",
+        # used as the From field when sending notifications.
+        # a username might be prepended later on
+        from_address="test@example.com",
+        # additionnal headers
+        headers={}
+    ),
+}
+
+# incoming mail worker configuration
+TODO_MAIL_TRACKERS = {
+    # configuration for worker "test_tracker"
+    "test_tracker": {
+        "producer": imap_producer(
+            host="imap.example.com",
+            username="text@example.com",
+            password="foobar",
+            # process_all=False, # by default, only unseen emails are processed
+            # preserve=False, # delete emails if False
+            # nap_duration=1, # duration of the pause between polling rounds
+            # input_folder="INBOX", # where to read emails from
+        ),
+        "consumer": tracker_consumer(
+            group="Mail Queuers",
+            task_list_slug="mail-queue",
+            priority=1,
+            task_title_format="[TEST_MAIL] {subject}",
+        )
+    }
+}
+```
+
+A mail worker can be started this way:
+
+```sh
+./manage.py mail_worker test_tracker
+```
+
+If you want to log mail events, make sure to properly configure django logging:
+
+```python
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+```
 
 ## Upgrade Notes
 
@@ -229,5 +322,3 @@ ALL groups, not just the groups they "belong" to)
 **0.9.1** - Removed context_processors.py - leftover turdlet
 
 **0.9** - First release
-
-

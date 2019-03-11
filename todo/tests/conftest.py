@@ -28,3 +28,9 @@ def todo_setup(django_user_model):
     Task.objects.create(created_by=u2, title="Task 1", task_list=tlist2, priority=1)
     Task.objects.create(created_by=u2, title="Task 2", task_list=tlist2, priority=2, completed=True)
     Task.objects.create(created_by=u2, title="Task 3", task_list=tlist2, priority=3)
+
+
+@pytest.fixture()
+# Set up an in-memory mail server to receive test emails
+def email_backend_setup(settings):
+    settings.EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"

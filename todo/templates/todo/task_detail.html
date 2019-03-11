@@ -2,50 +2,63 @@
 
 {% block title %}Task:{{ task.title }}{% endblock %}
 
+{% block extrahead %}
+<style>
+.select2 {
+    width: 100% !important;
+}
+
+.select2-container {
+    min-width: 0 !important;
+}
+</style>
+{{ form.media }}
+{{ merge_form.media }}
+{% endblock %}
+
+
+
 {% block content %}
-  <div class="row">
-    <div class="col-sm-8">
-      <h3 class="card-title">{{ task.title }}</h3>
-      {% if task.note %}
-        <p class="card-text">{{ task.note|safe|urlize|linebreaks }}</p>
-      {% endif %}
+  <div class="card-deck">
+    <div class="card col-sm-8">
+      <div class="card-body">
+        <h3 class="card-title">{{ task.title }}</h3>
+        {% if task.note %}
+        <div class="card-text">{{ task.note|safe|urlize|linebreaks }}</div>
+        {% endif %}
+      </div>
     </div>
 
-    <div class="col-sm-4">
-      <div class="mb-2">
-
-        <button
-          class="btn btn-sm btn-primary"
-          id="EditTaskButton"
-          type="button"
-          data-toggle="collapse"
-          data-target="#AddEditTask"
-        >
+    <div class="card col-sm-4 p-0">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+          <button
+            class="btn btn-sm btn-primary"
+            id="EditTaskButton"
+            type="button"
+            data-toggle="collapse"
+            data-target="#TaskEdit">
             Edit Task
-        </button>
+          </button>
 
-        <form method="post" action="{% url "todo:task_toggle_done" task.id %}" role="form" style="display:inline;">
-          {% csrf_token %}
-          <div style="display:inline;">
-            <button class="btn btn-info btn-sm" type="submit" name="toggle_done">
-              {% if task.completed %} Mark Not Done {% else %} Mark Done {% endif %}
-            </button>
-          </div>
-        </form>
+          <form method="post" action="{% url "todo:task_toggle_done" task.id %}" role="form" class="d-inline">
+            {% csrf_token %}
+            <div style="display:inline;">
+              <button class="btn btn-info btn-sm" type="submit" name="toggle_done">
+                {% if task.completed %} Mark Not Done {% else %} Mark Done {% endif %}
+              </button>
+            </div>
+          </form>
 
-        <form method="post" action="{% url "todo:delete_task" task.id %}" role="form" style="display:inline;">
-          {% csrf_token %}
-          <div style="display:inline;">
-            <button class="btn btn-danger btn-sm" type="submit" name="submit_delete">
-              Delete
-            </button>
-          </div>
-        </form>
-
-      </div>
-
-      <ul class="list-group">
-
+          <form method="post" action="{% url "todo:delete_task" task.id %}" role="form" class="d-inline">
+            {% csrf_token %}
+            <div style="display:inline;">
+              <button class="btn btn-danger btn-sm" type="submit" name="submit_delete">
+                Delete
+              </button>
+            </div>
+          </form>
+        </li>
         <li class="list-group-item">
           <strong>Assigned to:</strong>
           {% if task.assigned_to %} {{ task.assigned_to.get_full_name }} {% else %} Anyone {% endif %}
@@ -77,35 +90,65 @@
     </div>
   </div>
 
-  <div id="TaskEdit">
+  <div id="TaskEdit" class="collapse">
     {# Task edit / new task form #}
     {% include 'todo/include/task_edit.html' %}
+    {% if merge_form is not None %}
+    <form action="" method="post">
+      <div class="card border-danger">
+      <div class="card-header">Merge task</div>
+      <div class="card-body">
+        <div class="">
+          <p>Merging is a destructive operation. This task will not exist anymore, and comments will be moved to the target task.</p>
+        {% csrf_token %}
+        {% for field in merge_form.visible_fields %}
+        <p>
+          {{ field.errors }}
+          {{ field }}
+        </p>
+        {% endfor %}
+        <input class="d-inline btn btn-sm btn-outline-danger" type="submit" name="merge_task_into" value="Merge">
+      </div>
+      </div>
+      </div>
+    </form>
+    {% endif %}
   </div>
 
-  <h5>Add comment</h5>
-  <form action="" method="post">
-    {% csrf_token %}
-    <div class="form-group">
-      <textarea class="form-control" name="comment-body" rows="3"></textarea>
-    </div>
-    <input class="btn btn-sm btn-primary" type="submit" name="add_comment" value="Add Comment">
-  </form>
+  <div class="mt-3">
+    <h5>Add comment</h5>
+    <form action="" method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <textarea class="form-control" name="comment-body" rows="3"></textarea>
+      </div>
+      <input class="btn btn-sm btn-primary" type="submit" name="add_comment" value="Add Comment">
+    </form>
+  </div>
 
   <div class="task_comments mt-4">
     {% if comment_list %}
       <h5>Comments on this task</h5>
       {% for comment in comment_list %}
-        <p>
-          <strong>{{ comment.author.first_name }}
-            {{ comment.author.last_name }},
+      <div class="mb-3 card">
+        <div class="card-header">
+          <div class="float-left">
+            {% if comment.email_message_id %}
+            <span class="badge badge-warning">email</span>
+            {% endif %}
+            {{ comment.author_text }}
+          </div>
+          <span class="float-right d-inline-block text-muted">
             {{ comment.date|date:"F d Y P" }}
-          </strong>
-        </p>
-        {{ comment.body|safe|urlize|linebreaks }}
+          </span>
+        </div>
+        <div class="{{ comment_classes | join:" " }} card-body">
+          {{ comment.body|safe|urlize|linebreaks }}
+        </div>
+      </div>
       {% endfor %}
     {% else %}
         <h5>No comments (yet).</h5>
     {% endif %}
   </div>
-
 {% endblock %}
