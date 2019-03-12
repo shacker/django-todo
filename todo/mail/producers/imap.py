@@ -77,7 +77,7 @@ def imap_producer(
 
                     if not preserve:
                         # tag the message for deletion
-                        conn.uid("STORE", message_uid, "+FLAGS", "(\\Deleted)")
+                        conn.store(message_uid, '+FLAGS', '\\Deleted')
                 else:
                     logger.debug("did not receive any message")
             finally:
