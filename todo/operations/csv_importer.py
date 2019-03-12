@@ -44,7 +44,7 @@ class CSVImporter:
         # DI check: Do we have expected header row?
         header = csv_reader.fieldnames
         expected = ['Title', 'Group', 'Task List', 'Created By', 'Created Date', 'Due Date', 'Completed', 'Assigned To', 'Note', 'Priority']
-        if not header == expected:
+        if header != expected:
             self.results.get('summaries').append(f"Inbound data does not have expected columns.\nShould be: {expected}")
             return self.results
 
@@ -93,11 +93,8 @@ class CSVImporter:
             msg = f"Missing required task creator."
             row_errors.append(msg)
 
-        created_by = get_user_model().objects.filter(username=row.get("Created By"))
-        if created_by.exists():
-            creator = created_by.first()
-        else:
-            creator = None
+        creator = get_user_model().objects.filter(username=row.get("Created By")).first()
+        if not creator:
             msg = f"Invalid task creator {row.get('Created By')}"
             row_errors.append(msg)
 

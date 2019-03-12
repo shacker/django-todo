@@ -10,7 +10,7 @@ from todo.operations.csv_importer import CSVImporter
 class Command(BaseCommand):
     help = """Import specifically formatted CSV file containing incoming tasks to be loaded.
     For specfic format of inbound CSV, see data/import_example.csv.
-    For documentation on field formats and required fields, see README.md.
+    For documentation on upsert logic and required fields, see README.md.
     """
 
     def add_arguments(self, parser: CommandParser) -> None:
@@ -22,13 +22,14 @@ class Command(BaseCommand):
     def handle(self, *args: Any, **options: Any) -> None:
         # Need a file to proceed
         if not options.get("file"):
-            print("Sorry, we need a file name to work from.")
+            print("Sorry, we need a filename to work from.")
             sys.exit(1)
-        else:
-            filepath = str(options.get("file"))
-            if not Path(filepath).exists():
-                print(f"Sorry, couldn't find file: {filepath}")
-                sys.exit(1)
+
+        filepath = str(options.get("file"))
+
+        if not Path(filepath).exists():
+            print(f"Sorry, couldn't find file: {filepath}")
+            sys.exit(1)
 
         with open(filepath, mode="r", encoding="utf-8-sig") as fileobj:
             # Pass in a file *object*, not a path
