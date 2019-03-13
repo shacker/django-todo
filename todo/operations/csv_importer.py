@@ -17,11 +17,9 @@ class CSVImporter:
     """
 
     def __init__(self):
-        self.results = {
-            "errors": [],
-            "upserts": [],
-            "summaries": [],
-        }
+        self.errors = []
+        self.upserts = []
+        self.summaries = []
         self.line_count = 0
         self.upsert_count = 0
 
@@ -43,9 +41,22 @@ class CSVImporter:
 
         # DI check: Do we have expected header row?
         header = csv_reader.fieldnames
-        expected = ['Title', 'Group', 'Task List', 'Created By', 'Created Date', 'Due Date', 'Completed', 'Assigned To', 'Note', 'Priority']
+        expected = [
+            "Title",
+            "Group",
+            "Task List",
+            "Created By",
+            "Created Date",
+            "Due Date",
+            "Completed",
+            "Assigned To",
+            "Note",
+            "Priority",
+        ]
         if header != expected:
-            self.results.get('summaries').append(f"Inbound data does not have expected columns.\nShould be: {expected}")
+            self.results.get("summaries").append(
+                f"Inbound data does not have expected columns.\nShould be: {expected}"
+            )
             return self.results
 
         for row in csv_reader:
@@ -60,9 +71,13 @@ class CSVImporter:
                     task_list=newrow.get("Task List"),
                     title=newrow.get("Title"),
                     defaults={
-                        "assigned_to": newrow.get("Assigned To") if newrow.get("Assigned To") else None,
+                        "assigned_to": newrow.get("Assigned To")
+                        if newrow.get("Assigned To")
+                        else None,
                         "completed": newrow.get("Completed"),
-                        "created_date": newrow.get("Created Date") if newrow.get("Created Date") else None,
+                        "created_date": newrow.get("Created Date")
+                        if newrow.get("Created Date")
+                        else None,
                         "due_date": newrow.get("Due Date") if newrow.get("Due Date") else None,
                         "note": newrow.get("Note"),
                         "priority": newrow.get("Priority"),
@@ -73,13 +88,13 @@ class CSVImporter:
                     f'Upserted task {obj.id}: "{obj.title}"'
                     f' in list "{obj.task_list}" (group "{obj.task_list.group}")'
                 )
-                self.results.get("upserts").append(msg)
+                self.upserts.append(msg)
 
-        self.results.get('summaries').append(f"\nProcessed {self.line_count} CSV rows")
-        self.results.get('summaries').append(f"Upserted {self.upsert_count} rows")
-        self.results.get('summaries').append(f"Skipped {self.line_count - self.upsert_count} rows")
+        self.summaries.append(f"\nProcessed {self.line_count} CSV rows")
+        self.summaries.append(f"Upserted {self.upsert_count} rows")
+        self.summaries.append(f"Skipped {self.line_count - self.upsert_count} rows")
 
-        return self.results
+        return {"summaries": self.summaries, "upserts": self.upserts, "errors": self.errors}
 
     def validate_row(self, row):
         """Perform data integrity checks and set default values. Returns a valid object for insertion, or False.
@@ -175,7 +190,7 @@ class CSVImporter:
 
         # #######################
         if row_errors:
-            self.results.get("errors").append({self.line_count: row_errors})
+            self.errors.append({self.line_count: row_errors})
             return False
 
         # No errors:
