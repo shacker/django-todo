@@ -25,33 +25,33 @@ class Command(BaseCommand):
             print("Sorry, we need a filename to work from.")
             sys.exit(1)
 
-        filepath = str(options.get("file"))
+        filepath = Path(options["file"])
 
-        if not Path(filepath).exists():
+        if not filepath.exists():
             print(f"Sorry, couldn't find file: {filepath}")
             sys.exit(1)
 
-        with open(filepath, mode="r", encoding="utf-8-sig") as fileobj:
-            # Pass in a file *object*, not a path
+        # Encoding "utf-8-sig" means "ignore byte order mark (BOM), which Excel inserts when saving CSVs."
+        with filepath.open(mode="r", encoding="utf-8-sig") as fileobj:
             importer = CSVImporter()
             results = importer.upsert(fileobj, as_string_obj=True)
 
         # Report successes, failures and summaries
         print()
-        if results.get("upserts"):
-            for upsert_msg in results.get("upserts"):
+        if results["upserts"]:
+            for upsert_msg in results["upserts"]:
                 print(upsert_msg)
 
         # Stored errors has the form:
         # self.errors = [{3: ["Incorrect foo", "Non-existent bar"]}, {7: [...]}]
-        if results.get("errors"):
-            for error_dict in results.get("errors"):
+        if results["errors"]:
+            for error_dict in results["errors"]:
                 for k, error_list in error_dict.items():
                     print(f"\nSkipped CSV row {k}:")
                     for msg in error_list:
                         print(f"- {msg}")
 
         print()
-        if results.get("summaries"):
-            for summary_msg in results.get("summaries"):
+        if results["summaries"]:
+            for summary_msg in results["summaries"]:
                 print(summary_msg)

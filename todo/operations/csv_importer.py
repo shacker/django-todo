@@ -186,7 +186,7 @@ class CSVImporter:
             row["Assigned To"] = assignee
 
         # Set Completed
-        row["Completed"] = True if row.get("Completed") == "Yes" else False
+        row["Completed"] = (row["Completed"] == "Yes")
 
         # #######################
         if row_errors:
