@@ -9,9 +9,9 @@ addons:
   postgresql: "9.6"
 
 install:
-  - "pip3 install -e . --upgrade"
-  - "pip3 install git+https://github.com/pypa/pipenv.git"
+  - "pip3 install pipenv"
   - "pipenv install --dev"
+  - "pip3 install -e . --upgrade"
 
 language: python
 python:

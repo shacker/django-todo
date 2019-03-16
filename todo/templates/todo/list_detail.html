@@ -10,7 +10,9 @@
       data-toggle="collapse" data-target="#AddEditTask">Add Task</button>
 
     {# Task edit / new task form #}
-    {% include 'todo/include/task_edit.html' %}
+    <div id="AddEditTask" class="collapse">
+      {% include 'todo/include/task_edit.html' %}
+    </div>
     <hr />
   {% endif %}
 

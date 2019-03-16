@@ -2,9 +2,7 @@
 
 <form action="" name="add_task" method="post">
   {% csrf_token %}
-
-
-  <div id="AddEditTask" class="collapse mt-3">
+  <div class="mt-3">
     <div class="form-group">
       <label for="id_title" name="title">Task</label>
       <input type="text" class="form-control" id="id_title" name="title" required placeholder="Task title"
@@ -33,12 +31,15 @@
     </div>
 
     <div class="form-group">
-      <label for="id_notify">Notify</label>
-      <input type="checkbox" checked="checked" class="form-control" id="id_notify" name="notify" aria-describedby="inputNotifyHelp"
-        value="{{ form.notify.text }}">
-      <small id="inputNotifyHelp" class="form-text text-muted">
-        Email notifications will only be sent if task is assigned to someone other than yourself.
-      </small>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" aria-describedby="inputNotifyHelp" checked="checked" id="id_notify">
+        <label class="form-check-label" for="id_notify">
+          Notify
+        </label>
+        <small id="inputNotifyHelp" class="form-text text-muted">
+          Email notifications will only be sent if task is assigned to someone other than yourself.
+        </small>
+      </div>
     </div>
 
     <input type="hidden" name="priority"
