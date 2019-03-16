@@ -98,7 +98,9 @@ class CSVImporter:
 
     def validate_row(self, row):
         """Perform data integrity checks and set default values. Returns a valid object for insertion, or False.
-        Errors are stored for later display."""
+        Errors are stored for later display. Intentionally not broken up into separate validator functions because
+        there are interdpendencies, such as checking for existing `creator` in one place and then using
+        that creator for group membership check in others."""
 
         row_errors = []
 
@@ -155,28 +157,17 @@ class CSVImporter:
             row_errors.append(msg)
 
         # #######################
-        # Validate Due Date
-        dd = row.get("Due Date")
-        if dd:
-            try:
-                row["Due Date"] = datetime.datetime.strptime(dd, "%Y-%m-%d")
-            except ValueError:
-                msg = f"Could not convert Due Date {dd} to python date"
-                row_errors.append(msg)
-        else:
-            row["Created Date"] = None  # Override default empty string '' value
-
-        # #######################
-        # Validate Created Date
-        cd = row.get("Created Date")
-        if cd:
-            try:
-                row["Created Date"] = datetime.datetime.strptime(cd, "%Y-%m-%d")
-            except ValueError:
-                msg = f"Could not convert Created Date {cd} to python date"
-                row_errors.append(msg)
-        else:
-            row["Created Date"] = None  # Override default empty string '' value
+        # Validate Dates
+        datefields = ["Due Date", "Created Date"]
+        for datefield in datefields:
+            datestring = row.get(datefield)
+            if datestring:
+                valid_date = self.validate_date(datestring)
+                if valid_date:
+                    row[datefield] = valid_date
+                else:
+                    msg = f"Could not convert {datefield} {datestring} to valid date instance"
+                    row_errors.append(msg)
 
         # #######################
         # Group membership checks have passed
@@ -195,3 +186,11 @@ class CSVImporter:
 
         # No errors:
         return row
+
+    def validate_date(self, datestring):
+        """Inbound date string from CSV translates to a valid python date."""
+        try:
+            date_obj = datetime.datetime.strptime(datestring, "%Y-%m-%d")
+            return date_obj
+        except ValueError:
+            return False
