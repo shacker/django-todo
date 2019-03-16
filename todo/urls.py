@@ -88,4 +88,4 @@ urlpatterns.extend([
         'import_csv/',
         views.import_csv,
         name="import_csv"),
-]
+])
