@@ -82,7 +82,7 @@ class Task(models.Model):
         on_delete=models.CASCADE,
     )
     note = models.TextField(blank=True, null=True)
-    priority = models.PositiveIntegerField()
+    priority = models.PositiveIntegerField(blank=True, null=True)
 
     # Has due date for an instance of this object passed?
     def overdue_status(self):
@@ -115,7 +115,7 @@ class Task(models.Model):
             self.delete()
 
     class Meta:
-        ordering = ["priority"]
+        ordering = ["priority", "created_date"]
 
 
 class Comment(models.Model):

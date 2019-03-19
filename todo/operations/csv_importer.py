@@ -66,21 +66,22 @@ class CSVImporter:
             if newrow:
                 # newrow at this point is fully validated, and all FK relations exist,
                 # e.g. `newrow.get("Assigned To")`, is a Django User instance.
+                assignee = newrow.get("Assigned To") if newrow.get("Assigned To") else None
+                created_date = newrow.get("Created Date") if newrow.get("Created Date") else datetime.datetime.today()
+                due_date = newrow.get("Due Date") if newrow.get("Due Date") else None
+                priority = newrow.get("Priority") if newrow.get("Priority") else None
+
                 obj, created = Task.objects.update_or_create(
                     created_by=newrow.get("Created By"),
                     task_list=newrow.get("Task List"),
                     title=newrow.get("Title"),
                     defaults={
-                        "assigned_to": newrow.get("Assigned To")
-                        if newrow.get("Assigned To")
-                        else None,
+                        "assigned_to": assignee,
                         "completed": newrow.get("Completed"),
-                        "created_date": newrow.get("Created Date")
-                        if newrow.get("Created Date")
-                        else None,
-                        "due_date": newrow.get("Due Date") if newrow.get("Due Date") else None,
+                        "created_date": created_date,
+                        "due_date": due_date,
                         "note": newrow.get("Note"),
-                        "priority": newrow.get("Priority"),
+                        "priority": priority,
                     },
                 )
                 self.upsert_count += 1
@@ -90,7 +91,7 @@ class CSVImporter:
                 )
                 self.upserts.append(msg)
 
-        self.summaries.append(f"\nProcessed {self.line_count} CSV rows")
+        self.summaries.append(f"Processed {self.line_count} CSV rows")
         self.summaries.append(f"Upserted {self.upsert_count} rows")
         self.summaries.append(f"Skipped {self.line_count - self.upsert_count} rows")
 
@@ -117,6 +118,7 @@ class CSVImporter:
 
         # #######################
         # If specified, Assignee must exist
+        assignee = None  # Perfectly valid
         if row.get("Assigned To"):
             assigned = get_user_model().objects.filter(username=row.get("Assigned To"))
             if assigned.exists():
@@ -124,8 +126,6 @@ class CSVImporter:
             else:
                 msg = f"Missing or invalid task assignee {row.get('Assigned To')}"
                 row_errors.append(msg)
-        else:
-            assignee = None  # Perfectly valid
 
         # #######################
         # Group must exist
@@ -134,6 +134,7 @@ class CSVImporter:
         except Group.DoesNotExist:
             msg = f"Could not find group {row.get('Group')}."
             row_errors.append(msg)
+            target_group = None
 
         # #######################
         # Task creator must be in the target group
