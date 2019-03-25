@@ -97,7 +97,16 @@ def insert_message(task_list, message, priority, task_title_format):
         f"[From: {message['from']}]"
     )
 
-    message_id = message["message-id"]
+    # Due to limitations in MySQL wrt unique_together and TextField (grrr),
+    # we must use a CharField rather than TextField for message_id.
+    # In the unlikeley event that we get a VERY long inbound
+    # message_id, truncate it to the max_length of a MySQL CharField.
+    original_message_id = message["message-id"]
+    message_id = (
+        (original_message_id[:252] + "...")
+        if len(original_message_id) > 255
+        else original_message_id
+    )
     message_from = message["from"]
     text = message_text(message)
 
