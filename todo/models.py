@@ -130,7 +130,7 @@ class Comment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     date = models.DateTimeField(default=datetime.datetime.now)
     email_from = models.CharField(max_length=320, blank=True, null=True)
-    email_message_id = models.TextField(blank=True, null=True)
+    email_message_id = models.CharField(max_length=255, blank=True, null=True)
 
     body = models.TextField(blank=True)
 
