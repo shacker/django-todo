@@ -120,7 +120,7 @@
     <form action="" method="post">
       {% csrf_token %}
       <div class="form-group">
-        <textarea class="form-control" name="comment-body" rows="3"></textarea>
+        <textarea class="form-control" name="comment-body" rows="3" required></textarea>
       </div>
       <input class="btn btn-sm btn-primary" type="submit" name="add_comment" value="Add Comment">
     </form>
