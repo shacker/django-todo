@@ -41,13 +41,10 @@ def message_text(message):
 
 
 def format_task_title(format_string, message):
-    return format_string.format(
-        subject=message["subject"],
-        author=message["from"],
-    )
+    return format_string.format(subject=message["subject"], author=message["from"])
 
 
-DJANGO_TODO_THREAD = re.compile(r'<thread-(\d+)@django-todo>')
+DJANGO_TODO_THREAD = re.compile(r"<thread-(\d+)@django-todo>")
 
 
 def parse_references(task_list, references):
@@ -61,10 +58,7 @@ def parse_references(task_list, references):
             continue
 
         thread_id = int(match.group(1))
-        new_answer_thread = Task.objects.filter(
-            task_list=task_list,
-            pk=thread_id
-        ).first()
+        new_answer_thread = Task.objects.filter(task_list=task_list, pk=thread_id).first()
         if new_answer_thread is not None:
             answer_thread = new_answer_thread
 
@@ -97,20 +91,26 @@ def insert_message(task_list, message, priority, task_title_format):
         f"[From: {message['from']}]"
     )
 
-    message_id = message["message-id"]
+    # Due to limitations in MySQL wrt unique_together and TextField (grrr),
+    # we must use a CharField rather than TextField for message_id.
+    # In the unlikeley event that we get a VERY long inbound
+    # message_id, truncate it to the max_length of a MySQL CharField.
+    original_message_id = message["message-id"]
+    message_id = (
+        (original_message_id[:252] + "...")
+        if len(original_message_id) > 255
+        else original_message_id
+    )
     message_from = message["from"]
     text = message_text(message)
 
-    related_messages, answer_thread = \
-        parse_references(task_list, message.get("references", ""))
+    related_messages, answer_thread = parse_references(task_list, message.get("references", ""))
 
     # find the most relevant task to add a comment on.
     # among tasks in the selected task list, find the task having the
     # most email comments the current message references
     best_task = (
-        Task.objects.filter(
-            task_list=task_list, comment__email_message_id__in=related_messages
-        )
+        Task.objects.filter(task_list=task_list, comment__email_message_id__in=related_messages)
         .annotate(num_comments=Count("comment"))
         .order_by("-num_comments")
         .only("id")
@@ -127,7 +127,7 @@ def insert_message(task_list, message, priority, task_title_format):
             best_task = Task.objects.create(
                 priority=priority,
                 title=format_task_title(task_title_format, message),
-                task_list=task_list
+                task_list=task_list,
             )
         logger.info("using task: %r", best_task)
 
@@ -139,8 +139,9 @@ def insert_message(task_list, message, priority, task_title_format):
         logger.info("created comment: %r", comment)
 
 
-def tracker_consumer(producer, group=None, task_list_slug=None,
-                     priority=1, task_title_format="[MAIL] {subject}"):
+def tracker_consumer(
+    producer, group=None, task_list_slug=None, priority=1, task_title_format="[MAIL] {subject}"
+):
     task_list = TaskList.objects.get(group__name=group, slug=task_list_slug)
     for message in producer:
         try:
