@@ -15,6 +15,7 @@ assignment application for Django, designed to be dropped into an existing site 
 * Mobile-friendly (work in progress)
 * Separate view for My Tasks (across lists)
 * Batch-import tasks via CSV
+* Integrated mail tracking (unify a task list with an email box)
 
 
 ## Requirements
@@ -28,7 +29,7 @@ assignment application for Django, designed to be dropped into an existing site 
 
 ## Overview
 
-The assumption is that your organization/publication/company has multiple groups of employees, each with multiple users (where actual users and groups map to Django Users and Groups). Users may belong to multiple groups, and each group can have multiple todo lists.
+We assume that your organization has multiple groups of employees, each with multiple users (where actual users and groups map to Django Users and Groups). Users may belong to multiple groups, and each group can have multiple todo lists.
 
 You must have at least one Group set up in Django admin, and that group must have at least one User as a member. This is true even if you're the sole user of django-todo.
 
@@ -78,23 +79,27 @@ Put django-todo/todo somewhere on your Python path, or install via pip:
 
 Add to your settings:
 
-    INSTALLED_APPS = (
-        ...
-        'todo',
-    )
+```
+INSTALLED_APPS = (
+    ...
+    'todo',
+)
+```
 
-Create database tables:
+Migrate in database tables:
 
-	python manage.py migrate todo
+`python manage.py migrate todo`
 
 Add to your URL conf:
 
-	path('todo/', include('todo.urls', namespace="todo")),
+`path('todo/', include('todo.urls', namespace="todo")),`
 
 Add links to your site's navigation system:
 
-    <a href="{% url 'todo:lists' %}">Todo Lists</a>
-    <a href="{% url 'todo:mine' %}">My Tasks</a>
+```
+<a href="{% url 'todo:lists' %}">Todo Lists</a>
+<a href="{% url 'todo:mine' %}">My Tasks</a>
+```
 
 django-todo makes use of the Django `messages` system. Make sure you have something like [this](https://docs.djangoproject.com/en/2.0/ref/contrib/messages/#displaying-messages) (link) in your `base.html`.
 
@@ -155,7 +160,7 @@ django-todo has the ability to batch-import ("upsert") tasks from a specifically
 
 **Web Importer**
 
-Link from your navigation to `{url "todo:import_csv"}`
+Link from your navigation to `{url "todo:import_csv"}`. Follow the resulting link for the CSV web upload view.
 
 
 ### CSV Formatting
@@ -307,9 +312,7 @@ django-todo no longer references a jQuery datepicker, but defaults to native htm
 
 ## Version History
 
-**2.4.0** Added ability to batch-import tasks via CSV
-
-**2.3.0** Implement mail tracking system
+**2.3.0** Implement mail tracking system. Added ability to batch-import tasks via CSV. Fixed task re-ordering if task deleted behind the scenes.
 
 **2.2.2** Update dependencies
 
