@@ -14,6 +14,7 @@ assignment application for Django, designed to be dropped into an existing site 
 * Public-facing submission form for tickets
 * Mobile-friendly (work in progress)
 * Separate view for My Tasks (across lists)
+* Batch-import tasks via CSV
 
 
 ## Requirements
@@ -44,7 +45,7 @@ All tasks are "created by" the current user and can optionally be "assigned to" 
 
 django-todo v2 makes use of features only available in Django 2.0. It will not work in previous versions. v2 is only tested against Python 3.x -- no guarantees if running it against older versions.
 
-# Installation
+## Installation
 
 django-todo is a Django app, not a project site. It needs a site to live in. You can either install it into an existing Django project site, or clone the django-todo [demo site (GTD)](https://github.com/shacker/gtd).
 
@@ -132,7 +133,6 @@ The current django-todo version number is available from the [todo package](http
 
     python -c "import todo; print(todo.__version__)"
 
-
 ## Upgrade Notes
 
 django-todo 2.0 was rebuilt almost from the ground up, and included some radical changes, including model name changes. As a result, it is *not compatible* with data from django-todo 1.x. If you would like to upgrade an existing installation, try this:
@@ -153,7 +153,7 @@ django-todo no longer references a jQuery datepicker, but defaults to native htm
 
 ### URLs
 
-Some views and URLs were renamed for logical consistency. If this affects you, see source code and the demo GTD site for reference to the new URL names.
+Some views and URLs were renamed in 2.0 for logical consistency. If this affects you, see source code and the demo GTD site for reference to the new URL names.
 
 
 ## Running Tests
@@ -166,7 +166,49 @@ django-todo uses pytest exclusively for testing. The best way to run the suite i
 
 The previous `tox` system was removed with the v2 release, since we no longer aim to support older Python or Django versions.
 
-# Version History
+## Importing Tasks via CSV
+
+django-todo has the ability to batch-import ("upsert") tasks from a specifically formatted CSV spreadsheet. This ability is provided through both a management command and a web interface.
+
+**Management Command**
+
+`./manage.py import_csv -f /path/to/file.csv`
+
+**Web Importer**
+
+Link from your navigation to `{url "todo:import_csv"}`
+
+### Import Rules
+
+Because data entered via CSV is not going through the same view permissions enforced in the rest of django-todo, and to simplify data dependency logic, and to pre-empt disagreements between django-todo users, the importer will *not* create new users, groups, or task lists. All users, groups, and task lists referenced in your CSV must already exist, and group memberships must be correct.
+
+Any validation error (e.g. unparse-able dates, incorrect group memberships) **will result in that row being skipped.**
+
+A report of rows upserted and rows skipped (with line numbers and reasons) is provided at the end of the run.
+
+### CSV Formatting
+
+Copy `todo/data/import_example.csv` to another location on your system and edit in a spreadsheet or directly.
+
+**Do not edit the header row!**
+
+The first four columns: `'Title', 'Group', 'Task List', 'Created By'` are required -- all others are optional and should work pretty much exactly like manual task entry via the web UI.
+
+Note: Internally, Tasks are keyed to TaskLists, not to Groups (TaskLists are in Gruops). However, we request the Group in the CSV
+because it's possible to have multiple TaskLists with the same name in different groups; i.e. we need it for namespacing and permissions.
+
+### Upsert Logic
+
+For each valid row, we need to decide whether to create a new task or update an existing one. django-todo matches on the unique combination of the four required columns. If we find a task that matches those, we *update* the rest of the columns. In other words, if you import a CSV once, then edit the Assigned To for a task and import it again, the original task will be updated with a new assignee (and same for the other columns).
+
+Otherwise we create a new task.
+
+
+## Version History
+
+**2.3.0** Added ability to batch-import tasks via CSV
+
+**2.2.1** Convert task delete and toggle_done views to POST only
 
 **2.2.0** Re-instate enforcement of TODO_STAFF_ONLY setting
 
@@ -225,3 +267,5 @@ ALL groups, not just the groups they "belong" to)
 **0.9.1** - Removed context_processors.py - leftover turdlet
 
 **0.9** - First release
+
+

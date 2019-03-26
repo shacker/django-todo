@@ -1,10 +1,10 @@
+from django.conf import settings
 from django.urls import path
 
 from todo import views
 from todo.features import HAS_TASK_MERGE
-app_name = 'todo'
 
-from django.conf import settings
+app_name = 'todo'
 
 urlpatterns = [
     path(
@@ -59,7 +59,7 @@ urlpatterns = [
 ]
 
 if HAS_TASK_MERGE:
-    # ensure autocomplete is optional
+    # ensure mail tracker autocomplete is optional
     from todo.views.task_autocomplete import TaskAutocomplete
     urlpatterns.append(
         path(
@@ -83,4 +83,9 @@ urlpatterns.extend([
         'search/',
         views.search,
         name="search"),
+
+    path(
+        'import_csv/',
+        views.import_csv,
+        name="import_csv"),
 ])

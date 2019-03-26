@@ -8,3 +8,4 @@ from todo.views.reorder_tasks import reorder_tasks  # noqa: F401
 from todo.views.search import search  # noqa: F401
 from todo.views.task_detail import task_detail  # noqa: F401
 from todo.views.toggle_done import toggle_done  # noqa: F401
+from todo.views.import_csv import import_csv  # noqa: F401
