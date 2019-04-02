@@ -289,27 +289,6 @@ django-todo uses pytest exclusively for testing. The best way to run the suite i
 	pip install --editable .
 	pytest -x -v
 
-The previous `tox` system was removed with the v2 release, since we no longer aim to support older Python or Django versions.
-
-
-## Upgrade Notes
-
-django-todo 2.0 was rebuilt almost from the ground up, and included some radical changes, including model name changes. As a result, it is *not compatible* with data from django-todo 1.x. If you would like to upgrade an existing installation, try this:
-
-*  Use `./manage.py dumpdata todo --indent 4 > todo.json` to export your old todo data
-*  Edit the dump file, replacing the old model names `Item` and `List` with the new model names (`Task` and `TaskList`)
-*  Delete your existing todo data
-*  Uninstall the old todo app and reinstall
-*  Migrate, then use `./manage.py loaddata todo.json` to import the edited data
-
-### Why not provide migrations?
-
-That was the plan, but unfortunately, `makemigrations` created new tables and dropped the old ones, making this a destructive update. Renaming models is unfortunately not something `makemigrations` can do, and I really didn't want to keep the badly named original models. Sorry!
-
-### Datepicker
-
-django-todo no longer references a jQuery datepicker, but defaults to native html5 browser datepicker (not supported by Safari, unforunately). Feel free to implement one of your choosing.
-
 ## Version History
 
 **2.3.2** Update setup.py metadata
