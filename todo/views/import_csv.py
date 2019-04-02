@@ -13,7 +13,7 @@ def import_csv(request) -> HttpResponse:
     """Import a specifically formatted CSV into stored tasks.
     """
 
-    ctx = {}
+    ctx = {"results": None}
 
     if request.method == "POST":
         filepath = request.FILES.get("csvfile")
@@ -25,7 +25,6 @@ def import_csv(request) -> HttpResponse:
         importer = CSVImporter()
         results = importer.upsert(filepath)
 
-        ctx["results"] = None
         if results:
             ctx["results"] = results
         else:
