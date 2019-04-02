@@ -54,10 +54,10 @@ class CSVImporter:
             "Priority",
         ]
         if header != expected:
-            self.results.get("summaries").append(
+            self.errors.append(
                 f"Inbound data does not have expected columns.\nShould be: {expected}"
             )
-            return self.results
+            return
 
         for row in csv_reader:
             self.line_count += 1

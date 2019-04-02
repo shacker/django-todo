@@ -24,6 +24,12 @@ def import_csv(request) -> HttpResponse:
 
         importer = CSVImporter()
         results = importer.upsert(filepath)
-        ctx["results"] = results
+
+        ctx["results"] = None
+        if results:
+            ctx["results"] = results
+        else:
+            messages.error(request, "Could not parse provided CSV file.")
+            return redirect(reverse("todo:import_csv"))
 
     return render(request, "todo/import_csv.html", context=ctx)
