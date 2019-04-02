@@ -312,6 +312,8 @@ django-todo no longer references a jQuery datepicker, but defaults to native htm
 
 ## Version History
 
+**2.3.2** Update setup.py metadata
+
 **2.3.1** Improve error handling for badly formatted or non-existent CSV uploads.
 
 **2.3.0** Implement mail tracking system. Added ability to batch-import tasks via CSV. Fixed task re-ordering if task deleted behind the scenes.
