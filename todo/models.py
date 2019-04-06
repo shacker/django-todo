@@ -10,6 +10,13 @@ from django.urls import reverse
 from django.utils import timezone
 
 
+def get_attachment_upload_dir(instance, filename):
+    """Determine upload dir for task attachment files.
+    """
+
+    return "/".join(["tasks", "attachments", str(instance.task.id), filename])
+
+
 class LockedAtomicTransaction(Atomic):
     """
     modified from https://stackoverflow.com/a/41831049
@@ -156,3 +163,19 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.snippet
+
+
+class Attachment(models.Model):
+    """
+    Defines a generic file attachment for use in M2M relation with Task.
+    """
+
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    added_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
+    )
+    timestamp = models.DateTimeField(default=datetime.datetime.now)
+    file = models.FileField(upload_to=get_attachment_upload_dir, max_length=255)
+
+    def __str__(self):
+        return f"{self.task.id} - {self.file.name}"
