@@ -1,13 +1,15 @@
 import email.utils
-import functools
 import time
+import logging
+
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core import mail
-from django.core.exceptions import PermissionDenied
-from django.core.mail import send_mail
 from django.template.loader import render_to_string
+
 from todo.models import Comment, Task
+
+log = logging.getLogger(__name__)
 
 
 def staff_check(user):
@@ -28,7 +30,7 @@ def user_can_read_task(task, user):
 
 
 def todo_get_backend(task):
-    '''returns a mail backend for some task'''
+    """Returns a mail backend for some task"""
     mail_backends = getattr(settings, "TODO_MAIL_BACKENDS", None)
     if mail_backends is None:
         return None
@@ -41,7 +43,7 @@ def todo_get_backend(task):
 
 
 def todo_get_mailer(user, task):
-    """a mailer is a (from_address, backend) pair"""
+    """A mailer is a (from_address, backend) pair"""
     task_backend = todo_get_backend(task)
     if task_backend is None:
         return (None, mail.get_connection)
@@ -52,19 +54,13 @@ def todo_get_mailer(user, task):
 
 
 def todo_send_mail(user, task, subject, body, recip_list):
-    '''Send an email attached to task, triggered by user'''
-    references = Comment.objects.filter(task=task).only('email_message_id')
+    """Send an email attached to task, triggered by user"""
+    references = Comment.objects.filter(task=task).only("email_message_id")
     references = (ref.email_message_id for ref in references)
-    references = ' '.join(filter(bool, references))
+    references = " ".join(filter(bool, references))
 
     from_address, backend = todo_get_mailer(user, task)
-    message_hash = hash((
-        subject,
-        body,
-        from_address,
-        frozenset(recip_list),
-        references,
-    ))
+    message_hash = hash((subject, body, from_address, frozenset(recip_list), references))
 
     message_id = (
         # the task_id enables attaching back notification answers
@@ -76,14 +72,14 @@ def todo_send_mail(user, task, subject, body, recip_list):
         task_id=task.pk,
         # avoid the -hexstring case (hashes can be negative)
         message_hash=abs(message_hash),
-        epoch=int(time.time())
+        epoch=int(time.time()),
     )
 
     # the thread message id is used as a common denominator between all
     # notifications for some task. This message doesn't actually exist,
     # it's just there to make threading possible
     thread_message_id = "<thread-{}@django-todo>".format(task.pk)
-    references = '{} {}'.format(references, thread_message_id)
+    references = "{} {}".format(references, thread_message_id)
 
     with backend() as connection:
         message = mail.EmailMessage(
@@ -91,12 +87,12 @@ def todo_send_mail(user, task, subject, body, recip_list):
             body,
             from_address,
             recip_list,
-            [], # Bcc
+            [],  # Bcc
             headers={
-                **getattr(backend, 'headers', {}),
-                'Message-ID': message_id,
-                'References': references,
-                'In-reply-to': thread_message_id,
+                **getattr(backend, "headers", {}),
+                "Message-ID": message_id,
+                "References": references,
+                "In-reply-to": thread_message_id,
             },
             connection=connection,
         )
@@ -104,10 +100,10 @@ def todo_send_mail(user, task, subject, body, recip_list):
 
 
 def send_notify_mail(new_task):
-    '''
+    """
     Send email to assignee if task is assigned to someone other than submittor.
     Unassigned tasks should not try to notify.
-    '''
+    """
 
     if new_task.assigned_to == new_task.created_by:
         return
@@ -123,15 +119,12 @@ def send_notify_mail(new_task):
 
 
 def send_email_to_thread_participants(task, msg_body, user, subject=None):
-    '''Notify all previous commentors on a Task about a new comment.'''
+    """Notify all previous commentors on a Task about a new comment."""
 
     current_site = Site.objects.get_current()
     email_subject = subject
     if not subject:
-        subject = render_to_string(
-            "todo/email/assigned_subject.txt",
-            {"task": task}
-        )
+        subject = render_to_string("todo/email/assigned_subject.txt", {"task": task})
 
     email_body = render_to_string(
         "todo/email/newcomment_body.txt",
@@ -140,11 +133,7 @@ def send_email_to_thread_participants(task, msg_body, user, subject=None):
 
     # Get all thread participants
     commenters = Comment.objects.filter(task=task)
-    recip_list = set(
-        ca.author.email
-        for ca in commenters
-        if ca.author is not None
-    )
+    recip_list = set(ca.author.email for ca in commenters if ca.author is not None)
     for related_user in (task.created_by, task.assigned_to):
         if related_user is not None:
             recip_list.add(related_user.email)
@@ -154,12 +143,13 @@ def send_email_to_thread_participants(task, msg_body, user, subject=None):
 
 
 def toggle_task_completed(task_id: int) -> bool:
+    """Toggle the `completed` bool on Task from True to False or vice versa."""
     try:
         task = Task.objects.get(id=task_id)
         task.completed = not task.completed
         task.save()
         return True
+
     except Task.DoesNotExist:
-        # FIXME proper log message
-        print("task not found")
+        log.info(f"Task {task_id} not found.")
         return False
