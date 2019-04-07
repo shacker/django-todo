@@ -14,8 +14,8 @@ log = logging.getLogger(__name__)
 
 def staff_check(user):
     """If TODO_STAFF_ONLY is set to True, limit view access to staff users only.
-        # FIXME: More granular access control is needed... but need to do it generically,
-        # to satisfy all possible todo implementations.
+        # FIXME: More granular access control needed - see
+        https://github.com/shacker/django-todo/issues/50
     """
 
     if hasattr(settings, "TODO_STAFF_ONLY") and settings.TODO_STAFF_ONLY:

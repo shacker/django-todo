@@ -1,3 +1,7 @@
+# The integrated mail queue functionality can enable advanced functionality if
+# django-autocomplete-light is installed and configured. We can use this module
+# to check for other installed dependencies in the future.
+
 HAS_AUTOCOMPLETE = True
 try:
     import dal
