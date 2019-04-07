@@ -1,10 +1,12 @@
 from __future__ import unicode_literals
+
 import datetime
+import os
 import textwrap
 
 from django.conf import settings
 from django.contrib.auth.models import Group
-from django.db import models, DEFAULT_DB_ALIAS
+from django.db import DEFAULT_DB_ALIAS, models
 from django.db.transaction import Atomic, get_connection
 from django.urls import reverse
 from django.utils import timezone
@@ -176,6 +178,13 @@ class Attachment(models.Model):
     )
     timestamp = models.DateTimeField(default=datetime.datetime.now)
     file = models.FileField(upload_to=get_attachment_upload_dir, max_length=255)
+
+    def filename(self):
+        return os.path.basename(self.file.name)
+
+    def extension(self):
+        name, extension = os.path.splitext(self.file.name)
+        return extension
 
     def __str__(self):
         return f"{self.task.id} - {self.file.name}"

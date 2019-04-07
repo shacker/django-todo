@@ -115,6 +115,55 @@
     {% endif %}
   </div>
 
+{% if attachments_enabled %}
+  <div class="card mt-4">
+    <h5 class="card-header">
+      Attachments
+    </h5>
+
+    <div class="card-body pb-0">
+      {% if task.attachment_set.count %}
+        <div class="table-responsive">
+          <table class="table mb-0">
+            <thead>
+              <tr>
+                <th>File</th>
+                <th>Uploaded</th>
+                <th>By</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for attachment in task.attachment_set.all %}
+                <tr>
+                  <td><a href="{{ attachment.file.url }}">{{ attachment.filename }}</a></td>
+                  <td>{{ attachment.timestamp }}</td>
+                  <td>{{ attachment.added_by.get_full_name }}</td>
+                  <td>{{ attachment.extension.lower }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+
+      <form method="POST" action="#" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="input-group mb-3">
+          <div class="custom-file">
+            <input type="file" class="custom-file-input" id="attachment_file_input" name="attachment_file_input" />
+            <label class="custom-file-label" for="attachment_file_input">Choose file</label>
+          </div>
+          <div class="input-group-append">
+            <button class="btn btn-primary">Upload</button>
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+{% endif %}
+
   <div class="mt-3">
     <h5>Add comment</h5>
     <form action="" method="post">
@@ -152,3 +201,16 @@
     {% endif %}
   </div>
 {% endblock %}
+
+{% block extra_js %}
+  {# Support file attachment uploader #}
+  <script>
+    $('#attachment_file_input').on('change',function(){
+      // Get the file name and remove browser-added "fakepath."
+      // Then replace the "Choose a file" label.
+      var fileName = $(this).val().replace('C:\\fakepath\\', " ");
+      $(this).next('.custom-file-label').html(fileName);
+    })
+  </script>
+{% endblock extra_js %}
+
