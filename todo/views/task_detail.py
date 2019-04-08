@@ -1,4 +1,5 @@
 import datetime
+import os
 
 import bleach
 from django import forms
@@ -117,15 +118,26 @@ def task_detail(request, task_id: int) -> HttpResponse:
 
     # Handle uploaded files
     if request.FILES.get("attachment_file_input"):
+        file = request.FILES.get("attachment_file_input")
+
+        # Validate inbound file extension against allowed filetypes
+        # FIXME: Move defaults to centralized module
+        allowed_extensions = (
+            settings.TODO_ALLOWED_FILE_ATTACHMENTS
+            if hasattr(settings, "TODO_ALLOWED_FILE_ATTACHMENTS")
+            else [".jpg", ".gif", ".csv", ".pdf", ".zip"]
+        )
+        name, extension = os.path.splitext(file.name)
+        if extension not in allowed_extensions:
+            messages.error(request, f"This site does not allow upload of {extension} files.")
+            return redirect("todo:task_detail", task_id=task.id)
+
         Attachment.objects.create(
-            task=task,
-            added_by=request.user,
-            timestamp=datetime.datetime.now(),
-            file=request.FILES.get("attachment_file_input"),
+            task=task, added_by=request.user, timestamp=datetime.datetime.now(), file=file
         )
         return redirect("todo:task_detail", task_id=task.id)
 
-    # For the context: Settings for file attachments defaults to True
+    # Settings for file attachments defaults to True
     # FIXME: Move settings defaults to a central location?
     attachments_enabled = True
     if (

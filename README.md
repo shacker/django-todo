@@ -15,6 +15,7 @@ assignment application for Django, designed to be dropped into an existing site 
 * Mobile-friendly (work in progress)
 * Separate view for My Tasks (across lists)
 * Batch-import tasks via CSV
+* Multiple file attachments per task (see settings)
 * Integrated mail tracking (unify a task list with an email box)
 
 
@@ -38,6 +39,8 @@ Users can view and modify all to-do lists belonging to their group(s). Only user
 Identical list names can exist in different groups, but not in the same group.
 
 Emails are generated to the assigned-to person when new tasks are created.
+
+File attachments of a few types are allowed on tasks by default. See settings to disable or to limit filetypes.
 
 Comment threads can be added to tasks. Each participant in a thread receives email when new comments are added.
 
@@ -101,7 +104,7 @@ Add links to your site's navigation system:
 <a href="{% url 'todo:mine' %}">My Tasks</a>
 ```
 
-django-todo makes use of the Django `messages` system. Make sure you have something like [this](https://docs.djangoproject.com/en/2.0/ref/contrib/messages/#displaying-messages) (link) in your `base.html`.
+django-todo makes use of the Django `messages` system. Make sure you have something like [this](https://docs.djangoproject.com/en/2.1/ref/contrib/messages/#displaying-messages) (link) in your `base.html`.
 
 Log in and access `/todo`!
 
@@ -135,6 +138,11 @@ TODO_DEFAULT_LIST_SLUG = 'tickets'
 # redirected after submitting? (since they can't see the rest of the ticket system).
 # Defaults to "/"
 TODO_PUBLIC_SUBMIT_REDIRECT = 'dashboard'
+
+# Enable or disable file attachments on Tasks
+# Optionally limit list of allowed filetypes
+TODO_ALLOW_FILE_ATTACHMENTS = True
+TODO_ALLOWED_FILE_ATTACHMENTS = [".jpg", ".gif", ".csv", ".pdf", ".zip"]
 
 # additionnal classes the comment body should hold
 # adding "text-monospace" makes comment monospace

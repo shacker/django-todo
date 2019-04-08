@@ -124,7 +124,7 @@
     <div class="card-body pb-0">
       {% if task.attachment_set.count %}
         <div class="table-responsive">
-          <table class="table mb-0">
+          <table class="table mb-3">
             <thead>
               <tr>
                 <th>File</th>
@@ -147,7 +147,7 @@
         </div>
       {% endif %}
 
-      <form method="POST" action="#" enctype="multipart/form-data">
+      <form method="POST" action="" enctype="multipart/form-data" style="width:50%;">
         {% csrf_token %}
         <div class="input-group mb-3">
           <div class="custom-file">
