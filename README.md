@@ -40,7 +40,7 @@ Identical list names can exist in different groups, but not in the same group.
 
 Emails are generated to the assigned-to person when new tasks are created.
 
-File attachments of a few types are allowed on tasks by default. See settings to disable or to limit filetypes.
+File attachments of a few types are allowed on tasks by default. See settings to disable or to limit filetypes. If you are concerned about file sizes, limit them in your web server configuration (not currently handled separately by django-todo).
 
 Comment threads can be added to tasks. Each participant in a thread receives email when new comments are added.
 
