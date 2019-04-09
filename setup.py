@@ -13,7 +13,7 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="django-todo",
-    version="2.3.2",
+    version="2.4.0",
     description="A multi-user, multi-group task management and assignment system for Django.",
     long_description=long_description,
     long_description_content_type="text/markdown",

@@ -299,6 +299,8 @@ django-todo uses pytest exclusively for testing. The best way to run the suite i
 
 ## Version History
 
+**2.4.0** Implement optional file attachments on tasks
+
 **2.3.2** Update setup.py metadata
 
 **2.3.1** Improve error handling for badly formatted or non-existent CSV uploads.

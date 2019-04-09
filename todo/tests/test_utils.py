@@ -54,3 +54,6 @@ def test_send_email_to_thread_participants(todo_setup, django_user_model, email_
     assert "u1@example.com" in mail.outbox[0].recipients()
     assert "u3@example.com" in mail.outbox[0].recipients()
     assert "u4@example.com" in mail.outbox[0].recipients()
+
+# FIXME: Add tests for:
+# Attachments: Test whether allowed, test multiple, test extensions
