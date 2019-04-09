@@ -131,6 +131,7 @@
                 <th>Uploaded</th>
                 <th>By</th>
                 <th>Type</th>
+                <th>Remove</th>
               </tr>
             </thead>
             <tbody>
@@ -140,6 +141,12 @@
                   <td>{{ attachment.timestamp }}</td>
                   <td>{{ attachment.added_by.get_full_name }}</td>
                   <td>{{ attachment.extension.lower }}</td>
+                  <td>
+                    <form action="{% url "todo:remove_attachment" attachment.id %}" method="POST">
+                      {% csrf_token %}
+                      <input type="submit" value="X" class="btn btn-danger btn-sm">
+                    </form>
+                  </td>
                 </tr>
               {% endfor %}
             </tbody>

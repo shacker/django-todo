@@ -1,13 +1,14 @@
 import email.utils
-import time
 import logging
+import os
+import time
 
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core import mail
 from django.template.loader import render_to_string
 
-from todo.models import Comment, Task
+from todo.models import Attachment, Comment, Task
 
 log = logging.getLogger(__name__)
 
@@ -152,4 +153,20 @@ def toggle_task_completed(task_id: int) -> bool:
 
     except Task.DoesNotExist:
         log.info(f"Task {task_id} not found.")
+        return False
+
+
+def remove_attachment_file(attachment_id: int) -> bool:
+    """Delete an Attachment object and its corresponding file from the filesystem."""
+    try:
+        attachment = Attachment.objects.get(id=attachment_id)
+        if attachment.file:
+            if os.path.isfile(attachment.file.path):
+                os.remove(attachment.file.path)
+
+        attachment.delete()
+        return True
+
+    except Attachment.DoesNotExist:
+        log.info(f"Attachment {attachment_id} not found.")
         return False
