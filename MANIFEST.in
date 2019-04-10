@@ -1,4 +1,5 @@
 include LICENSE
-include README.rst
+include README.md
+recursive-include todo/data *
 recursive-include todo/static *
 recursive-include todo/templates *

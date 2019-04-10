@@ -3,7 +3,7 @@
 from io import open
 from os import path
 
-from setuptools import find_packages, setup
+from setuptools import setup, find_packages
 
 here = path.abspath(path.dirname(__file__))
 
@@ -13,7 +13,7 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="django-todo",
-    version="2.4.0",
+    version="2.4.4",
     description="A multi-user, multi-group task management and assignment system for Django.",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -35,7 +35,8 @@ setup(
         "Topic :: Software Development :: Bug Tracking",
     ],
     keywords="lists todo bug bugs tracking",
-    packages=find_packages(exclude=["contrib", "docs", "tests"]),
+    packages=find_packages(),  # Finds modules with an __init__.py
+    include_package_data=True,  # Pulls in non-module data from MANIFEST.in
     python_requires=">=3.5",
     install_requires=["unidecode"],
     project_urls={
