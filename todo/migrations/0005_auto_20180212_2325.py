@@ -5,18 +5,13 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('todo', '0004_rename_list_tasklist'),
-    ]
+    dependencies = [("todo", "0004_rename_list_tasklist")]
 
     operations = [
         migrations.AlterModelOptions(
-            name='tasklist',
-            options={'ordering': ['name'], 'verbose_name_plural': 'Task Lists'},
+            name="tasklist", options={"ordering": ["name"], "verbose_name_plural": "Task Lists"}
         ),
         migrations.AlterField(
-            model_name='item',
-            name='completed',
-            field=models.BooleanField(default=False),
+            model_name="item", name="completed", field=models.BooleanField(default=False)
         ),
     ]

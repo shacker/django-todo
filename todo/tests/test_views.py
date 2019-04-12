@@ -166,6 +166,7 @@ def test_no_javascript_in_comments(todo_setup, client):
 
 # ### PERMISSIONS ###
 
+
 def test_view_add_list_nonadmin(todo_setup, client):
     url = reverse("todo:add_list")
     client.login(username="you", password="password")

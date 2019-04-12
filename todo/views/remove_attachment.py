@@ -18,10 +18,7 @@ def remove_attachment(request, attachment_id: int) -> HttpResponse:
     if request.method == "POST":
         attachment = get_object_or_404(Attachment, pk=attachment_id)
 
-        redir_url = reverse(
-            "todo:task_detail",
-            kwargs={"task_id": attachment.task.id},
-        )
+        redir_url = reverse("todo:task_detail", kwargs={"task_id": attachment.task.id})
 
         # Permissions
         if not (
@@ -33,7 +30,9 @@ def remove_attachment(request, attachment_id: int) -> HttpResponse:
         if remove_attachment_file(attachment.id):
             messages.success(request, f"Attachment {attachment.id} removed.")
         else:
-            messages.error(request, f"Sorry, there was a problem deleting attachment {attachment.id}.")
+            messages.error(
+                request, f"Sorry, there was a problem deleting attachment {attachment.id}."
+            )
 
         return redirect(redir_url)
 

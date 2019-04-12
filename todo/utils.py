@@ -20,7 +20,7 @@ def staff_check(user):
         https://github.com/shacker/django-todo/issues/50
     """
 
-    if defaults('TODO_STAFF_ONLY'):
+    if defaults("TODO_STAFF_ONLY"):
         return user.is_staff
     else:
         # If unset or False, allow all logged in users

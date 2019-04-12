@@ -2,11 +2,7 @@ import os
 
 DEBUG = (True,)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3"
-    }
-}
+DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3"}}
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
@@ -65,28 +61,12 @@ TEMPLATES = [
 ]
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        '': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'django': {
-            'handlers': ['console'],
-            'level': 'WARNING',
-            'propagate': True,
-        },
-        'django.request': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "loggers": {
+        "": {"handlers": ["console"], "level": "DEBUG", "propagate": True},
+        "django": {"handlers": ["console"], "level": "WARNING", "propagate": True},
+        "django.request": {"handlers": ["console"], "level": "DEBUG", "propagate": True},
     },
 }

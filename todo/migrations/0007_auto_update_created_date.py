@@ -6,14 +6,12 @@ import django.utils.timezone
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('todo', '0006_rename_item_model'),
-    ]
+    dependencies = [("todo", "0006_rename_item_model")]
 
     operations = [
         migrations.AlterField(
-            model_name='task',
-            name='created_date',
+            model_name="task",
+            name="created_date",
             field=models.DateField(blank=True, default=django.utils.timezone.now, null=True),
-        ),
+        )
     ]

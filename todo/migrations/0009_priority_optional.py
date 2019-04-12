@@ -5,18 +5,15 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('todo', '0008_mail_tracker'),
-    ]
+    dependencies = [("todo", "0008_mail_tracker")]
 
     operations = [
         migrations.AlterModelOptions(
-            name='task',
-            options={'ordering': ['priority', 'created_date']},
+            name="task", options={"ordering": ["priority", "created_date"]}
         ),
         migrations.AlterField(
-            model_name='task',
-            name='priority',
+            model_name="task",
+            name="priority",
             field=models.PositiveIntegerField(blank=True, null=True),
         ),
     ]

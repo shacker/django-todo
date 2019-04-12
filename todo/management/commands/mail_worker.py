@@ -26,10 +26,7 @@ class Command(BaseCommand):
         worker_name = options["worker_name"]
         tracker = settings.TODO_MAIL_TRACKERS.get(worker_name, None)
         if tracker is None:
-            logger.error(
-                "couldn't find configuration for %r in TODO_MAIL_TRACKERS",
-                worker_name
-            )
+            logger.error("couldn't find configuration for %r in TODO_MAIL_TRACKERS", worker_name)
             sys.exit(1)
 
         # set the default socket timeout (imaplib doesn't enable configuring it)

@@ -45,9 +45,7 @@ class LockedAtomicTransaction(Atomic):
                 cursor = get_connection(self.using).cursor()
                 for model in self.models:
                     cursor.execute(
-                        "LOCK TABLE {table_name}".format(
-                            table_name=model._meta.db_table
-                        )
+                        "LOCK TABLE {table_name}".format(table_name=model._meta.db_table)
                     )
             finally:
                 if cursor and not cursor.closed:
@@ -159,9 +157,7 @@ class Comment(models.Model):
     def snippet(self):
         body_snippet = textwrap.shorten(self.body, width=35, placeholder="...")
         # Define here rather than in __str__ so we can use it in the admin list_display
-        return "{author} - {snippet}...".format(
-            author=self.author_text, snippet=body_snippet
-        )
+        return "{author} - {snippet}...".format(author=self.author_text, snippet=body_snippet)
 
     def __str__(self):
         return self.snippet
@@ -173,9 +169,7 @@ class Attachment(models.Model):
     """
 
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    added_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
-    )
+    added_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(default=datetime.datetime.now)
     file = models.FileField(upload_to=get_attachment_upload_dir, max_length=255)
 

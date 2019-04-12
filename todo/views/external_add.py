@@ -43,7 +43,7 @@ def external_add(request) -> HttpResponse:
             task = form.save(commit=False)
             task.task_list = TaskList.objects.get(slug=settings.TODO_DEFAULT_LIST_SLUG)
             task.created_by = request.user
-            if defaults('TODO_DEFAULT_ASSIGNEE'):
+            if defaults("TODO_DEFAULT_ASSIGNEE"):
                 task.assigned_to = User.objects.get(username=settings.TODO_DEFAULT_ASSIGNEE)
             task.save()
 

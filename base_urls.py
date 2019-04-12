@@ -10,6 +10,4 @@ For your project, ignore this file and add
 to your site's urlconf.
 """
 
-urlpatterns = [
-    path('lists/', include('todo.urls')),
-]
+urlpatterns = [path("lists/", include("todo.urls"))]

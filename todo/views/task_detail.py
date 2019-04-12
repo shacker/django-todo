@@ -121,13 +121,13 @@ def task_detail(request, task_id: int) -> HttpResponse:
     if request.FILES.get("attachment_file_input"):
         file = request.FILES.get("attachment_file_input")
 
-        if file.size > defaults('TODO_MAXIMUM_ATTACHMENT_SIZE'):
+        if file.size > defaults("TODO_MAXIMUM_ATTACHMENT_SIZE"):
             messages.error(request, f"File exceeds maximum attachment size.")
             return redirect("todo:task_detail", task_id=task.id)
 
         name, extension = os.path.splitext(file.name)
 
-        if extension not in defaults('TODO_LIMIT_FILE_ATTACHMENTS'):
+        if extension not in defaults("TODO_LIMIT_FILE_ATTACHMENTS"):
             messages.error(request, f"This site does not allow upload of {extension} files.")
             return redirect("todo:task_detail", task_id=task.id)
 
@@ -144,7 +144,7 @@ def task_detail(request, task_id: int) -> HttpResponse:
         "merge_form": merge_form,
         "thedate": thedate,
         "comment_classes": defaults("TODO_COMMENT_CLASSES"),
-        "attachments_enabled": defaults('TODO_ALLOW_FILE_ATTACHMENTS'),
+        "attachments_enabled": defaults("TODO_ALLOW_FILE_ATTACHMENTS"),
     }
 
     return render(request, "todo/task_detail.html", context)

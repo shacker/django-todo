@@ -70,14 +70,12 @@ def imap_producer(
                     try:
                         yield message
                     except Exception:
-                        logger.exception(
-                            f"something went wrong while processing {message_uid}"
-                        )
+                        logger.exception(f"something went wrong while processing {message_uid}")
                         raise
 
                     if not preserve:
                         # tag the message for deletion
-                        conn.store(message_uid, '+FLAGS', '\\Deleted')
+                        conn.store(message_uid, "+FLAGS", "\\Deleted")
                 else:
                     logger.debug("did not receive any message")
             finally:
