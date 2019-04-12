@@ -5,6 +5,8 @@ from os import path
 
 from setuptools import setup, find_packages
 
+import todo
+
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
@@ -13,7 +15,7 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="django-todo",
-    version="2.4.5",
+    version=todo.__version__,
     description="A multi-user, multi-group task management and assignment system for Django.",
     long_description=long_description,
     long_description_content_type="text/markdown",
