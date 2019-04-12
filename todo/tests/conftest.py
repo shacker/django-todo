@@ -11,7 +11,7 @@ def todo_setup(django_user_model):
 
     g1 = Group.objects.create(name="Workgroup One")
     u1 = django_user_model.objects.create_user(
-        username="u1", password="password", email="u1@example.com"
+        username="u1", password="password", email="u1@example.com", is_staff=True
     )
     u1.groups.add(g1)
     tlist1 = TaskList.objects.create(group=g1, name="Zip", slug="zip")
@@ -21,7 +21,7 @@ def todo_setup(django_user_model):
 
     g2 = Group.objects.create(name="Workgroup Two")
     u2 = django_user_model.objects.create_user(
-        username="u2", password="password", email="u2@example.com"
+        username="u2", password="password", email="u2@example.com", is_staff=True
     )
     u2.groups.add(g2)
     tlist2 = TaskList.objects.create(group=g2, name="Zap", slug="zap")

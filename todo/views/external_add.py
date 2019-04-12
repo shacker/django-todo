@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 
+from todo.defaults import defaults
 from todo.forms import AddExternalTaskForm
 from todo.models import TaskList
 from todo.utils import staff_check
@@ -24,6 +25,7 @@ def external_add(request) -> HttpResponse:
     """
 
     if not settings.TODO_DEFAULT_LIST_SLUG:
+        # We do NOT provide a default in defaults
         raise RuntimeError(
             "This feature requires TODO_DEFAULT_LIST_SLUG: in settings. See documentation."
         )
@@ -41,7 +43,7 @@ def external_add(request) -> HttpResponse:
             task = form.save(commit=False)
             task.task_list = TaskList.objects.get(slug=settings.TODO_DEFAULT_LIST_SLUG)
             task.created_by = request.user
-            if settings.TODO_DEFAULT_ASSIGNEE:
+            if defaults('TODO_DEFAULT_ASSIGNEE'):
                 task.assigned_to = User.objects.get(username=settings.TODO_DEFAULT_ASSIGNEE)
             task.save()
 
@@ -69,7 +71,7 @@ def external_add(request) -> HttpResponse:
             messages.success(
                 request, "Your trouble ticket has been submitted. We'll get back to you soon."
             )
-            return redirect(settings.TODO_PUBLIC_SUBMIT_REDIRECT)
+            return redirect(defaults("TODO_PUBLIC_SUBMIT_REDIRECT"))
 
     else:
         form = AddExternalTaskForm(initial={"priority": 999})

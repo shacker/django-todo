@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
-from todo.defaults import TODO_ALLOW_FILE_ATTACHMENTS, TODO_LIMIT_FILE_ATTACHMENTS
+from todo.defaults import defaults
 from todo.features import HAS_TASK_MERGE
 from todo.forms import AddEditTaskForm
 from todo.models import Attachment, Comment, Task
@@ -53,7 +53,7 @@ def task_detail(request, task_id: int) -> HttpResponse:
     task = get_object_or_404(Task, pk=task_id)
     comment_list = Comment.objects.filter(task=task_id).order_by("-date")
 
-    # Ensure user has permission to view task. Admins can view all tasks.
+    # Ensure user has permission to view task. Superusers can view all tasks.
     # Get the group this task belongs to, and check whether current user is a member of that group.
     if not user_can_read_task(task, request.user):
         raise PermissionDenied
@@ -120,15 +120,21 @@ def task_detail(request, task_id: int) -> HttpResponse:
     # Handle uploaded files
     if request.FILES.get("attachment_file_input"):
         file = request.FILES.get("attachment_file_input")
+
+        if file.size > defaults('TODO_MAXIMUM_ATTACHMENT_SIZE'):
+            messages.error(request, f"File exceeds maximum attachment size.")
+            return redirect("todo:task_detail", task_id=task.id)
+
         name, extension = os.path.splitext(file.name)
 
-        if extension not in TODO_LIMIT_FILE_ATTACHMENTS:
+        if extension not in defaults('TODO_LIMIT_FILE_ATTACHMENTS'):
             messages.error(request, f"This site does not allow upload of {extension} files.")
             return redirect("todo:task_detail", task_id=task.id)
 
         Attachment.objects.create(
             task=task, added_by=request.user, timestamp=datetime.datetime.now(), file=file
         )
+        messages.success(request, f"File attached successfully")
         return redirect("todo:task_detail", task_id=task.id)
 
     context = {
@@ -137,8 +143,8 @@ def task_detail(request, task_id: int) -> HttpResponse:
         "form": form,
         "merge_form": merge_form,
         "thedate": thedate,
-        "comment_classes": getattr(settings, "TODO_COMMENT_CLASSES", []),
-        "attachments_enabled": TODO_ALLOW_FILE_ATTACHMENTS,
+        "comment_classes": defaults("TODO_COMMENT_CLASSES"),
+        "attachments_enabled": defaults('TODO_ALLOW_FILE_ATTACHMENTS'),
     }
 
     return render(request, "todo/task_detail.html", context)

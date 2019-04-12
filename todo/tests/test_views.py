@@ -246,11 +246,17 @@ def test_setting_TODO_STAFF_ONLY_False(todo_setup, client, settings):
     assert response.status_code == 200
 
 
-def test_setting_TODO_STAFF_ONLY_True(todo_setup, client, settings):
-    # We use Django's user_passes_test to call `staff_check` utility function on all views.
-    # Just testing one view here; if it works, it works for all of them.
+def test_setting_TODO_STAFF_ONLY_True(todo_setup, client, settings, django_user_model):
+    # We use Django's user_passes_test to call `staff_check` utility function on some views.
+    # Just testing one view here...
     settings.TODO_STAFF_ONLY = True
     url = reverse("todo:lists")
+
+    # Remove staff privileges from user u2; they should not be able to access
+    u2 = django_user_model.objects.get(username="u2")
+    u2.is_staff = False
+    u2.save()
+
     client.login(username="u2", password="password")
     response = client.get(url)
     assert response.status_code == 302  # Redirected to login view

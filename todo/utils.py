@@ -8,6 +8,7 @@ from django.contrib.sites.models import Site
 from django.core import mail
 from django.template.loader import render_to_string
 
+from todo.defaults import defaults
 from todo.models import Attachment, Comment, Task
 
 log = logging.getLogger(__name__)
@@ -19,7 +20,7 @@ def staff_check(user):
         https://github.com/shacker/django-todo/issues/50
     """
 
-    if hasattr(settings, "TODO_STAFF_ONLY") and settings.TODO_STAFF_ONLY:
+    if defaults('TODO_STAFF_ONLY'):
         return user.is_staff
     else:
         # If unset or False, allow all logged in users
@@ -27,7 +28,7 @@ def staff_check(user):
 
 
 def user_can_read_task(task, user):
-    return task.task_list.group in user.groups.all() or user.is_staff
+    return task.task_list.group in user.groups.all() or user.is_superuser
 
 
 def todo_get_backend(task):
