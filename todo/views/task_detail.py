@@ -11,6 +11,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
+from todo.defaults import TODO_ALLOW_FILE_ATTACHMENTS, TODO_LIMIT_FILE_ATTACHMENTS
 from todo.features import HAS_TASK_MERGE
 from todo.forms import AddEditTaskForm
 from todo.models import Attachment, Comment, Task
@@ -119,16 +120,9 @@ def task_detail(request, task_id: int) -> HttpResponse:
     # Handle uploaded files
     if request.FILES.get("attachment_file_input"):
         file = request.FILES.get("attachment_file_input")
-
-        # Validate inbound file extension against allowed filetypes
-        # FIXME: Move defaults to centralized module
-        allowed_extensions = (
-            settings.TODO_ALLOWED_FILE_ATTACHMENTS
-            if hasattr(settings, "TODO_ALLOWED_FILE_ATTACHMENTS")
-            else [".jpg", ".gif", ".csv", ".pdf", ".zip"]
-        )
         name, extension = os.path.splitext(file.name)
-        if extension not in allowed_extensions:
+
+        if extension not in TODO_LIMIT_FILE_ATTACHMENTS:
             messages.error(request, f"This site does not allow upload of {extension} files.")
             return redirect("todo:task_detail", task_id=task.id)
 
@@ -137,15 +131,6 @@ def task_detail(request, task_id: int) -> HttpResponse:
         )
         return redirect("todo:task_detail", task_id=task.id)
 
-    # Settings for file attachments defaults to True
-    # FIXME: Move settings defaults to a central location?
-    attachments_enabled = True
-    if (
-        hasattr(settings, "TODO_ALLOW_FILE_ATTACHMENTS")
-        and not settings.TODO_ALLOW_FILE_ATTACHMENTS
-    ):
-        attachments_enabled = False
-
     context = {
         "task": task,
         "comment_list": comment_list,
@@ -153,7 +138,7 @@ def task_detail(request, task_id: int) -> HttpResponse:
         "merge_form": merge_form,
         "thedate": thedate,
         "comment_classes": getattr(settings, "TODO_COMMENT_CLASSES", []),
-        "attachments_enabled": attachments_enabled,
+        "attachments_enabled": TODO_ALLOW_FILE_ATTACHMENTS,
     }
 
     return render(request, "todo/task_detail.html", context)
