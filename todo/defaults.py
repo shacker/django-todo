@@ -1,14 +1,26 @@
 # If a documented django-todo option is NOT configured in settings, use these values.
 from django.conf import settings
 
-TODO_ALLOW_FILE_ATTACHMENTS = (
-    settings.TODO_ALLOW_FILE_ATTACHMENTS
-    if hasattr(settings, "TODO_ALLOW_FILE_ATTACHMENTS")
-    else True
-)
 
-TODO_LIMIT_FILE_ATTACHMENTS = (
-    settings.TODO_LIMIT_FILE_ATTACHMENTS
-    if hasattr(settings, "TODO_LIMIT_FILE_ATTACHMENTS")
-    else [".jpg", ".gif", ".png", ".csv", ".pdf", ".zip"]
-)
+hash = {
+    "TODO_ALLOW_FILE_ATTACHMENTS": True,
+    "TODO_LIMIT_FILE_ATTACHMENTS": [".jpg", ".gif", ".png", ".csv", ".pdf", ".zip"],
+    "TODO_MAXIMUM_ATTACHMENT_SIZE": 5000000,
+    "TODO_STAFF_ONLY": True,
+    "TODO_DEFAULT_ASSIGNEE": None,
+    "TODO_PUBLIC_SUBMIT_REDIRECT": "/",
+    "TODO_COMMENT_CLASSES": [],
+}
+
+# These intentionally have no defaults (user MUST set a value):
+# TODO_DEFAULT_LIST_SLUG
+# TODO_MAIL_BACKENDS
+# TODO_MAIL_TRACKERS
+
+
+def defaults(key: str):
+    """Try to get a setting from project settings.
+    If empty or doesn't exist, fall back to a value from defaults hash."""
+
+    _ret = getattr(settings, key, False) or hash.get(key)
+    return _ret
