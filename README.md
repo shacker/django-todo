@@ -143,6 +143,7 @@ TODO_PUBLIC_SUBMIT_REDIRECT = 'dashboard'
 # Optionally limit list of allowed filetypes
 TODO_ALLOW_FILE_ATTACHMENTS = True
 TODO_ALLOWED_FILE_ATTACHMENTS = [".jpg", ".gif", ".csv", ".pdf", ".zip"]
+TODO_MAXIMUM_ATTACHMENT_SIZE = 5000000  # In bytes
 
 # additionnal classes the comment body should hold
 # adding "text-monospace" makes comment monospace
