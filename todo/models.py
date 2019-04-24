@@ -140,7 +140,7 @@ class Comment(models.Model):
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True
     )
-    task = models.ForeignKey(BaseTask, on_delete=models.CASCADE)
+    task = models.ForeignKey("Task", on_delete=models.CASCADE)
     date = models.DateTimeField(default=datetime.datetime.now)
     email_from = models.CharField(max_length=320, blank=True, null=True)
     email_message_id = models.CharField(max_length=255, blank=True, null=True)
@@ -174,7 +174,7 @@ class Attachment(models.Model):
     Defines a generic file attachment for use in M2M relation with Task.
     """
 
-    task = models.ForeignKey(BaseTask, on_delete=models.CASCADE)
+    task = models.ForeignKey("Task", on_delete=models.CASCADE)
     added_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(default=datetime.datetime.now)
     file = models.FileField(upload_to=get_attachment_upload_dir, max_length=255)
