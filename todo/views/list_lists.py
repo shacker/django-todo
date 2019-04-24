@@ -9,12 +9,18 @@ from todo.forms import SearchForm
 from todo.models import Task, TaskList
 from todo.utils import staff_check
 
+from todo.signals import pizza_done
 
 @login_required
 @user_passes_test(staff_check)
 def list_lists(request) -> HttpResponse:
     """Homepage view - list of lists a user can view, and ability to add a list.
     """
+
+    # Demonstrates sending a custom signal from elsewhere in the project.
+    # In this case when the list of lists is viewed, I'm going to toggle
+    # the "completed" state of task 150 (just for example's sake).
+    pizza_done.send(sender="foobar", toppings=["anchovies", "parmesan"], size=7, task_id=150)
 
     thedate = datetime.datetime.now()
     searchform = SearchForm(auto_id=False)
