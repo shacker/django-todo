@@ -6,12 +6,11 @@ import django.db.models.deletion
 import django.utils.timezone
 
 
-def forward_data_migration(apps, schema_editor):
-    pass
-
-
-def backward_data_migration(apps, schema_editor):
-    pass
+def forward_migration(apps, schema_editor):
+    BaseTask = apps.get_model("todo", "BaseTask")
+    Task = apps.get_model("todo", "Task")
+    for base_task in BaseTask.objects.all():
+        Task.objects.create(basetask_ptr=base_task)
 
 
 class Migration(migrations.Migration):
@@ -22,90 +21,23 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RenameModel("Task", "BaseTask"),
         migrations.CreateModel(
-            name="BaseTask",
+            name="Task",
             fields=[
                 (
-                    "id",
-                    models.AutoField(
+                    "basetask_ptr",
+                    models.OneToOneField(
                         auto_created=True,
+                        default=1,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
                         primary_key=True,
                         serialize=False,
-                        verbose_name="ID",
+                        to="todo.BaseTask",
                     ),
-                ),
-                ("title", models.CharField(max_length=140)),
-                (
-                    "created_date",
-                    models.DateField(
-                        blank=True,
-                        default=django.utils.timezone.now,
-                        null=True,
-                    ),
-                ),
-                ("due_date", models.DateField(blank=True, null=True)),
-                ("completed", models.BooleanField(default=False)),
-                ("completed_date", models.DateField(blank=True, null=True)),
-                ("note", models.TextField(blank=True, null=True)),
-                (
-                    "priority",
-                    models.PositiveIntegerField(blank=True, null=True),
-                ),
-                (
-                    "assigned_to",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name="todo_assigned_to",
-                        to=settings.AUTH_USER_MODEL,
-                    ),
-                ),
-                (
-                    "created_by",
-                    models.ForeignKey(
-                        null=True,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name="todo_created_by",
-                        to=settings.AUTH_USER_MODEL,
-                    ),
-                ),
-                (
-                    "task_list",
-                    models.ForeignKey(
-                        null=True,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        to="todo.TaskList",
-                    ),
-                ),
+                )
             ],
-            options={"ordering": ["priority", "created_date"]},
         ),
-        migrations.RunPython(forward_data_migration, backward_data_migration),
-        migrations.AlterModelOptions(name="task", options={}),
-        migrations.RemoveField(model_name="task", name="assigned_to"),
-        migrations.RemoveField(model_name="task", name="completed"),
-        migrations.RemoveField(model_name="task", name="completed_date"),
-        migrations.RemoveField(model_name="task", name="created_by"),
-        migrations.RemoveField(model_name="task", name="created_date"),
-        migrations.RemoveField(model_name="task", name="due_date"),
-        migrations.RemoveField(model_name="task", name="id"),
-        migrations.RemoveField(model_name="task", name="note"),
-        migrations.RemoveField(model_name="task", name="priority"),
-        migrations.RemoveField(model_name="task", name="task_list"),
-        migrations.RemoveField(model_name="task", name="title"),
-        migrations.AddField(
-            model_name="task",
-            name="basetask_ptr",
-            field=models.OneToOneField(
-                auto_created=True,
-                default=1,
-                on_delete=django.db.models.deletion.CASCADE,
-                parent_link=True,
-                primary_key=True,
-                serialize=False,
-                to="todo.BaseTask",
-            ),
-            preserve_default=False,
-        ),
+        migrations.RunPython(forward_migration),
     ]
