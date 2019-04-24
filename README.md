@@ -300,6 +300,10 @@ django-todo uses pytest exclusively for testing. The best way to run the suite i
 	pip install --editable .
 	pytest -x -v
 
+## Contribution notes
+
+To generate new migrations, run `./make_migrations.py`
+
 ## Version History
 
 **2.4.6** Use `defaults` hash for default settings, update perms and tests
