@@ -2,7 +2,12 @@ import os
 
 DEBUG = (True,)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3"}}
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": "test"
+    }
+}
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
