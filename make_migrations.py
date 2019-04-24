@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# Credit: https://stackoverflow.com/a/42166382/885053
 
 import os
 import sys
