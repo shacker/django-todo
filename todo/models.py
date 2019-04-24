@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import datetime
 import os
+import swapper
 import textwrap
 
 from django.conf import settings
@@ -68,7 +69,7 @@ class TaskList(models.Model):
         unique_together = ("group", "slug")
 
 
-class Task(models.Model):
+class BaseTask(models.Model):
     title = models.CharField(max_length=140)
     task_list = models.ForeignKey(TaskList, on_delete=models.CASCADE, null=True)
     created_date = models.DateField(default=timezone.now, blank=True, null=True)
@@ -123,6 +124,11 @@ class Task(models.Model):
 
     class Meta:
         ordering = ["priority", "created_date"]
+
+
+class Task(BaseTask):
+    class Meta:
+        swappable = swapper.swappable_setting("todo", "Task")
 
 
 class Comment(models.Model):
