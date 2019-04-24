@@ -140,7 +140,7 @@ class Comment(models.Model):
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True
     )
-    task = models.ForeignKey("Task", on_delete=models.CASCADE)
+    task = models.ForeignKey(settings.TODO_TASK_MODEL, on_delete=models.CASCADE)
     date = models.DateTimeField(default=datetime.datetime.now)
     email_from = models.CharField(max_length=320, blank=True, null=True)
     email_message_id = models.CharField(max_length=255, blank=True, null=True)
