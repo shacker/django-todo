@@ -12,3 +12,4 @@ settings.json
 *.py[cod]
 .pytest_cache/*
 .mypy_cache
+.testdb
