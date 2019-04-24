@@ -13,6 +13,10 @@ def forward_migration(apps, schema_editor):
         Task.objects.create(basetask_ptr=base_task)
 
 
+def backward_migration(apps, schema_editor):
+    pass  # fix IrreversibleError
+
+
 class Migration(migrations.Migration):
     atomic = False
 
@@ -40,7 +44,7 @@ class Migration(migrations.Migration):
                 )
             ],
         ),
-        migrations.RunPython(forward_migration),
+        migrations.RunPython(forward_migration, backward_migration),
         migrations.AlterField(
             model_name="attachment",
             name="task",
