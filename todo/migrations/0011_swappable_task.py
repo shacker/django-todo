@@ -41,4 +41,32 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.RunPython(forward_migration),
+        migrations.AlterField(
+            model_name="attachment",
+            name="task",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.TODO_TASK_MODEL,
+            ),
+        ),
+        migrations.AlterField(
+            model_name="comment",
+            name="task",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.TODO_TASK_MODEL,
+            ),
+        ),
+        migrations.AlterField(
+            model_name="task",
+            name="basetask_ptr",
+            field=models.OneToOneField(
+                auto_created=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                parent_link=True,
+                primary_key=True,
+                serialize=False,
+                to="todo.BaseTask",
+            ),
+        ),
     ]
