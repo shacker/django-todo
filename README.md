@@ -329,6 +329,7 @@ django-todo uses pytest exclusively for testing. The best way to run the suite i
 To generate new migrations, run `./make_migrations.py`
 
 ## Version History
+**2.4.7** April 2019: Make the Task model swappable via Swapper.
 
 **2.4.6** Use `defaults` hash for default settings, update perms and tests
 
