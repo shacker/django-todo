@@ -73,9 +73,4 @@ class Migration(migrations.Migration):
                 to="todo.BaseTask",
             ),
         ),
-        migrations.AlterField(
-            model_name='basetask',
-            name='task_list',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.TODO_TASK_MODEL),
-        ),
     ]
