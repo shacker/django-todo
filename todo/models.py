@@ -40,13 +40,18 @@ class LockedAtomicTransaction(Atomic):
         super(LockedAtomicTransaction, self).__enter__()
 
         # Make sure not to lock, when sqlite is used, or you'll run into problems while running tests!!!
-        if settings.DATABASES[self.using]["ENGINE"] != "django.db.backends.sqlite3":
+        if (
+            settings.DATABASES[self.using]["ENGINE"]
+            != "django.db.backends.sqlite3"
+        ):
             cursor = None
             try:
                 cursor = get_connection(self.using).cursor()
                 for model in self.models:
                     cursor.execute(
-                        "LOCK TABLE {table_name}".format(table_name=model._meta.db_table)
+                        "LOCK TABLE {table_name}".format(
+                            table_name=model._meta.db_table
+                        )
                     )
             finally:
                 if cursor and not cursor.closed:
@@ -71,8 +76,12 @@ class TaskList(models.Model):
 
 class BaseTask(models.Model):
     title = models.CharField(max_length=140)
-    task_list = models.ForeignKey(TaskList, on_delete=models.CASCADE, null=True)
-    created_date = models.DateField(default=timezone.now, blank=True, null=True)
+    task_list = models.ForeignKey(
+        TaskList, on_delete=models.CASCADE, null=True
+    )
+    created_date = models.DateField(
+        default=timezone.now, blank=True, null=True
+    )
     due_date = models.DateField(blank=True, null=True)
     completed = models.BooleanField(default=False)
     completed_date = models.DateField(blank=True, null=True)
@@ -94,7 +103,7 @@ class BaseTask(models.Model):
 
     # Has due date for an instance of this object passed?
     def overdue_status(self):
-        "Returns whether the Tasks's due date has passed or not."
+        "Returns whether the BaseTasks's due date has passed or not."
         if self.due_date and datetime.date.today() > self.due_date:
             return True
 
@@ -104,12 +113,12 @@ class BaseTask(models.Model):
     def get_absolute_url(self):
         return reverse("todo:task_detail", kwargs={"task_id": self.id})
 
-    # Auto-set the Task creation / completed date
+    # Auto-set the BaseTask creation / completed date
     def save(self, **kwargs):
-        # If Task is being marked complete, set the completed_date
+        # If BaseTask is being marked complete, set the completed_date
         if self.completed:
             self.completed_date = datetime.datetime.now()
-        super(Task, self).save()
+        super(BaseTask, self).save()
 
     def merge_into(self, merge_target):
         if merge_target.pk == self.pk:
@@ -138,7 +147,10 @@ class Comment(models.Model):
     """
 
     author = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
     )
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     date = models.DateTimeField(default=datetime.datetime.now)
@@ -163,7 +175,9 @@ class Comment(models.Model):
     def snippet(self):
         body_snippet = textwrap.shorten(self.body, width=35, placeholder="...")
         # Define here rather than in __str__ so we can use it in the admin list_display
-        return "{author} - {snippet}...".format(author=self.author_text, snippet=body_snippet)
+        return "{author} - {snippet}...".format(
+            author=self.author_text, snippet=body_snippet
+        )
 
     def __str__(self):
         return self.snippet
@@ -175,9 +189,13 @@ class Attachment(models.Model):
     """
 
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    added_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    added_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
+    )
     timestamp = models.DateTimeField(default=datetime.datetime.now)
-    file = models.FileField(upload_to=get_attachment_upload_dir, max_length=255)
+    file = models.FileField(
+        upload_to=get_attachment_upload_dir, max_length=255
+    )
 
     def filename(self):
         return os.path.basename(self.file.name)
