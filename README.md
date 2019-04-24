@@ -294,7 +294,7 @@ LOGGING = {
 
 django-todo uses pytest exclusively for testing. The best way to run the suite is to clone django-todo into its own directory, install pytest, then:
 
-	pip install pytest pytest-django
+	pip install pytest pytest-django Django
 	pip install --editable .
 	pytest -x -v
 
