@@ -40,7 +40,7 @@ setup(
     packages=find_packages(),  # Finds modules with an __init__.py
     include_package_data=True,  # Pulls in non-module data from MANIFEST.in
     python_requires=">=3.5",
-    install_requires=["unidecode"],
+    install_requires=["unidecode", "bleach", "swapper"],
     project_urls={
         "Demo Site": "http://django-todo.org",
         "Bug Reports": "https://github.com/shacker/django-todo/issues",

@@ -25,8 +25,9 @@ assignment application for Django, designed to be dropped into an existing site 
 * Python 3.6+
 * jQuery (full version, not "slim", for drag/drop prioritization)
 * Bootstrap (to work with provided templates, though you can override them)
-* bleach (`pip install bleach`)
 * django-autocomplete-light (optional, required for task merging)
+
+Note that **unidecode**, **bleach** and **swapper** will be installed with this package.
 
 ## Overview
 
