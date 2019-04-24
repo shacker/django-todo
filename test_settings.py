@@ -75,3 +75,5 @@ LOGGING = {
         "django.request": {"handlers": ["console"], "level": "DEBUG", "propagate": True},
     },
 }
+
+TODO_TASK_MODEL = "todo.Task"

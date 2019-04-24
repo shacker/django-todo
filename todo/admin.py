@@ -1,6 +1,8 @@
 from django.contrib import admin
+import swapper
+from todo.models import Attachment, Comment, TaskList
 
-from todo.models import Attachment, Comment, Task, TaskList
+Task = swapper.load_model("todo", "Task")
 
 
 class TaskAdmin(admin.ModelAdmin):
