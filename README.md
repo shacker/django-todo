@@ -113,6 +113,30 @@ Log in and access `/todo`!
 
 The provided templates are fairly bare-bones, and are meant as starting points only. Unlike previous versions of django-todo, they now ship as Bootstrap examples, but feel free to override them - there is no hard dependency on Bootstrap. To override a template, create a `todo` folder in your project's `templates` dir, then copy the template you want to override from django-todo source and into that dir.
 
+## Custom Task models
+
+To define a custom task model:
+
+```py
+# my_project/my_app/models.py
+
+from todo.models import BaseTask
+
+class LinkedTask(Task):
+    """
+    Task linked to another model, to allow signals/hooks actions.
+    """
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
+
+# my_project/settings.py
+
+TODO_TASK_MODEL = "my_app.LinkedTask"
+```
+
+Confer [Django Swappable Models](https://github.com/wq/django-swappable-models)
+
 ### Filing Public Tickets
 
 If you wish to use the public ticket-filing system, first create the list into which those tickets should be filed, then add its slug to `TODO_DEFAULT_LIST_SLUG` in settings (more on settings below).
