@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.http import HttpResponse
@@ -44,7 +44,7 @@ def external_add(request) -> HttpResponse:
             task.task_list = TaskList.objects.get(slug=settings.TODO_DEFAULT_LIST_SLUG)
             task.created_by = request.user
             if defaults("TODO_DEFAULT_ASSIGNEE"):
-                task.assigned_to = User.objects.get(username=settings.TODO_DEFAULT_ASSIGNEE)
+                task.assigned_to = get_user_model().objects.get(username=settings.TODO_DEFAULT_ASSIGNEE)
             task.save()
 
             # Send email to assignee if we have one
