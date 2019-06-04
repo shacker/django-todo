@@ -300,6 +300,10 @@ django-todo uses pytest exclusively for testing. The best way to run the suite i
 
 ## Version History
 
+**2.4.8** Fix bug when setting default values for unspecified settings
+
+**2.4.7** Support custom user model in external_add
+
 **2.4.6** Use `defaults` hash for default settings, update perms and tests
 
 **2.4.5** Re-enable "notify" feature during task edit

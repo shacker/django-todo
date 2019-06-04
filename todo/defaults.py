@@ -11,7 +11,7 @@ hash = {
     "TODO_STAFF_ONLY": True,
 }
 
-# These intentionally have no defaults (user MUST set a value):
+# These intentionally have no defaults (user MUST set a value if their features are used):
 # TODO_DEFAULT_LIST_SLUG
 # TODO_MAIL_BACKENDS
 # TODO_MAIL_TRACKERS
@@ -21,4 +21,8 @@ def defaults(key: str):
     """Try to get a setting from project settings.
     If empty or doesn't exist, fall back to a value from defaults hash."""
 
-    return getattr(settings, key, False) or hash.get(key)
+    if hasattr(settings, key):
+        val = getattr(settings, key)
+    else:
+        val = hash.get(key)
+    return val

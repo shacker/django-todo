@@ -7,7 +7,6 @@ DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3"}}
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # Document
-TODO_STAFF_ONLY = False
 TODO_DEFAULT_LIST_SLUG = "tickets"
 TODO_DEFAULT_ASSIGNEE = None
 TODO_PUBLIC_SUBMIT_REDIRECT = "/"

@@ -1,9 +1,8 @@
-import pytest
-
 from django.core import mail
 
-from todo.models import Task, Comment
-from todo.utils import send_notify_mail, send_email_to_thread_participants
+from todo.defaults import defaults
+from todo.models import Comment, Task
+from todo.utils import send_email_to_thread_participants, send_notify_mail
 
 
 def test_send_notify_mail_not_me(todo_setup, django_user_model, email_backend_setup):
@@ -54,6 +53,27 @@ def test_send_email_to_thread_participants(todo_setup, django_user_model, email_
     assert "u1@example.com" in mail.outbox[0].recipients()
     assert "u3@example.com" in mail.outbox[0].recipients()
     assert "u4@example.com" in mail.outbox[0].recipients()
+
+
+def test_defaults(settings):
+    """todo's `defaults` module provides reasonable default values for unspecified settings.
+    If a value is NOT set, it should be pulled from the hash in defaults.py.
+    If a value IS set, it should be respected.
+    n.b. TODO_STAFF_ONLY which defaults to True in the `defaults` module."""
+
+    key = "TODO_STAFF_ONLY"
+
+    # Setting is not set, and should default to True (the value in defaults.py)
+    assert not hasattr(settings, key)
+    assert defaults(key)
+
+    # Setting is already set to True and should be respected.
+    settings.TODO_STAFF_ONLY = True
+    assert defaults(key)
+
+    # Setting is already set to False and should be respected.
+    settings.TODO_STAFF_ONLY = False
+    assert not defaults(key)
 
 
 # FIXME: Add tests for:
