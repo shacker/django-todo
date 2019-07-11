@@ -127,7 +127,7 @@ def task_detail(request, task_id: int) -> HttpResponse:
 
         name, extension = os.path.splitext(file.name)
 
-        if extension not in defaults("TODO_LIMIT_FILE_ATTACHMENTS"):
+        if extension not in defaults("TODO_LIMIT_FILE_ATTACHMENTS") and "*" not in defaults("TODO_LIMIT_FILE_ATTACHMENTS"):
             messages.error(request, f"This site does not allow upload of {extension} files.")
             return redirect("todo:task_detail", task_id=task.id)
 
