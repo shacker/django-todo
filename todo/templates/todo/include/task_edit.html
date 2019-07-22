@@ -44,7 +44,8 @@
 
     <input type="hidden" name="priority"
       value="{% if form.priority.value %}{{ form.priority.value }}{% else %}999{% endif %}" id="id_priority">
-    <input type="hidden" name="created_by" value="{{ request.user.id }}" id="id_created_by">
+    <input type="hidden" name="created_by" 
+      value="{% if form.created_by.value %}{{ form.created_by.value }}{% else %}{{ request.user.id }}{% endif %}" id="id_created_by">
     <input type="hidden" name="task_list" value="{{ form.task_list.value }}" id="id_task_list">
 
     <p>
