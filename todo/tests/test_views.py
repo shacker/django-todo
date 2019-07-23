@@ -62,13 +62,6 @@ def test_view_list(todo_setup, admin_client):
     assert response.status_code == 200
 
 
-def test_del_list(todo_setup, admin_client):
-    tlist = TaskList.objects.get(slug="zip")
-    url = reverse("todo:del_list", kwargs={"list_id": tlist.id, "list_slug": tlist.slug})
-    response = admin_client.get(url)
-    assert response.status_code == 200
-
-
 def test_view_add_list(todo_setup, admin_client):
     url = reverse("todo:add_list")
     response = admin_client.get(url)
@@ -180,6 +173,13 @@ def test_view_del_list_nonadmin(todo_setup, client):
     client.login(username="you", password="password")
     response = client.get(url)
     assert response.status_code == 302  # Fedirected to login
+
+
+def test_del_list_not_in_list_group(todo_setup, admin_client):
+    tlist = TaskList.objects.get(slug="zip")
+    url = reverse("todo:del_list", kwargs={"list_id": tlist.id, "list_slug": tlist.slug})
+    response = admin_client.get(url)
+    assert response.status_code == 403
 
 
 def test_view_list_mine(todo_setup, client):
