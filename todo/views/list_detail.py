@@ -52,7 +52,6 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False) -> 
         if form.is_valid():
             new_task = form.save(commit=False)
             new_task.created_by = request.user
-            new_task.created_date = timezone.now()
             new_task.note = bleach.clean(form.cleaned_data["note"], strip=True)
             form.save()
 
