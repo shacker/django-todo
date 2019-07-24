@@ -17,7 +17,9 @@ def del_list(request, list_id: int, list_slug: str) -> HttpResponse:
 
     # Ensure user has permission to delete list. Get the group this list belongs to,
     # and check whether current user is a member of that group AND a staffer.
-    if task_list.group not in request.user.groups.all() and not request.user.is_staff:
+    if task_list.group not in request.user.groups.all():
+        raise PermissionDenied    
+    if not request.user.is_staff:
         raise PermissionDenied
 
     if request.method == "POST":
