@@ -141,6 +141,61 @@ def test_no_javascript_in_task_note(todo_setup, client):
 
 
 @pytest.mark.django_db
+def test_created_by_unchanged(todo_setup, client):
+    
+    task_list = TaskList.objects.first()
+    u2 = get_user_model().objects.get(username="u2")
+    title = "Some Unique String with unique chars: ab78539e"
+    note = "a note"
+    data = {
+        "task_list": task_list.id,
+        "created_by": u2.id,
+        "priority": 10,
+        "title": title,
+        "note": note,
+        "add_edit_task": "Submit",
+    }
+
+    client.login(username="u2", password="password")
+    url_add_task = reverse("todo:list_detail", kwargs={"list_id": task_list.id, "list_slug": task_list.slug})
+
+    response = client.post(url_add_task, data)
+    assert response.status_code == 302
+
+    # Retrieve new task and compare created_by
+    task = Task.objects.get(title=title)
+    assert task.created_by == u2
+
+    # Now that we've created the task, edit it as another user.
+    # After saving, created_by should remain unchanged.
+    extra_g2_user = get_user_model().objects.get(username="extra_g2_user")
+
+    client.login(username="extra_g2_user", password="password")
+
+    url_edit_task = reverse("todo:task_detail", kwargs={"task_id": task.id})
+
+    dataTwo =  {
+        "task_list": task.task_list.id,
+        "created_by": extra_g2_user.id,   # this submission is attempting to change created_by
+        "priority": 10,
+        "title": task.title,
+        "note": "the note was changed",
+        "add_edit_task": "Submit",
+    }
+    
+    response = client.post(url_edit_task, dataTwo)
+    assert response.status_code == 302
+
+    task.refresh_from_db()
+    
+    # Proof that the task was saved:
+    assert task.note == "the note was changed"
+
+    # client was unable to modify created_by:
+    assert task.created_by == u2
+    
+
+@pytest.mark.django_db
 def test_no_javascript_in_comments(todo_setup, client):
     user = get_user_model().objects.get(username="u2")
     client.login(username="u2", password="password")
