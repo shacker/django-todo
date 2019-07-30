@@ -78,6 +78,7 @@ class Task(models.Model):
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
+        blank=True,
         related_name="todo_created_by",
         on_delete=models.CASCADE,
     )

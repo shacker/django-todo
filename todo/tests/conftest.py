@@ -29,6 +29,12 @@ def todo_setup(django_user_model):
     Task.objects.create(created_by=u2, title="Task 2", task_list=tlist2, priority=2, completed=True)
     Task.objects.create(created_by=u2, title="Task 3", task_list=tlist2, priority=3)
 
+    # Add a third user for a test that needs two users in the same group.
+    extra_g2_user = django_user_model.objects.create_user(
+        username="extra_g2_user", password="password", email="extra_g2_user@example.com", is_staff=True
+    )
+    extra_g2_user.groups.add(g2)
+
 
 @pytest.fixture()
 # Set up an in-memory mail server to receive test emails
