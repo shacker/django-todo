@@ -53,6 +53,12 @@ class AddEditTaskForm(ModelForm):
         """Keep the existing created_by regardless of anything coming from the submitted form.
         If creating a new task, then created_by will be None, but we set it before saving."""
         return self.instance.created_by
+    
+    def clean_completed(self):
+        """There's not a 'completed' checkbox on the edit form,
+        so Django assumes completed=False when you save. This function
+        disregards the form's `completed` value, so completed tasks stay complete."""
+        return self.instance.completed
 
     class Meta:
         model = Task
