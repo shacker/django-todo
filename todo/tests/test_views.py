@@ -134,6 +134,64 @@ def test_no_javascript_in_task_note(todo_setup, client):
 
 
 @pytest.mark.django_db
+def test_completed_unchanged(todo_setup, client):
+
+    def makeTask(title, client):
+        task_list = TaskList.objects.first()
+        u2 = get_user_model().objects.get(username="u2")
+        
+        data = {
+            "task_list": task_list.id,
+            "created_by": u2.id,
+            "priority": 10,
+            "title": title,
+            "note": "a note",
+            "add_edit_task": "Submit",
+        }
+
+        url_add_task = reverse("todo:list_detail", kwargs={"list_id": task_list.id, "list_slug": task_list.slug})
+
+        response = client.post(url_add_task, data)
+        assert response.status_code == 302
+
+    title = "Some Unique String with unique chars: xpf893sgyqrzx"
+    client.login(username="u2", password="password")
+    makeTask(title, client)
+    # Retrieve new task
+    task = Task.objects.get(title=title)
+    assert task.completed == False
+
+    # Complete the task
+    url_complete_task = reverse("todo:task_toggle_done", kwargs={"task_id": task.id})
+    client.post(url_complete_task)
+
+    task.refresh_from_db()
+    assert task.completed == True
+
+    url_edit_task = reverse("todo:task_detail", kwargs={"task_id": task.id})
+
+    dataTwo =  {
+        "task_list": task.task_list.id,
+        "created_by": task.created_by.id,
+        "priority": task.priority,
+        "title": task.title,
+        "note": "the note was changed",
+        "add_edit_task": "Submit",
+    }
+    
+    response = client.post(url_edit_task, dataTwo)
+    assert response.status_code == 302
+
+    task.refresh_from_db()
+    
+    # Proof that the task was saved:
+    assert task.note == "the note was changed"
+
+    # completed was not changed:
+    assert task.completed == True
+
+
+@pytest.mark.django_db
 def test_created_by_unchanged(todo_setup, client):
     
     task_list = TaskList.objects.first()
