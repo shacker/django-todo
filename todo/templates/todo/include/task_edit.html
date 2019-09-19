@@ -45,6 +45,7 @@
     <input type="hidden" name="priority"
       value="{% if form.priority.value %}{{ form.priority.value }}{% else %}999{% endif %}" id="id_priority">
     <input type="hidden" name="task_list" value="{{ form.task_list.value }}" id="id_task_list">
+    <input type="hidden" name="completed" class="form-check-input" type="checkbox" checked="{%if task.completed%}checked{% endif %}" id="id_completed">
 
     <p>
       <input type="submit" name="add_edit_task" value="Submit" class="btn btn-primary">

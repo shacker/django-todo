@@ -49,6 +49,8 @@ class AddEditTaskForm(ModelForm):
 
     note = forms.CharField(widget=forms.Textarea(), required=False)
 
+    completed = forms.BooleanField(required=False)
+
     def clean_created_by(self):
         """Keep the existing created_by regardless of anything coming from the submitted form.
         If creating a new task, then created_by will be None, but we set it before saving."""

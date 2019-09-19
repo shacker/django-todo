@@ -135,7 +135,7 @@ def test_no_javascript_in_task_note(todo_setup, client):
 
 @pytest.mark.django_db
 def test_created_by_unchanged(todo_setup, client):
-    
+
     task_list = TaskList.objects.first()
     u2 = get_user_model().objects.get(username="u2")
     title = "Some Unique String with unique chars: ab78539e"
@@ -150,7 +150,9 @@ def test_created_by_unchanged(todo_setup, client):
     }
 
     client.login(username="u2", password="password")
-    url_add_task = reverse("todo:list_detail", kwargs={"list_id": task_list.id, "list_slug": task_list.slug})
+    url_add_task = reverse(
+        "todo:list_detail", kwargs={"list_id": task_list.id, "list_slug": task_list.slug}
+    )
 
     response = client.post(url_add_task, data)
     assert response.status_code == 302
@@ -167,26 +169,58 @@ def test_created_by_unchanged(todo_setup, client):
 
     url_edit_task = reverse("todo:task_detail", kwargs={"task_id": task.id})
 
-    dataTwo =  {
+    dataTwo = {
         "task_list": task.task_list.id,
-        "created_by": extra_g2_user.id,   # this submission is attempting to change created_by
+        "created_by": extra_g2_user.id,  # this submission is attempting to change created_by
         "priority": 10,
         "title": task.title,
         "note": "the note was changed",
         "add_edit_task": "Submit",
     }
-    
+
     response = client.post(url_edit_task, dataTwo)
     assert response.status_code == 302
 
     task.refresh_from_db()
-    
+
     # Proof that the task was saved:
     assert task.note == "the note was changed"
 
     # client was unable to modify created_by:
     assert task.created_by == u2
-    
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("test_input, expected", [(True, True), (False, False)])
+def test_completed_unchanged(test_input, expected, todo_setup, client):
+    """Tasks are marked completed/uncompleted by buttons,
+    not via checkbox on the task edit form. Editing a task should
+    not change its completed status. Test with both completed and incomplete Tasks."""
+
+    task = Task.objects.get(title="Task 1", created_by__username="u1")
+    task.completed = test_input
+    task.save()
+    assert task.completed == expected
+
+    url_edit_task = reverse("todo:task_detail", kwargs={"task_id": task.id})
+
+    data = {
+        "task_list": task.task_list.id,
+        "title": "Something",
+        "note": "the note was changed",
+        "add_edit_task": "Submit",
+        "completed": task.completed,
+    }
+
+    client.login(username="u1", password="password")
+    response = client.post(url_edit_task, data)
+    assert response.status_code == 302
+
+    # Prove the task is still marked complete/incomplete
+    # (despite the default default state for completed being False)
+    task.refresh_from_db()
+    assert task.completed == expected
+
 
 @pytest.mark.django_db
 def test_no_javascript_in_comments(todo_setup, client):
