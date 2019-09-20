@@ -28,10 +28,10 @@ def list_lists(request) -> HttpResponse:
 
     # Superusers see all lists
     if request.user.is_superuser:
-        lists = TaskList.objects.all().order_by("group", "name")
+        lists = TaskList.objects.all().order_by("group__name", "name")
     else:
         lists = TaskList.objects.filter(group__in=request.user.groups.all()).order_by(
-            "group", "name"
+            "group__name", "name"
         )
 
     list_count = lists.count()
