@@ -27,12 +27,9 @@ def list_lists(request) -> HttpResponse:
         )
 
     # Superusers see all lists
-    if request.user.is_superuser:
-        lists = TaskList.objects.all().order_by("group__name", "name")
-    else:
-        lists = TaskList.objects.filter(group__in=request.user.groups.all()).order_by(
-            "group__name", "name"
-        )
+    lists = TaskList.objects.all().order_by("group__name", "name")
+    if not request.user.is_superuser:
+        lists = lists.filter(group__in=request.user.groups.all())
 
     list_count = lists.count()
 
