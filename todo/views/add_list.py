@@ -25,7 +25,7 @@ def add_list(request) -> HttpResponse:
         if form.is_valid():
             try:
                 newlist = form.save(commit=False)
-                newlist.slug = slugify(newlist.name)
+                newlist.slug = slugify(newlist.name, allow_unicode=True)
                 newlist.save()
                 messages.success(request, "A new list has been added.")
                 return redirect("todo:lists")

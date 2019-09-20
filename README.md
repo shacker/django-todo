@@ -300,6 +300,8 @@ django-todo uses pytest exclusively for testing. The best way to run the suite i
 
 ## Version History
 
+**2.4.10** It is now possible to use unicode characters (such as Chinese) as the only chars in a list title.
+
 **2.4.9** Fixed: Editing a task should not change its completed/incomplete status
 
 **2.4.8** Fix bug when setting default values for unspecified settings
