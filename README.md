@@ -290,6 +290,32 @@ LOGGING = {
 ```
 
 
+## Custom models
+
+It's possible to use your own models with the `DJANGO_TODO_MODELS` setting:
+
+```python
+DJANGO_TODO_MODELS = {
+    "Task": "my_app.models.MyTask",  # defaults to "todo.models.Task"
+    "TaskList": "my_app.models.MyTaskList",  # defaults to "todo.models.TaskList"
+    "Comment": "my_app.models.MyComment",  # defaults to "todo.models.Comment"
+    "Attachment": "my_app.models.MyAttachment",  # defaults to "todo.models.Attachment"
+}
+```
+
+When you define your own model by deriving from a model in django-todo,
+import from `todo.default_models` and not from `todo.models` otherwise you will get
+an error about having a circular import:
+
+
+```python
+from todo.default_models import Task
+
+class MyTask(Task):
+    pass
+```
+
+
 ## Running Tests
 
 django-todo uses pytest exclusively for testing. The best way to run the suite is to clone django-todo into its own directory, install pytest, then:
