@@ -53,7 +53,7 @@
           <form method="post" action="{% url "todo:delete_task" task.id %}" role="form" class="d-inline">
             {% csrf_token %}
             <div style="display:inline;">
-              <button class="btn btn-danger btn-sm" type="submit" name="submit_delete">
+              <button class="btn btn-danger btn-sm" type="submit" onclick="return confirm('Are you sure to delete task?');" name="submit_delete">
                 Delete
               </button>
             </div>
