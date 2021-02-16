@@ -261,6 +261,15 @@ TODO_MAIL_TRACKERS = {
 }
 ```
 
+Optionally, you can match incoming users with their accounts.
+
+Ex: If a user emails the test_tracker, and also is a registered User in your application, the user will be added to "created_by" for the task.
+
+Settings:
+```python
+TODO_MATCH_USERS = True # Set to True if you would like to match users. If you do not have authentication setup, do not set this to True.
+```
+
 A mail worker can be started with:
 
 ```sh

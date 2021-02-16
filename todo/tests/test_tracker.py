@@ -58,3 +58,46 @@ def test_tracker_task_creation(todo_setup, django_user_model):
     Comment.objects.get(
         task=task, body__contains="test3 content", email_message_id="<c@example.com>"
     )
+
+def test_user_match_tracker(todo_setup, django_user_model, settings):
+    """
+    Ensure that a user is added to new lists when sent from registered email
+    """
+    settings.TODO_MATCH_USERS = True
+
+    u1 = django_user_model.objects.get(username="u1")
+
+    msg = make_message("test1 subject", "test1 content")
+    msg["From"] = u1.email
+    msg["Message-ID"] = "<a@example.com>"
+
+    # test task creation
+    task_count = Task.objects.count()
+    consumer([msg])
+
+    assert task_count + 1 == Task.objects.count(), "task wasn't created"
+    task = Task.objects.filter(title="[TEST] test1 subject").first()
+    assert task is not None, "task was created with the wrong name"
+    assert task.created_by == u1
+
+
+def test_user_no_match_tracker(todo_setup, django_user_model, settings):
+    """
+    Do not match users on incoming mail if TODO_MATCH_USERS is False
+    """
+    settings.TODO_MATCH_USERS = False
+
+    u1 = django_user_model.objects.get(username="u1")
+
+    msg = make_message("test1 subject", "test1 content")
+    msg["From"] = u1.email
+    msg["Message-ID"] = "<a@example.com>"
+
+    # test task creation
+    task_count = Task.objects.count()
+    consumer([msg])
+
+    assert task_count + 1 == Task.objects.count(), "task wasn't created"
+    task = Task.objects.filter(title="[TEST] test1 subject").first()
+    assert task is not None, "task was created with the wrong name"
+    assert task.created_by == None

@@ -4,7 +4,10 @@ import logging
 from email.charset import Charset as EMailCharset
 from django.db import transaction
 from django.db.models import Count
+from django.contrib.auth import get_user_model
+from django.conf import settings
 from html2text import html2text
+from email.utils import parseaddr
 from todo.models import Comment, Task, TaskList
 
 logger = logging.getLogger(__name__)
@@ -124,10 +127,20 @@ def insert_message(task_list, message, priority, task_title_format):
 
     with transaction.atomic():
         if best_task is None:
+            if settings.TODO_MATCH_USERS:
+                # Try to get user if new task list needs to be created.
+                if get_user_model().objects.filter(email=parseaddr(message_from)[1]):
+                    user = get_user_model().objects.get(email=parseaddr(message_from)[1])
+                else:
+                    user = None
+            else:
+                user = None
+
             best_task = Task.objects.create(
                 priority=priority,
                 title=format_task_title(task_title_format, message),
                 task_list=task_list,
+                created_by=user,
             )
         logger.info("using task: %r", best_task)
 
