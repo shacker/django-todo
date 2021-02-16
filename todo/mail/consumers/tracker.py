@@ -65,7 +65,7 @@ def parse_references(task_list, references):
     if answer_thread is None:
         logger.info("no answer thread found in references")
     else:
-        logger.info("found an answer thread: %d", answer_thread)
+        logger.info(f"found an answer thread: {answer_thread}")
     return related_messages, answer_thread
 
 
