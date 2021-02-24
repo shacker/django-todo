@@ -59,7 +59,7 @@ def test_tracker_task_creation(todo_setup, django_user_model):
         task=task, body__contains="test3 content", email_message_id="<c@example.com>"
     )
 
-def test_user_match_tracker(todo_setup, django_user_model, settings):
+def test_tracker_email_match(todo_setup, django_user_model, settings):
     """
     Ensure that a user is added to new lists when sent from registered email
     """
@@ -80,8 +80,21 @@ def test_user_match_tracker(todo_setup, django_user_model, settings):
     assert task is not None, "task was created with the wrong name"
     assert task.created_by == u1
 
+    # Check no match
+    msg = make_message("test2 subject", "test2 content")
+    msg["From"] = "no-match-email@example.com"
+    msg["Message-ID"] = "<a@example.com>"
 
-def test_user_no_match_tracker(todo_setup, django_user_model, settings):
+    # test task creation
+    task_count = Task.objects.count()
+    consumer([msg])
+
+    assert task_count + 1 == Task.objects.count(), "task wasn't created"
+    task = Task.objects.filter(title="[TEST] test2 subject").first()
+    assert task.created_by == None
+
+
+def test_tracker_match_users_false(todo_setup, django_user_model, settings):
     """
     Do not match users on incoming mail if TODO_MATCH_USERS is False
     """

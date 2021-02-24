@@ -127,14 +127,12 @@ def insert_message(task_list, message, priority, task_title_format):
 
     with transaction.atomic():
         if best_task is None:
+            user = None
             if settings.TODO_MATCH_USERS:
-                # Try to get user if new task list needs to be created.
-                if get_user_model().objects.filter(email=parseaddr(message_from)[1]):
+                try:
                     user = get_user_model().objects.get(email=parseaddr(message_from)[1])
-                else:
+                except get_user_model().DoesNotExist:
                     user = None
-            else:
-                user = None
 
             best_task = Task.objects.create(
                 priority=priority,
