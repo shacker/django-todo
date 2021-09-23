@@ -10,6 +10,7 @@ from django.template.loader import render_to_string
 
 from todo.defaults import defaults
 from todo.models import Attachment, Comment, Task
+from todo.defaults import defaults
 
 log = logging.getLogger(__name__)
 
@@ -28,7 +29,8 @@ def staff_check(user):
 
 
 def user_can_read_task(task, user):
-    return task.task_list.group in user.groups.all() or user.is_superuser
+    user_groups = getattr(user, defaults("TODO_USER_GROUP_ATTRIBUTE"), "groups")
+    return task.task_list.group in user_groups .all() or user.is_superuser
 
 
 def todo_get_backend(task):

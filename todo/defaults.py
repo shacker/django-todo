@@ -9,6 +9,7 @@ hash = {
     "TODO_MAXIMUM_ATTACHMENT_SIZE": 5000000,
     "TODO_PUBLIC_SUBMIT_REDIRECT": "/",
     "TODO_STAFF_ONLY": True,
+    "TODO_USER_GROUP_ATTRIBUTE": "groups",
 }
 
 # These intentionally have no defaults (user MUST set a value if their features are used):

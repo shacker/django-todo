@@ -1,7 +1,8 @@
 from django import forms
-from django.contrib.auth.models import Group
 from django.forms import ModelForm
+
 from todo.models import Task, TaskList
+from todo.defaults import defaults
 
 
 class AddTaskListForm(ModelForm):
@@ -11,7 +12,10 @@ class AddTaskListForm(ModelForm):
 
     def __init__(self, user, *args, **kwargs):
         super(AddTaskListForm, self).__init__(*args, **kwargs)
-        self.fields["group"].queryset = Group.objects.filter(user=user)
+        
+        group_field = getattr(user, defaults("TODO_USER_GROUP_ATTRIBUTE"), "groups")
+        
+        self.fields["group"].queryset = group_field.model.objects.filter(**{group_field.query_field_name: user})
         self.fields["group"].widget.attrs = {
             "id": "id_group",
             "class": "custom-select mb-3",
@@ -29,8 +33,11 @@ class AddEditTaskForm(ModelForm):
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        group_field = getattr(user, defaults("TODO_USER_GROUP_ATTRIBUTE"), "groups")
+        
         task_list = kwargs.get("initial").get("task_list")
-        members = task_list.group.user_set.all()
+        members = getattr(task_list.group, group_field.query_field_name).all()
         self.fields["assigned_to"].queryset = members
         self.fields["assigned_to"].label_from_instance = lambda obj: "%s (%s)" % (
             obj.get_full_name(),

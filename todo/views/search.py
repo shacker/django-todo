@@ -5,7 +5,7 @@ from django.shortcuts import render
 
 from todo.models import Task
 from todo.utils import staff_check
-
+from todo.defaults import defaults
 
 @login_required
 @user_passes_test(staff_check)
@@ -37,7 +37,8 @@ def search(request) -> HttpResponse:
 
     # Only include tasks that are in groups of which this user is a member:
     if not request.user.is_superuser:
-        found_tasks = found_tasks.filter(task_list__group__in=request.user.groups.all())
+        user_groups = getattr(request.user, defaults("TODO_USER_GROUP_ATTRIBUTE"), "groups")
+        found_tasks = found_tasks.filter(task_list__group__in=user_groups.all())
 
     context = {"query_string": query_string, "found_tasks": found_tasks}
     return render(request, "todo/search_results.html", context)

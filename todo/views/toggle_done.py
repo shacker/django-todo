@@ -8,7 +8,7 @@ from django.urls import reverse
 from todo.models import Task
 from todo.utils import toggle_task_completed
 from todo.utils import staff_check
-
+from todo.defaults import defaults
 
 @login_required
 @user_passes_test(staff_check)
@@ -26,11 +26,12 @@ def toggle_done(request, task_id: int) -> HttpResponse:
         )
 
         # Permissions
+        user_groups = getattr(request.user, defaults("TODO_USER_GROUP_ATTRIBUTE"), "groups")
         if not (
             (task.created_by == request.user)
             or (request.user.is_superuser)
             or (task.assigned_to == request.user)
-            or (task.task_list.group in request.user.groups.all())
+            or (task.task_list.group in user_groups.all())
         ):
             raise PermissionDenied
 

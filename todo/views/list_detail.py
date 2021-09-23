@@ -9,6 +9,7 @@ from django.utils import timezone
 from todo.forms import AddEditTaskForm
 from todo.models import Task, TaskList
 from todo.utils import send_notify_mail, staff_check
+from todo.defaults import defaults
 
 
 @login_required
@@ -28,7 +29,8 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False) -> 
     else:
         # Show a specific list, ensuring permissions.
         task_list = get_object_or_404(TaskList, id=list_id)
-        if task_list.group not in request.user.groups.all() and not request.user.is_superuser:
+        user_groups = getattr(request.user, defaults("TODO_USER_GROUP_ATTRIBUTE"), "groups")
+        if task_list.group not in user_groups.all() and not request.user.is_superuser:
             raise PermissionDenied
         tasks = Task.objects.filter(task_list=task_list.id)
 

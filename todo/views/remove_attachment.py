@@ -7,6 +7,7 @@ from django.urls import reverse
 
 from todo.models import Attachment
 from todo.utils import remove_attachment_file
+from todo.defaults import defaults
 
 
 @login_required
@@ -21,8 +22,9 @@ def remove_attachment(request, attachment_id: int) -> HttpResponse:
         redir_url = reverse("todo:task_detail", kwargs={"task_id": attachment.task.id})
 
         # Permissions
+        user_groups = getattr(request.user, defaults("TODO_USER_GROUP_ATTRIBUTE"), "groups")
         if not (
-            attachment.task.task_list.group in request.user.groups.all()
+            attachment.task.task_list.group in user_groups.all()
             or request.user.is_superuser
         ):
             raise PermissionDenied

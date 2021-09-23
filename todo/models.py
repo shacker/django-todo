@@ -5,11 +5,13 @@ import os
 import textwrap
 
 from django.conf import settings
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import User
 from django.db import DEFAULT_DB_ALIAS, models
 from django.db.transaction import Atomic, get_connection
 from django.urls import reverse
 from django.utils import timezone
+
+from todo.defaults import defaults
 
 
 def get_attachment_upload_dir(instance, filename):
@@ -53,9 +55,12 @@ class LockedAtomicTransaction(Atomic):
 
 
 class TaskList(models.Model):
+    group_field = getattr(User, defaults("TODO_USER_GROUP_ATTRIBUTE"), "groups")
+    group_model = group_field.field.model 
+    
     name = models.CharField(max_length=60)
     slug = models.SlugField(default="")
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    group = models.ForeignKey(group_model, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name

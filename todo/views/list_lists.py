@@ -4,10 +4,12 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.conf import settings
 
 from todo.forms import SearchForm
 from todo.models import Task, TaskList
 from todo.utils import staff_check
+from todo.defaults import defaults
 
 
 @login_required
@@ -18,9 +20,10 @@ def list_lists(request) -> HttpResponse:
 
     thedate = datetime.datetime.now()
     searchform = SearchForm(auto_id=False)
+    user_groups = getattr(request.user, defaults("TODO_USER_GROUP_ATTRIBUTE"), "groups")
 
     # Make sure user belongs to at least one group.
-    if not request.user.groups.all().exists():
+    if not user_groups.all().exists():
         messages.warning(
             request,
             "You do not yet belong to any groups. Ask your administrator to add you to one.",
@@ -29,7 +32,7 @@ def list_lists(request) -> HttpResponse:
     # Superusers see all lists
     lists = TaskList.objects.all().order_by("group__name", "name")
     if not request.user.is_superuser:
-        lists = lists.filter(group__in=request.user.groups.all())
+        lists = lists.filter(group__in=user_groups.all())
 
     list_count = lists.count()
 
@@ -39,7 +42,7 @@ def list_lists(request) -> HttpResponse:
     else:
         task_count = (
             Task.objects.filter(completed=0)
-            .filter(task_list__group__in=request.user.groups.all())
+            .filter(task_list__group__in=user_groups.all())
             .count()
         )
 

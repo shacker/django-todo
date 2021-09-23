@@ -8,7 +8,7 @@ from django.utils.text import slugify
 
 from todo.forms import AddTaskListForm
 from todo.utils import staff_check
-
+from todo.defaults import defaults
 
 @login_required
 @user_passes_test(staff_check)
@@ -37,9 +37,10 @@ def add_list(request) -> HttpResponse:
                     "Most likely a list with the same name in the same group already exists.",
                 )
     else:
-        if request.user.groups.all().count() == 1:
+        user_groups = getattr(request.user, defaults("TODO_USER_GROUP_ATTRIBUTE"), "groups")
+        if user_groups.all().count() == 1:
             # FIXME: Assuming first of user's groups here; better to prompt for group
-            form = AddTaskListForm(request.user, initial={"group": request.user.groups.all()[0]})
+            form = AddTaskListForm(request.user, initial={"group": user_groups.all()[0]})
         else:
             form = AddTaskListForm(request.user)
 

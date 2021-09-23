@@ -9,6 +9,7 @@ from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 
 from todo.models import Task, TaskList
+from todo.defaults import defaults
 
 
 num_lists = 5
@@ -73,20 +74,22 @@ class Command(BaseCommand):
                     email="{}@example.com".format(username),
                     password="todo",
                 )
+                
+            user_groups = getattr(request.user, defaults("TODO_USER_GROUP_ATTRIBUTE"), "groups")
 
             if username in ["user1", "user2"]:
-                user.groups.add(bw_group)
+                user_groups.add(bw_group)
 
             if username in ["user3", "user4"]:
-                user.groups.add(sd_group)
+                user_groups.add(sd_group)
 
             if username == "staffer":
                 user.is_staff = True
                 user.first_name = fake.first_name()
                 user.last_name = fake.last_name()
                 user.save()
-                user.groups.add(bw_group)
-                user.groups.add(sd_group)
+                user_groups.add(bw_group)
+                user_groups.add(sd_group)
 
         # Create lists with tasks, plus one with fixed name for externally added tasks
         TaskListFactory.create_batch(5, group=bw_group)
