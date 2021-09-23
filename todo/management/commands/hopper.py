@@ -4,12 +4,11 @@ from titlecase import titlecase
 import random
 
 from django.core.management.base import BaseCommand
-from django.contrib.auth.models import Group
 from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 
 from todo.models import Task, TaskList
-from todo.defaults import defaults
+from todo.settings import setting
 
 
 num_lists = 5
@@ -57,17 +56,25 @@ class Command(BaseCommand):
 
         fake = Faker()  # Use to create user's names
 
+        user_model = get_user_model()
+        group_field = getattr(user_model, setting("TODO_USER_GROUP_ATTRIBUTE"), "groups")
+        # Django's ManyToManyRel is a little odd in that its directional sense 
+        # is not guranteeed and must be tested for. One of these models is User, 
+        # the other is the Groups model (the one group_field points to)  
+        candidates = (group_field.rel.model, group_field.rel.related_model)
+        group_model = candidates[0] if candidates[1] == user_model else candidates[1]
+
         # Create users and groups, add different users to different groups. Staff user is in both groups.
-        sd_group, created = Group.objects.get_or_create(name="Scuba Divers")
-        bw_group, created = Group.objects.get_or_create(name="Basket Weavers")
+        sd_group, created = group_model.objects.get_or_create(name="Scuba Divers")
+        bw_group, created = group_model.objects.get_or_create(name="Basket Weavers")
 
         # Put user1 and user2 in one group, user3 and user4 in another
         usernames = ["user1", "user2", "user3", "user4", "staffer"]
         for username in usernames:
-            if get_user_model().objects.filter(username=username).exists():
-                user = get_user_model().objects.get(username=username)
+            if user_model.objects.filter(username=username).exists():
+                user = user_model.objects.get(username=username)
             else:
-                user = get_user_model().objects.create_user(
+                user = user_model.objects.create_user(
                     username=username,
                     first_name=fake.first_name(),
                     last_name=fake.last_name(),
@@ -75,7 +82,7 @@ class Command(BaseCommand):
                     password="todo",
                 )
                 
-            user_groups = getattr(request.user, defaults("TODO_USER_GROUP_ATTRIBUTE"), "groups")
+            user_groups = getattr(user, setting("TODO_USER_GROUP_ATTRIBUTE"), "groups")
 
             if username in ["user1", "user2"]:
                 user_groups.add(bw_group)
@@ -139,7 +146,16 @@ class TaskFactory(factory.django.DjangoModelFactory):
         fake = Faker()  # Use to create user's names
         taskgroup = self.task_list.group
 
-        self.created_by = taskgroup.user_set.all().order_by("?").first()
+        # Django's ManyToManyRel is a little odd in that its directional sense 
+        # is not guranteeed and must be tested for. One of these models is User, 
+        # the other is the Groups model (the one group_field points to). We seek 
+        # the attribute with which we can access the set of users in a group.
+        user_model = get_user_model()
+        group_field = getattr(user_model, setting("TODO_USER_GROUP_ATTRIBUTE"), "groups")
+        candidates = (group_field.rel.related_name, group_field.rel.field.attname)
+        user_attr = candidates[1] if group_field.rel.model == user_model else candidates[0]
+
+        self.created_by = getattr(taskgroup, user_attr, 'user_set').all().order_by("?").first()
 
         if self.completed:
             self.completed_date = fake.date_this_year()
@@ -150,6 +166,6 @@ class TaskFactory(factory.django.DjangoModelFactory):
 
         # 1/3 of generated tasks are assigned to someone in this tasks's group
         if random.randint(1, 3) == 1:
-            self.assigned_to = taskgroup.user_set.all().order_by("?").first()
+            self.assigned_to = getattr(taskgroup, user_attr, 'user_set').all().order_by("?").first()
 
         self.save()

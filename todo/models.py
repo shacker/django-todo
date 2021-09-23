@@ -11,7 +11,7 @@ from django.db.transaction import Atomic, get_connection
 from django.urls import reverse
 from django.utils import timezone
 
-from todo.defaults import defaults
+from todo.settings import setting
 
 
 def get_attachment_upload_dir(instance, filename):
@@ -55,8 +55,17 @@ class LockedAtomicTransaction(Atomic):
 
 
 class TaskList(models.Model):
-    group_field = getattr(User, defaults("TODO_USER_GROUP_ATTRIBUTE"), "groups")
-    group_model = group_field.field.model 
+    # The User Group attribute is configurable and so the FreignKey for group
+    # must point to the appropriate model that this attribute relates to.
+    # To wit, TODO_USER_GROUP_ATTRIBUTE must be set before the initial migration
+    # to ensure any dtabase constraints are correctly applied. Djangos migration
+    # tools are not savvy enough to detect changes applied via TODO_USER_GROUP_ATTRIBUTE.  
+    group_field = getattr(User, setting("TODO_USER_GROUP_ATTRIBUTE"), "groups")
+    # Django's ManyToManyRel is a little odd in that its directional sense 
+    # is not guranteeed and must be tested for. One of these models is User, 
+    # the other is the Groups model (the one group_field points to)  
+    candidates = (group_field.rel.model, group_field.rel.related_model)
+    group_model = candidates[0] if candidates[1] == User else candidates[1]
     
     name = models.CharField(max_length=60)
     slug = models.SlugField(default="")

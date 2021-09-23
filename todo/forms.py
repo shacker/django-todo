@@ -2,7 +2,7 @@ from django import forms
 from django.forms import ModelForm
 
 from todo.models import Task, TaskList
-from todo.defaults import defaults
+from todo.settings import setting
 
 
 class AddTaskListForm(ModelForm):
@@ -13,7 +13,7 @@ class AddTaskListForm(ModelForm):
     def __init__(self, user, *args, **kwargs):
         super(AddTaskListForm, self).__init__(*args, **kwargs)
         
-        group_field = getattr(user, defaults("TODO_USER_GROUP_ATTRIBUTE"), "groups")
+        group_field = getattr(user, setting("TODO_USER_GROUP_ATTRIBUTE"), "groups")
         
         self.fields["group"].queryset = group_field.model.objects.filter(**{group_field.query_field_name: user})
         self.fields["group"].widget.attrs = {
@@ -34,10 +34,16 @@ class AddEditTaskForm(ModelForm):
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        group_field = getattr(user, defaults("TODO_USER_GROUP_ATTRIBUTE"), "groups")
+        # Django's ManyToManyRel is a little odd in that its directional sense 
+        # is not guranteeed and must be tested for. One of these models is User, 
+        # the other is the Groups model (the one group_field points to). We seek 
+        # the attribute with which we can access the set of users in a group.  
+        group_field = getattr(user._meta.model, setting("TODO_USER_GROUP_ATTRIBUTE"), "groups")
+        candidates = (group_field.rel.related_name, group_field.rel.field.attname)
+        user_attr = candidates[1] if group_field.rel.model == user._meta.model else candidates[0]
         
         task_list = kwargs.get("initial").get("task_list")
-        members = getattr(task_list.group, group_field.query_field_name).all()
+        members = getattr(task_list.group, user_attr).all()
         self.fields["assigned_to"].queryset = members
         self.fields["assigned_to"].label_from_instance = lambda obj: "%s (%s)" % (
             obj.get_full_name(),

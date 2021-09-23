@@ -1,6 +1,7 @@
 import pytest
 
 from django.contrib.auth.models import Group
+from django.conf import settings
 
 from todo.models import Task, TaskList
 

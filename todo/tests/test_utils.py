@@ -1,6 +1,6 @@
 from django.core import mail
 
-from todo.defaults import defaults
+from todo.settings import setting
 from todo.models import Comment, Task
 from todo.utils import send_email_to_thread_participants, send_notify_mail
 
@@ -56,24 +56,24 @@ def test_send_email_to_thread_participants(todo_setup, django_user_model, email_
 
 
 def test_defaults(settings):
-    """todo's `defaults` module provides reasonable default values for unspecified settings.
-    If a value is NOT set, it should be pulled from the hash in defaults.py.
+    """todo's `settings` module provides reasonable default values for unspecified settings.
+    If a value is NOT set, it should be pulled from the defaults in settings.py.
     If a value IS set, it should be respected.
-    n.b. TODO_STAFF_ONLY which defaults to True in the `defaults` module."""
+    n.b. TODO_STAFF_ONLY which defaults to True in the `settings` module."""
 
     key = "TODO_STAFF_ONLY"
 
     # Setting is not set, and should default to True (the value in defaults.py)
     assert not hasattr(settings, key)
-    assert defaults(key)
+    assert setting(key)
 
     # Setting is already set to True and should be respected.
     settings.TODO_STAFF_ONLY = True
-    assert defaults(key)
+    assert setting(key)
 
     # Setting is already set to False and should be respected.
     settings.TODO_STAFF_ONLY = False
-    assert not defaults(key)
+    assert not setting(key)
 
 
 # FIXME: Add tests for:

@@ -1,7 +1,7 @@
 # If a documented django-todo option is NOT configured in settings, use these values.
 from django.conf import settings
 
-hash = {
+defaults = {
     "TODO_ALLOW_FILE_ATTACHMENTS": True,
     "TODO_COMMENT_CLASSES": [],
     "TODO_DEFAULT_ASSIGNEE": None,
@@ -12,18 +12,18 @@ hash = {
     "TODO_USER_GROUP_ATTRIBUTE": "groups",
 }
 
-# These intentionally have no defaults (user MUST set a value if their features are used):
+# These intentionally have no setting (user MUST set a value if their features are used):
 # TODO_DEFAULT_LIST_SLUG
 # TODO_MAIL_BACKENDS
 # TODO_MAIL_TRACKERS
 
 
-def defaults(key: str):
+def setting(key: str):
     """Try to get a setting from project settings.
-    If empty or doesn't exist, fall back to a value from defaults hash."""
+    If empty or doesn't exist, fall back to a value from setting hash."""
 
     if hasattr(settings, key):
         val = getattr(settings, key)
     else:
-        val = hash.get(key)
+        val = defaults.get(key)
     return val
