@@ -146,8 +146,8 @@ TODO_ALLOW_FILE_ATTACHMENTS = True
 TODO_ALLOWED_FILE_ATTACHMENTS = [".jpg", ".gif", ".csv", ".pdf", ".zip"]
 TODO_MAXIMUM_ATTACHMENT_SIZE = 5000000  # In bytes
 
-# additionnal classes the comment body should hold
-# adding "text-monospace" makes comment monospace
+# Additional classes the comment body should hold.
+# Adding "text-monospace" makes comment monospace
 TODO_COMMENT_CLASSES = []
 
 # The following two settings are relevant only if you want todo to track a support mailbox -
@@ -301,6 +301,8 @@ django-todo uses pytest exclusively for testing. The best way to run the suite i
 
 ## Version History
 
+**2.4.11** Add SECURITY.md
+
 **2.4.10** It is now possible to use unicode characters (such as Chinese) as the only chars in a list title.
 
 **2.4.9** Fixed: Editing a task should not change its completed/incomplete status
@@ -401,7 +403,7 @@ That was the plan, but unfortunately, `makemigrations` created new tables and dr
 
 ### Datepicker
 
-django-todo no longer references a jQuery datepicker, but defaults to native html5 browser datepicker (not supported by Safari, unforunately). Feel free to implement one of your choosing.
+django-todo no longer references a jQuery datepicker, but defaults to native html5 browser datepicker. Feel free to implement one of your choosing.
 
 ### URLs
 
