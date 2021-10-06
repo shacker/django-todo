@@ -56,10 +56,10 @@ def test_send_email_to_thread_participants(todo_setup, django_user_model, email_
 
 
 def test_defaults(settings):
-    """todo's `settings` module provides reasonable default values for unspecified settings.
-    If a value is NOT set, it should be pulled from the defaults in settings.py.
+    """todo's `defaults` module provides reasonable default values for unspecified settings.
+    If a value is NOT set, it should be pulled from the defaults in defaults.py.
     If a value IS set, it should be respected.
-    n.b. TODO_STAFF_ONLY which defaults to True in the `settings` module."""
+    n.b. TODO_STAFF_ONLY which defaults to True in the `defaults` module."""
 
     key = "TODO_STAFF_ONLY"
 
