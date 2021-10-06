@@ -1,6 +1,6 @@
 from django.core import mail
 
-from todo.settings import setting
+from todo.defaults import setting
 from todo.models import Comment, Task
 from todo.utils import send_email_to_thread_participants, send_notify_mail
 

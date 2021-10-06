@@ -8,8 +8,8 @@ from django.contrib.sites.models import Site
 from django.core import mail
 from django.template.loader import render_to_string
 
+from todo.defaults import setting
 from todo.models import Attachment, Comment, Task
-from todo.settings import setting
 
 log = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ def staff_check(user):
 
 
 def user_can_read_task(task, user):
-    user_groups = getattr(user, setting("TODO_USER_GROUP_ATTRIBUTE"), "groups")
+    user_groups = getattr(user, setting("TODO_USER_GROUP_ATTRIBUTE"))
     return task.task_list.group in user_groups .all() or user.is_superuser
 
 
@@ -172,3 +172,6 @@ def remove_attachment_file(attachment_id: int) -> bool:
     except Attachment.DoesNotExist:
         log.info(f"Attachment {attachment_id} not found.")
         return False
+
+
+

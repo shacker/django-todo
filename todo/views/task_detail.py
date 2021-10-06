@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
-from todo.settings import setting
+from todo.defaults import setting
 from todo.features import HAS_TASK_MERGE
 from todo.forms import AddEditTaskForm
 from todo.models import Attachment, Comment, Task

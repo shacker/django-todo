@@ -9,7 +9,7 @@ from django.conf import settings
 from todo.forms import SearchForm
 from todo.models import Task, TaskList
 from todo.utils import staff_check
-from todo.settings import setting
+from todo.defaults import setting
 
 
 @login_required
@@ -20,7 +20,7 @@ def list_lists(request) -> HttpResponse:
 
     thedate = datetime.datetime.now()
     searchform = SearchForm(auto_id=False)
-    user_groups = getattr(request.user, setting("TODO_USER_GROUP_ATTRIBUTE"), "groups")
+    user_groups = getattr(request.user, setting("TODO_USER_GROUP_ATTRIBUTE"))
 
     # Make sure user belongs to at least one group.
     if not user_groups.all().exists():

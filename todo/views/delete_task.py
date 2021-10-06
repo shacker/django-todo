@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from todo.models import Task
 from todo.utils import staff_check
-from todo.settings import setting
+from todo.defaults import setting
 
 @login_required
 @user_passes_test(staff_check)
@@ -25,7 +25,7 @@ def delete_task(request, task_id: int) -> HttpResponse:
         )
 
         # Permissions
-        user_groups = getattr(request.user, setting("TODO_USER_GROUP_ATTRIBUTE"), "groups")
+        user_groups = getattr(request.user, setting("TODO_USER_GROUP_ATTRIBUTE"))
         if not (
             (task.created_by == request.user)
             or (request.user.is_superuser)

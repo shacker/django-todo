@@ -74,3 +74,10 @@ def test_inserted_row(import_setup):
     assert task.note == "This is note one"
     assert task.priority == 3
     assert task.created_date == datetime.datetime.today().date()
+
+@pytest.mark.django_db
+def test_hopper(import_setup):
+    """Confirm that the management command 'hopper' works as expected."""
+    from django.core.management import call_command
+    result = call_command('hopper')
+    assert(True)

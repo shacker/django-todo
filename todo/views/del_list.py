@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from todo.models import Task, TaskList
 from todo.utils import staff_check
-from todo.settings import setting
+from todo.defaults import setting
 
 @login_required
 @user_passes_test(staff_check)
@@ -17,7 +17,7 @@ def del_list(request, list_id: int, list_slug: str) -> HttpResponse:
 
     # Ensure user has permission to delete list. Get the group this list belongs to,
     # and check whether current user is a member of that group AND a staffer.
-    user_groups = getattr(request.user, setting("TODO_USER_GROUP_ATTRIBUTE"), "groups")
+    user_groups = getattr(request.user, setting("TODO_USER_GROUP_ATTRIBUTE"))
     if task_list.group not in user_groups.all():
         raise PermissionDenied    
     if not request.user.is_staff:

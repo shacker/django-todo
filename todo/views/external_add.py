@@ -8,7 +8,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 
-from todo.settings import setting
+from todo.defaults import setting
 from todo.forms import AddExternalTaskForm
 from todo.models import TaskList
 from todo.utils import staff_check
