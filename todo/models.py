@@ -133,7 +133,8 @@ class Comment(models.Model):
     """
 
     author = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True,
+        related_name="todo_comments"
     )
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     date = models.DateTimeField(default=datetime.datetime.now)
