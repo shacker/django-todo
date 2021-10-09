@@ -14,14 +14,14 @@ defaults = {
     "TODO_GROUP_USER_ATTRIBUTE": "user_set"
 }
 
-# These intentionally have no setting (user MUST set a value if their features are used):
+# These intentionally have no defaults (user MUST set a value if their features are used):
 # TODO_DEFAULT_LIST_SLUG
 # TODO_MAIL_BACKENDS
 # TODO_MAIL_TRACKERS
 
 def setting(key: str):
     """Try to get a setting from project settings.
-    If empty or doesn't exist, fall back to a value from setting hash."""
+    If empty or doesn't exist, fall back to a value from defaults hash."""
 
     val = None
     if hasattr(settings, key):
@@ -46,7 +46,7 @@ def setting(key: str):
     return val
 
 def user_group_attr():
-    """Returns the field in User model that contanis a users Groups.
+    """Returns the field in User model that contains a user's Groups.
        The default scenario returns the auth.User.groups field. 
     """
     return getattr(get_user_model(), setting("TODO_USER_GROUP_ATTRIBUTE"))
