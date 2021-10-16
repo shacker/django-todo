@@ -9,4 +9,8 @@ __email__ = "shacker@birdhouse.org"
 __url__ = "https://github.com/shacker/django-todo"
 __license__ = "BSD License"
 
-from . import check
+try:
+	from . import check
+except ModuleNotFoundError:
+	# this can happen during install time, if django is not installed yet!
+	pass
