@@ -70,4 +70,4 @@ LOGGING = {
     },
 }
 
-TODO_MATCH_USERS = False
+TODO_MAIL_USER_MAPPER = None

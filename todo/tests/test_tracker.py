@@ -63,7 +63,7 @@ def test_tracker_email_match(todo_setup, django_user_model, settings):
     """
     Ensure that a user is added to new lists when sent from registered email
     """
-    settings.TODO_MATCH_USERS = True
+    settings.TODO_MAIL_USER_MAPPER = True
 
     u1 = django_user_model.objects.get(username="u1")
 
@@ -96,9 +96,9 @@ def test_tracker_email_match(todo_setup, django_user_model, settings):
 
 def test_tracker_match_users_false(todo_setup, django_user_model, settings):
     """
-    Do not match users on incoming mail if TODO_MATCH_USERS is False
+    Do not match users on incoming mail if TODO_MAIL_USER_MAPPER is False
     """
-    settings.TODO_MATCH_USERS = False
+    settings.TODO_MAIL_USER_MAPPER = None
 
     u1 = django_user_model.objects.get(username="u1")
 

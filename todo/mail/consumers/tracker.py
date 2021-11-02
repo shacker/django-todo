@@ -127,18 +127,11 @@ def insert_message(task_list, message, priority, task_title_format):
 
     with transaction.atomic():
         if best_task is None:
-            user = None
-            if settings.TODO_MATCH_USERS:
-                try:
-                    user = get_user_model().objects.get(email=parseaddr(message_from)[1])
-                except get_user_model().DoesNotExist:
-                    user = None
-
             best_task = Task.objects.create(
                 priority=priority,
                 title=format_task_title(task_title_format, message),
                 task_list=task_list,
-                created_by=user,
+                created_by=match_user(message_from),
             )
         logger.info("using task: %r", best_task)
 
@@ -146,6 +139,7 @@ def insert_message(task_list, message, priority, task_title_format):
             task=best_task,
             email_message_id=message_id,
             defaults={"email_from": message_from, "body": text},
+            author=match_user(message_from), # TODO: Write test for this
         )
         logger.info("created comment: %r", comment)
 
@@ -160,3 +154,18 @@ def tracker_consumer(
         except Exception:
             # ignore exceptions during insertion, in order to avoid
             logger.exception("got exception while inserting message")
+
+
+def match_user(email):
+    """ This function takes an email and checks for a registered user."""
+
+    if not settings.TODO_MAIL_USER_MAPPER:
+        user = None
+    else:
+        try:
+            # Find the first user that matches the email
+            user = get_user_model().objects.get(email=parseaddr(email)[1])
+        except get_user_model().DoesNotExist:
+            user = None
+
+    return user
