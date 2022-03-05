@@ -69,3 +69,5 @@ LOGGING = {
         "django.request": {"handlers": ["console"], "level": "DEBUG", "propagate": True},
     },
 }
+
+TODO_MAIL_USER_MAPPER = None

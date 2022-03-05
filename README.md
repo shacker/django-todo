@@ -261,6 +261,15 @@ TODO_MAIL_TRACKERS = {
 }
 ```
 
+Optionally, the email addresses of incoming emails can be mapped back to django users. If a user emails the test_tracker, and also is a registered User in your application, the user will show up as having created the task or comment. By default, only the email address will show up.
+
+This isn't enabled by default, as some domains are misconfigured and do not prevent impersonation. If this option is enabled and your setup doesn't properly authenticate emails, malicious incoming emails might mistakenly be attributed to users.
+
+Settings:
+```python
+TODO_MAIL_USER_MAPPER = None # Set to True if you would like to match users. If you do not have authentication setup, do not set this to True.
+```
+
 A mail worker can be started with:
 
 ```sh
