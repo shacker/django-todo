@@ -310,6 +310,8 @@ django-todo uses pytest exclusively for testing. The best way to run the suite i
 
 ## Version History
 
+**2.5.0** Change setup to pyprojec.toml
+
 **2.4.11** Add SECURITY.md
 
 **2.4.10** It is now possible to use unicode characters (such as Chinese) as the only chars in a list title.
