@@ -25,7 +25,7 @@ assignment application for Django, designed to be dropped into an existing site 
 * Django 2.0+
 * Python 3.6+
 * jQuery (full version, not "slim", for drag/drop prioritization)
-* Bootstrap (to work with provided templates, though you can override them)
+* Bootstrap v5 (to work with provided templates, though you can override them)
 * bleach (`pip install bleach`)
 * django-autocomplete-light (optional, required for task merging)
 
@@ -55,7 +55,7 @@ django-todo v2 makes use of features only available in Django 2.0. It will not w
 
 django-todo is a Django app, not a project site. It needs a site to live in. You can either install it into an existing Django project site, or clone the django-todo [demo site (GTD)](https://github.com/shacker/gtd).
 
-If using your own site, be sure you have jQuery and Bootstrap wired up and working.
+If using your own site, be sure you have jQuery and Bootstrap v5 wired up and working.
 
 django-todo views that require it will insert additional CSS/JavaScript into page heads, so your project's base templates must include:
 
