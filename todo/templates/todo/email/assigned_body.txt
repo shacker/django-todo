@@ -1,3 +1,7 @@
+{% load todo_tags %}
+
+{% settings_value "TODO_MAIL_LINK_FORCE_HTTP" as http %}
+
 {{ task.assigned_to.first_name }} -
 
 A new task on the list {{ task.task_list.name }} has been assigned to you by {{ task.created_by.get_full_name }}:
@@ -10,8 +14,12 @@ Note: {{ task.note }}
 {% endautoescape %}
 {% endif %}
 
+{% with protocol=http|yesno:"http,https,https" %}
+
 Task details/comments:
-http://{{ site }}{% url 'todo:task_detail' task.id %}
+{{ protocol }}://{{ site }}{% url 'todo:task_detail' task.id %}
 
 List {{ task.task_list.name }}:
-http://{{ site }}{% url 'todo:list_detail' task.task_list.id task.task_list.slug %}
+{{ protocol }}://{{ site }}{% url 'todo:list_detail' task.task_list.id task.task_list.slug %}
+
+{% endwith %}
