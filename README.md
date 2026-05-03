@@ -150,10 +150,14 @@ TODO_MAXIMUM_ATTACHMENT_SIZE = 5000000  # In bytes
 # Adding "text-monospace" makes comment monospace
 TODO_COMMENT_CLASSES = []
 
-# The following setting is relevant only if you have enabled email generation (see below). If set to `True`, links in generated emails start by the `http` protocol. If set to `False` or unset, those links start by the `https` protocol. This setting is only recommended on development environments, on production environments `https` is a security standard.
+# The following setting is relevant only if you have enabled email generation (see below).
+# If set to `True`, links in generated emails start by the `http` protocol.
+# If set to `False` or unset, those links start by the `https` protocol, falling back to the latter by default.
+# This setting is only recommended on development environments, on production environments `https` is a security standard.
 TODO_MAIL_LINK_FORCE_HTTP = True
 
-# The following setting is relevant if you want emails being generated on task assignment and comments on tasks. Without a proper mail backend email generation is skipped silently.
+# The following setting is relevant if you want emails being generated on task assignment and comments on tasks.
+# Without a proper mail backend email generation is skipped silently.
 TODO_MAIL_BACKENDS
 
 # The following setting is relevant only if you want todo to track a support mailbox -
