@@ -223,7 +223,7 @@ from todo.mail.delivery import smtp_backend, console_backend
 # email notifications configuration
 # each task list can get its own delivery method
 TODO_MAIL_BACKENDS = {
-    # mail-queue is the name of the task list, not the worker name
+    # mail-queue is the slug of the task list, not the worker name
     "mail-queue": smtp_backend(
         host="smtp.example.com",
         port=465,
