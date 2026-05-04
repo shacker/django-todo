@@ -37,9 +37,10 @@ def todo_get_backend(task):
     if mail_backends is None:
         return None
 
-    task_backend = mail_backends[task.task_list.slug]
-    if task_backend is None:
-        return None
+    task_backend = None
+
+    if task.task_list.slug in mail_backends:
+        task_backend = mail_backends[task.task_list.slug]
 
     return task_backend
 
