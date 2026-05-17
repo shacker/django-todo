@@ -1,3 +1,7 @@
+{% load todo_tags %}
+
+{% settings_value "TODO_MAIL_LINK_FORCE_HTTP" as http %}
+
 A new task comment has been added.
 
 Task: {{ task.title }}
@@ -8,9 +12,12 @@ Comment:
 {{ body }}
 {% endautoescape %}
 
+{% with protocol=http|yesno:"http,https,https" %}
+
 Task details/comments:
-https://{{ site }}{% url 'todo:task_detail' task.id %}
+{{ protocol }}://{{ site }}{% url 'todo:task_detail' task.id %}
 
 List {{ task.task_list.name }}:
-https://{{ site }}{% url 'todo:list_detail' task.task_list.id task.task_list.slug %}
+{{ protocol }}://{{ site }}{% url 'todo:list_detail' task.task_list.id task.task_list.slug %}
 
+{% endwith %}
