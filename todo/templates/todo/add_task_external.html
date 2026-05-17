@@ -26,12 +26,12 @@
 
     <form action="" name="add_task" method="post">
         {% csrf_token %}
-        <div class="form-group">
+        <div class="mb-3">
           <label for="id_title" name="title">Subject</label>
           <input type="text" class="form-control" id="id_title" name="title" required placeholder="Our spaceship doesn't go"
             value="{% if form.title.value %}{{ form.title.value }}{% endif %}">
         </div>
-        <div class="form-group">
+        <div class="mb-3">
           <label for="id_note">Description</label>
           <textarea class="form-control" id="id_note" name="note" rows="5"
             aria-describedby="inputNoteHelp">{% if form.note.value %}{{ form.note.value }}{% endif %}</textarea>

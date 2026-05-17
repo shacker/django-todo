@@ -19,17 +19,20 @@
 
 
 {% block content %}
-  <div class="card-deck">
-    <div class="card col-sm-8">
+  <div class="row g-3">
+    <div class="col-sm-8">
+      <div class="card">
       <div class="card-body">
         <h3 class="card-title">{{ task.title }}</h3>
         {% if task.note %}
         <div class="card-text">{{ task.note|safe|urlize|linebreaks }}</div>
         {% endif %}
       </div>
+      </div>
     </div>
 
-    <div class="card col-sm-4 p-0">
+    <div class="col-sm-4">
+      <div class="card">
       <ul class="list-group list-group-flush">
         <li class="list-group-item">
           <button
@@ -87,6 +90,7 @@
           </a>
         </li>
       </ul>
+      </div>
     </div>
   </div>
 
@@ -157,13 +161,8 @@
       <form method="POST" action="" enctype="multipart/form-data" style="width:50%;">
         {% csrf_token %}
         <div class="input-group mb-3">
-          <div class="custom-file">
-            <input type="file" class="custom-file-input" id="attachment_file_input" name="attachment_file_input" />
-            <label class="custom-file-label" for="attachment_file_input">Choose file</label>
-          </div>
-          <div class="input-group-append">
-            <button class="btn btn-primary">Upload</button>
-          </div>
+          <input type="file" class="form-control" id="attachment_file_input" name="attachment_file_input" />
+          <button class="btn btn-primary">Upload</button>
         </div>
       </form>
 
@@ -175,7 +174,7 @@
     <h5>Add comment</h5>
     <form action="" method="post">
       {% csrf_token %}
-      <div class="form-group">
+      <div class="mb-3">
         <textarea class="form-control" name="comment-body" rows="3" required></textarea>
       </div>
       <input class="btn btn-sm btn-primary" type="submit" name="add_comment" value="Add Comment">
@@ -188,13 +187,13 @@
       {% for comment in comment_list %}
       <div class="mb-3 card">
         <div class="card-header">
-          <div class="float-left">
+          <div class="float-start">
             {% if comment.email_message_id %}
-            <span class="badge badge-warning">email</span>
+            <span class="badge text-bg-warning">email</span>
             {% endif %}
             {{ comment.author_text }}
           </div>
-          <span class="float-right d-inline-block text-muted">
+          <span class="float-end d-inline-block text-muted">
             {{ comment.date|date:"F d Y P" }}
           </span>
         </div>
@@ -209,15 +208,5 @@
   </div>
 {% endblock %}
 
-{% block extra_js %}
-  {# Support file attachment uploader #}
-  <script>
-    $('#attachment_file_input').on('change',function(){
-      // Get the file name and remove browser-added "fakepath."
-      // Then replace the "Choose a file" label.
-      var fileName = $(this).val().replace('C:\\fakepath\\', " ");
-      $(this).next('.custom-file-label').html(fileName);
-    })
-  </script>
-{% endblock extra_js %}
+{% block extra_js %}{% endblock extra_js %}
 
