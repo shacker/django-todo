@@ -319,6 +319,8 @@ django-todo uses pytest exclusively for testing. The best way to run the suite i
 
 ## Version History
 
+**2.5.1** Upgrade templates to Bootstrap 5; fix CSV importer crash on non-UTF-8 and BOM-encoded files; remove stale docs/index.md
+
 **2.5.0** Change setup to pyprojec.toml
 
 **2.4.11** Add SECURITY.md
