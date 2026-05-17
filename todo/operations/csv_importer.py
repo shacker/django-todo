@@ -37,7 +37,11 @@ class CSVImporter:
             csv_reader = csv.DictReader(fileobj)
         else:
             # fileobj comes from browser upload (in-memory)
-            csv_reader = csv.DictReader(codecs.iterdecode(fileobj, "utf-8"))
+            try:
+                csv_reader = csv.DictReader(codecs.iterdecode(fileobj, "utf-8-sig"))
+            except UnicodeDecodeError:
+                self.errors.append("Could not decode file as UTF-8. Save your CSV as UTF-8 and try again.")
+                return {"summaries": self.summaries, "upserts": self.upserts, "errors": self.errors}
 
         # DI check: Do we have expected header row?
         header = csv_reader.fieldnames
@@ -57,9 +61,15 @@ class CSVImporter:
             self.errors.append(
                 f"Inbound data does not have expected columns.\nShould be: {expected}"
             )
-            return
+            return {"summaries": self.summaries, "upserts": self.upserts, "errors": self.errors}
 
-        for row in csv_reader:
+        try:
+          rows = list(csv_reader)
+        except UnicodeDecodeError:
+            self.errors.append("Could not decode file as UTF-8. Save your CSV as UTF-8 and try again.")
+            return {"summaries": self.summaries, "upserts": self.upserts, "errors": self.errors}
+
+        for row in rows:
             self.line_count += 1
 
             newrow = self.validate_row(row)
