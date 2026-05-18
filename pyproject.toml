@@ -1,3 +1,40 @@
 [build-system]
-requires = ['setuptools>=40.8.0', 'wheel']
-build-backend = 'setuptools.build_meta:__legacy__'
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "django-todo"
+version = "2.5.2"
+description = "A multi-user, multi-group task management and assignment system for Django."
+readme = "README.md"
+license = { text = "BSD-3-Clause" }
+authors = [{ name = "Scot Hacker", email = "shacker@birdhouse.org" }]
+requires-python = ">=3.9"
+dependencies = [
+    "Django>=4.0",
+    "factory-boy",
+    "titlecase",
+    "bleach",
+    "django-autocomplete-light",
+    "html2text",
+]
+classifiers = [
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 4.0",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
+[project.urls]
+Homepage = "http://django-todo.org"
+
+[tool.setuptools.packages.find]
+where = ["."]
