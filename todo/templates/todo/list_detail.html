@@ -109,6 +109,7 @@
         console.log(this.innerHTML);
         this.innerHTML = (this.innerHTML == 'Add Task' ? 'Cancel' : 'Add Task');
     }
-    document.getElementById('AddTaskButton').onclick=handleClick;
+    const addBtn = document.getElementById('AddTaskButton');
+    if (addBtn) addBtn.onclick=handleClick;
   </script>
 {% endblock extra_js %}

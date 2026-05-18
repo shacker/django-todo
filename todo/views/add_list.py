@@ -28,7 +28,7 @@ def add_list(request) -> HttpResponse:
                 newlist.slug = slugify(newlist.name, allow_unicode=True)
                 newlist.save()
                 messages.success(request, "A new list has been added.")
-                return redirect("todo:lists")
+                return redirect("todo:list_detail", list_id=newlist.id, list_slug=newlist.slug)
 
             except IntegrityError:
                 messages.warning(
