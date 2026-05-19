@@ -82,12 +82,10 @@ class Task(models.Model):
         related_name="todo_created_by",
         on_delete=models.CASCADE,
     )
-    assigned_to = models.ForeignKey(
+    assigned_to = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         blank=True,
-        null=True,
         related_name="todo_assigned_to",
-        on_delete=models.CASCADE,
     )
     note = models.TextField(blank=True, null=True)
     priority = models.PositiveIntegerField(blank=True, null=True)

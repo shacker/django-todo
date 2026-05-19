@@ -13,3 +13,4 @@ settings.json
 .pytest_cache/*
 .mypy_cache
 .venv
+uv.lock

@@ -108,7 +108,8 @@ def send_notify_mail(new_task):
     Unassigned tasks should not try to notify.
     """
 
-    if new_task.assigned_to == new_task.created_by:
+    assignees = new_task.assigned_to.exclude(pk=new_task.created_by.pk)
+    if not assignees.exists():
         return
 
     current_site = Site.objects.get_current()
@@ -117,7 +118,7 @@ def send_notify_mail(new_task):
         "todo/email/assigned_body.txt", {"task": new_task, "site": current_site}
     )
 
-    recip_list = [new_task.assigned_to.email]
+    recip_list = list(assignees.values_list("email", flat=True))
     todo_send_mail(new_task.created_by, new_task, subject, body, recip_list)
 
 
@@ -137,9 +138,10 @@ def send_email_to_thread_participants(task, msg_body, user, subject=None):
     # Get all thread participants
     commenters = Comment.objects.filter(task=task)
     recip_list = set(ca.author.email for ca in commenters if ca.author is not None)
-    for related_user in (task.created_by, task.assigned_to):
-        if related_user is not None:
-            recip_list.add(related_user.email)
+    if task.created_by:
+        recip_list.add(task.created_by.email)
+    for assignee in task.assigned_to.all():
+        recip_list.add(assignee.email)
     recip_list = list(m for m in recip_list if m)
 
     todo_send_mail(user, task, email_subject, email_body, recip_list)

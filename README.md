@@ -319,6 +319,8 @@ django-todo uses pytest exclusively for testing. The best way to run the suite i
 
 ## Version History
 
+**2.5.4** Allow a task to be assigned to multiple people
+
 **2.5.3** Fix Add Task button
 
 **2.5.2** Migrate from setup.cfg to pyproject.toml

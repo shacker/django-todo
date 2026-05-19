@@ -145,8 +145,12 @@ class TaskFactory(factory.django.DjangoModelFactory):
         if random.randint(1, 3) == 1:
             self.due_date = fake.date_this_year()
 
-        # 1/3 of generated tasks are assigned to someone in this tasks's group
+        assign_user = None
         if random.randint(1, 3) == 1:
-            self.assigned_to = taskgroup.user_set.all().order_by("?").first()
+            assign_user = taskgroup.user_set.all().order_by("?").first()
 
         self.save()
+
+        # M2M must be set after save
+        if assign_user:
+            self.assigned_to.add(assign_user)

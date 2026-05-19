@@ -51,7 +51,7 @@
               {{ task.created_by }}
             </td>
             <td>
-              {% if task.assigned_to %}{{ task.assigned_to }}{% else %}Anyone{% endif %}
+              {% if task.assigned_to.all %}{{ task.assigned_to.all|join:", " }}{% else %}Anyone{% endif %}
             </td>
             <td>
               <form method="post" action="{% url "todo:task_toggle_done" task.id %}" role="form">

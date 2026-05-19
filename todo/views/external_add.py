@@ -43,12 +43,13 @@ def external_add(request) -> HttpResponse:
             task = form.save(commit=False)
             task.task_list = TaskList.objects.get(slug=settings.TODO_DEFAULT_LIST_SLUG)
             task.created_by = request.user
-            if defaults("TODO_DEFAULT_ASSIGNEE"):
-                task.assigned_to = get_user_model().objects.get(username=settings.TODO_DEFAULT_ASSIGNEE)
             task.save()
+            if defaults("TODO_DEFAULT_ASSIGNEE"):
+                assignee = get_user_model().objects.get(username=settings.TODO_DEFAULT_ASSIGNEE)
+                task.assigned_to.set([assignee])
 
             # Send email to assignee if we have one
-            if task.assigned_to:
+            if task.assigned_to.exists():
                 email_subject = render_to_string(
                     "todo/email/assigned_subject.txt", {"task": task.title}
                 )
@@ -60,7 +61,7 @@ def external_add(request) -> HttpResponse:
                         email_subject,
                         email_body,
                         task.created_by.email,
-                        [task.assigned_to.email],
+                        list(task.assigned_to.values_list("email", flat=True)),
                         fail_silently=False,
                     )
                 except ConnectionRefusedError:

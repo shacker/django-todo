@@ -90,7 +90,6 @@ class CSVImporter:
                     task_list=newrow.get("Task List"),
                     title=newrow.get("Title"),
                     defaults={
-                        "assigned_to": assignee,
                         "completed": newrow.get("Completed"),
                         "created_date": created_date,
                         "due_date": due_date,
@@ -98,6 +97,10 @@ class CSVImporter:
                         "priority": priority,
                     },
                 )
+                if assignee:
+                    obj.assigned_to.set([assignee])
+                else:
+                    obj.assigned_to.clear()
                 self.upsert_count += 1
                 msg = (
                     f'Upserted task {obj.id}: "{obj.title}"'

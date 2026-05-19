@@ -14,8 +14,7 @@ def test_send_notify_mail_not_me(todo_setup, django_user_model, email_backend_se
     u2 = django_user_model.objects.get(username="u2")
 
     task = Task.objects.filter(created_by=u1).first()
-    task.assigned_to = u2
-    task.save()
+    task.assigned_to.set([u2])
     send_notify_mail(task)
     assert len(mail.outbox) == 1
 
@@ -26,8 +25,7 @@ def test_send_notify_mail_myself(todo_setup, django_user_model, email_backend_se
 
     u1 = django_user_model.objects.get(username="u1")
     task = Task.objects.filter(created_by=u1).first()
-    task.assigned_to = u1
-    task.save()
+    task.assigned_to.set([u1])
     send_notify_mail(task)
     assert len(mail.outbox) == 0
 

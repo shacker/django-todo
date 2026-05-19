@@ -14,9 +14,8 @@ both the `import_csv` management command and the "Import CSV" web interface.
 """
 
 
-@pytest.mark.django_db
 @pytest.fixture
-def import_setup(todo_setup):
+def import_setup(todo_setup, db):
     app_path = Path(__file__).resolve().parent.parent
     filepath = Path(app_path, "tests/data/csv_import_data.csv")
     with filepath.open(mode="r", encoding="utf-8-sig") as fileobj:
@@ -69,7 +68,7 @@ def test_inserted_row(import_setup):
     """Confirm that one inserted row is exactly right."""
     task = Task.objects.get(title="Make dinner", task_list__name="Zip")
     assert task.created_by == get_user_model().objects.get(username="u1")
-    assert task.assigned_to == get_user_model().objects.get(username="u1")
+    assert task.assigned_to.filter(username="u1").exists()
     assert not task.completed
     assert task.note == "This is note one"
     assert task.priority == 3

@@ -64,7 +64,7 @@
         </li>
         <li class="list-group-item">
           <strong>Assigned to:</strong>
-          {% if task.assigned_to %} {{ task.assigned_to.get_full_name }} {% else %} Anyone {% endif %}
+          {% if task.assigned_to.all %}{% for u in task.assigned_to.all %}{{ u.get_full_name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% else %}Anyone{% endif %}
         </li>
         <li class="list-group-item">
           <strong>Reported by:</strong> {{ task.created_by.get_full_name }}

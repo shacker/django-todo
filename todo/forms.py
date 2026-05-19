@@ -38,7 +38,7 @@ class AddEditTaskForm(ModelForm):
         )
         self.fields["assigned_to"].widget.attrs = {
             "id": "id_assigned_to",
-            "class": "custom-select mb-3",
+            "class": "form-select",
             "name": "assigned_to",
         }
         self.fields["task_list"].value = kwargs["initial"]["task_list"].id

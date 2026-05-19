@@ -46,7 +46,7 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False) -> 
         form = AddEditTaskForm(
             request.user,
             request.POST,
-            initial={"assigned_to": request.user.id, "priority": 999, "task_list": task_list},
+            initial={"assigned_to": [request.user.id], "priority": 999, "task_list": task_list},
         )
 
         if form.is_valid():
@@ -55,11 +55,10 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False) -> 
             new_task.note = bleach.clean(form.cleaned_data["note"], strip=True)
             form.save()
 
-            # Send email alert only if Notify checkbox is checked AND assignee is not same as the submitter
+            # Send email alert only if Notify checked AND at least one assignee is not the submitter
             if (
                 "notify" in request.POST
-                and new_task.assigned_to
-                and new_task.assigned_to != request.user
+                and new_task.assigned_to.exclude(pk=request.user.pk).exists()
             ):
                 send_notify_mail(new_task)
 
@@ -70,7 +69,7 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False) -> 
         if list_slug not in ["mine", "recent-add", "recent-complete"]:
             form = AddEditTaskForm(
                 request.user,
-                initial={"assigned_to": request.user.id, "priority": 999, "task_list": task_list},
+                initial={"assigned_to": [request.user.id], "priority": 999, "task_list": task_list},
             )
 
     context = {
