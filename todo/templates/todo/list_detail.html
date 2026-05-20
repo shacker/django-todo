@@ -37,7 +37,7 @@
         {% for task in tasks %}
           <tr id="{{ task.id }}">
             <td>
-                <a href="{% url 'todo:task_detail' task.id %}">{{ task.title|truncatewords:10 }}</a>
+                <a href="{% url 'todo:task_detail' task.id %}">{{ task.title|safe|truncatewords:10 }}</a>
             </td>
             <td>
                 {{ task.created_date|date:"m/d/Y" }}
