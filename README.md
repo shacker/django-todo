@@ -319,6 +319,8 @@ django-todo uses pytest exclusively for testing. The best way to run the suite i
 
 ## Version History
 
+**2.5.5** Fix task merge crash on Django 3.2+ (`Atomic.__init__` missing `durable` arg)
+
 **2.5.4** Allow a task to be assigned to multiple people
 
 **2.5.3** Fix Add Task button
