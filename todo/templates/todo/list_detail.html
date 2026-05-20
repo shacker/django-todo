@@ -20,7 +20,7 @@
     {% if list_slug == "mine" %}
       <h1>Tasks assigned to me (in all groups)</h1>
     {% else %}
-      <h1>{{ view_completed|yesno:"Completed tasks, Tasks" }} in "{{ task_list.name }}"</h1>
+      <h1>{{ view_completed|yesno:"Completed tasks, Tasks" }} in "{{ task_list.name }} ({{ tasks.count }})"</h1>
       <p><small><i>In workgroup "{{ task_list.group }}" - drag rows to set priorities.</i></small></p>
     {% endif %}
 
