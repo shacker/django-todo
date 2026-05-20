@@ -23,7 +23,7 @@
     <div class="col-sm-8">
       <div class="card">
       <div class="card-body">
-        <h3 class="card-title">{{ task.title }}</h3>
+        <h3 class="card-title">{{ task.title|safe }}</h3>
         {% if task.note %}
         <div class="card-text">{{ task.note|safe|urlize|linebreaks }}</div>
         {% endif %}
