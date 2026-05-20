@@ -1,8 +1,20 @@
+import pytest
+
 from django.core import mail
 
 from todo.defaults import defaults
-from todo.models import Comment, Task
+from todo.models import Comment, LockedAtomicTransaction, Task
 from todo.utils import send_email_to_thread_participants, send_notify_mail
+
+
+@pytest.mark.django_db
+def test_locked_atomic_transaction(todo_setup):
+    """Confirm that calls to Atomic Transaction send durable arg, or default works."""
+    task = Task.objects.first()
+    with LockedAtomicTransaction(Task):
+        task.title = "updated"
+        task.save()
+    assert Task.objects.get(pk=task.pk).title == "updated"
 
 
 def test_send_notify_mail_not_me(todo_setup, django_user_model, email_backend_setup):

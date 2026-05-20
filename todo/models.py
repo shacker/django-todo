@@ -29,10 +29,10 @@ class LockedAtomicTransaction(Atomic):
     caution, since it has impacts on performance, for obvious reasons...
     """
 
-    def __init__(self, *models, using=None, savepoint=None):
+    def __init__(self, *models, using=None, savepoint=None, durable=False):
         if using is None:
             using = DEFAULT_DB_ALIAS
-        super().__init__(using, savepoint)
+        super().__init__(using, savepoint, durable)
         self.models = models
 
     def __enter__(self):

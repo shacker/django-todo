@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pipenv run *)",
+      "Bash(which pytest; find /Users/shacker -name \"pytest\" -type f 2>/dev/null | head -5)",
+      "Read(//Users/shacker/**)",
+      "Bash(.venv/bin/pytest todo/tests/test_utils.py::test_locked_atomic_transaction -v)",
+      "Bash(/Users/shacker/dev/home/django-todo/.venv/bin/python -m pytest todo/tests/test_utils.py::test_locked_atomic_transaction -v)"
+    ]
+  }
+}
