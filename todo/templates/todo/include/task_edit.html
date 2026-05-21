@@ -6,13 +6,13 @@
     <div class="mb-3">
       <label for="id_title" name="title">Task</label>
       <input type="text" class="form-control" id="id_title" name="title" required placeholder="Task title"
-        value="{% if form.title.value %}{{ form.title.value }}{% endif %}">
+        value="{% if form.title.value %}{{ form.title.value|safe }}{% endif %}">
     </div>
 
     <div class="mb-3">
       <label for="id_note">Description</label>
       <textarea class="form-control" id="id_note" name="note" rows="5"
-        aria-describedby="inputNoteHelp">{% if form.note.value %}{{ form.note.value }}{% endif %}</textarea>
+        aria-describedby="inputNoteHelp">{% if form.note.value %}{{ form.note.value|safe }}{% endif %}</textarea>
       <small id="inputNoteHelp" class="form-text text-muted">
         Describe the task or bug. Provide steps to reproduce the issue.
       </small>
