@@ -101,15 +101,12 @@
         }
       });
 
-    });
-
-    // When adding a task, change the text of the Add Task button
-    function handleClick()
-    {
-        console.log(this.innerHTML);
-        this.innerHTML = (this.innerHTML == 'Add Task' ? 'Cancel' : 'Add Task');
-    }
-    const addBtn = document.getElementById('AddTaskButton');
-    if (addBtn) addBtn.onclick=handleClick;
+      // When adding a task, change the text of the Add Task button
+      document.getElementById('AddTaskButton').addEventListener("click", (e) => {
+        console.log(e.target.innerHTML);
+        e.target.innerHTML = (e.target.innerHTML == 'Add Task' ? 'Cancel' : 'Add Task');
+       });
+     });
+    
   </script>
 {% endblock extra_js %}
