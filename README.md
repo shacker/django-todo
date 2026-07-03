@@ -84,6 +84,14 @@ Put django-todo/todo somewhere on your Python path, or install via pip:
 
     pip install django-todo
 
+For a bleeding-edge (unreleased) version, install straight from git -- pin to a commit/tag,
+since branch heads drift:
+
+    pip install git+https://github.com/shacker/django-todo.git@<commit-or-tag>
+
+With uv: `uv add git+https://github.com/shacker/django-todo.git@<commit-or-tag>`, or
+`uv add --editable /path/to/local/checkout` for local development.
+
 
 Add to your settings:
 
@@ -366,6 +374,8 @@ django-todo uses [uv](https://docs.astral.sh/uv/) for dependency management (`py
 Commit the updated `uv.lock` along with any `pyproject.toml` change.
 
 ## Version History
+
+**2.6.2** Bump bleach to 6.4.0; document installing bleeding-edge/unreleased versions via git
 
 **2.6.1** Clarify mail notification / push docs.
 
