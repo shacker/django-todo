@@ -317,7 +317,20 @@ django-todo uses pytest exclusively for testing. The best way to run the suite i
 	pip install --editable .
 	pytest -x -v
 
+## Upgrading Dependencies
+
+django-todo uses [uv](https://docs.astral.sh/uv/) for dependency management (`pyproject.toml` +
+`uv.lock`). To upgrade a single dependency to the latest version allowed by `pyproject.toml`:
+
+    uv lock --upgrade-package <package-name>
+    uv sync
+
+Commit the updated `uv.lock` along with any `pyproject.toml` change.
+
 ## Version History
+
+**2.6.0** Upgrade django-autocomplete-light to 5.0.0; require Django>=5.2, Python>=3.11; track
+uv.lock in git; document dependency upgrades in README
 
 **2.5.5** Fix task merge crash on Django 3.2+ (`Atomic.__init__` missing `durable` arg)
 
