@@ -5,7 +5,13 @@
       "Bash(which pytest; find /Users/shacker -name \"pytest\" -type f 2>/dev/null | head -5)",
       "Read(//Users/shacker/**)",
       "Bash(.venv/bin/pytest todo/tests/test_utils.py::test_locked_atomic_transaction -v)",
-      "Bash(/Users/shacker/dev/home/django-todo/.venv/bin/python -m pytest todo/tests/test_utils.py::test_locked_atomic_transaction -v)"
+      "Bash(/Users/shacker/dev/home/django-todo/.venv/bin/python -m pytest todo/tests/test_utils.py::test_locked_atomic_transaction -v)",
+      "Bash(git -C /Users/shacker/dev/home/django-todo log --oneline -- README.md)",
+      "Bash(git -C /Users/shacker/dev/home/django-todo log -p --follow -- README.md)",
+      "Bash(git -C /Users/shacker/dev/home/django-todo log --oneline -S \"mail-queue is the slug\" -- README.md)",
+      "Bash(git -C /Users/shacker/dev/home/django-todo log --oneline -S \"skipped silently\" -- README.md)",
+      "Bash(git -C /Users/shacker/dev/home/django-todo status --short)",
+      "Bash(git -C /Users/shacker/dev/home/django-todo diff .claude/settings.local.json)"
     ]
   }
 }

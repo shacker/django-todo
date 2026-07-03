@@ -72,7 +72,11 @@ If you use some other name for your main content area, you'll need to override a
 
 All views are login-required. Therefore, you must have a working user authentication system.
 
-For email notifications to work, make sure your site/project is [set up to send email](https://docs.djangoproject.com/en/2.0/topics/email/).
+For email notifications to work, make sure your site/project is [set up to send email](https://docs.djangoproject.com/en/2.0/topics/email/) --
+in particular, `DEFAULT_FROM_EMAIL` must be a sender address your mail provider will actually
+relay (the Django default, `webmaster@localhost`, is rejected outright by most providers). No
+django-todo-specific settings are required for this; see `TODO_MAIL_BACKENDS` below only if you
+need per-task-list senders or Mail Tracking.
 
 Make sure you've installed the Django "sites" framework and have specified the default site in settings, e.g. `SITE_ID = 1`
 
@@ -156,8 +160,12 @@ TODO_COMMENT_CLASSES = []
 # This setting is only recommended on development environments, on production environments `https` is a security standard.
 TODO_MAIL_LINK_FORCE_HTTP = True
 
-# The following setting is relevant if you want emails being generated on task assignment and comments on tasks.
-# Without a proper mail backend email generation is skipped silently.
+# Optional. Task-assignment and new-comment notification emails are sent using Django's
+# normal email settings (EMAIL_BACKEND, DEFAULT_FROM_EMAIL, etc -- see Django's email docs)
+# by default, so TODO_MAIL_BACKENDS does not need to be set just to get notifications working.
+# Set it only if some task lists need a *different* backend or From address than the rest of
+# your site (this is required for Mail Tracking, below). See "Mail Tracking" for the format
+# and for how it interacts with your global Django email settings.
 TODO_MAIL_BACKENDS
 
 # The following setting is relevant only if you want todo to track a support mailbox -
@@ -222,6 +230,34 @@ To enable mail tracking, you need to:
  - Define an email backend for incoming emails
  - Start a worker, which will wait for new emails
 
+### How outgoing mail is routed
+
+All django-todo notification emails (task-assigned, new-comment, *and* mail-tracking replies)
+go through the same lookup, keyed by task list **slug** (not the list's display name, and not
+the tracker/worker name used in `TODO_MAIL_TRACKERS`):
+
+1. If `TODO_MAIL_BACKENDS` is set and contains a key matching the task's list slug, that
+   entry's backend and `from_address` are used for the message. This is how you attach a
+   dedicated mailbox to a task list, and is **required** for Mail Tracking so that replies
+   are sent from the same address that received the original email.
+2. Otherwise (the setting is unset, or the task's list slug isn't one of its keys),
+   django-todo falls back entirely to your project's global Django email settings: the
+   connection comes from `EMAIL_BACKEND` and the sender address from `DEFAULT_FROM_EMAIL`.
+   Nothing is skipped -- if this fallback is misconfigured (e.g. no SMTP host), sending will
+   raise the same error it would from any other Django `send_mail()` call.
+
+There's no wildcard/"apply to all lists" key in `TODO_MAIL_BACKENDS` -- if you want every task
+list to share one non-default backend, assign the same backend object to each list's slug:
+
+```python
+shared_backend = smtp_backend(host="smtp.example.com", from_address="tasks@example.com")
+TODO_MAIL_BACKENDS = {"zip": shared_backend, "zap": shared_backend}
+```
+
+For a site-wide default, it's simpler to just configure `EMAIL_BACKEND` /
+`DEFAULT_FROM_EMAIL` in your regular Django settings and skip `TODO_MAIL_BACKENDS` entirely,
+reserving it for the task lists that need to differ (such as a tracked mailbox).
+
 In settings:
 
 ```python
@@ -239,8 +275,10 @@ TODO_MAIL_BACKENDS = {
         use_ssl=True,
         username="test@example.com",
         password="foobar",
-        # used as the From field when sending notifications.
-        # a username might be prepended later on
+        # Required. Used as the From address when sending notifications for this task
+        # list (a display name/username may be prepended). There is no fallback within
+        # a TODO_MAIL_BACKENDS entry -- if you declare a backend for a list, you must
+        # give it a from_address.
         from_address="test@example.com",
         # additionnal headers
         headers={}
@@ -328,6 +366,8 @@ django-todo uses [uv](https://docs.astral.sh/uv/) for dependency management (`py
 Commit the updated `uv.lock` along with any `pyproject.toml` change.
 
 ## Version History
+
+**2.6.1** Clarify mail notification / push docs.
 
 **2.6.0** Upgrade django-autocomplete-light to 5.0.0; require Django>=5.2, Python>=3.11; track
 uv.lock in git; document dependency upgrades in README
