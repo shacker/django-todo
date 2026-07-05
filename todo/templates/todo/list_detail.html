@@ -35,7 +35,7 @@
         </tr>
 
         {% for task in tasks %}
-          <tr id="{{ task.id }}">
+          <tr id="{{ task.id }} {% if task.overdue_status %}class="table-danger"{% endif %}">
             <td>
                 <a href="{% url 'todo:task_detail' task.id %}">{{ task.title|safe|truncatewords:10 }}</a>
             </td>
@@ -43,7 +43,7 @@
                 {{ task.created_date|date:"m/d/Y" }}
             </td>
             <td>
-              <span {% if task.overdue_status %}class="overdue"{% endif %}>
+              <span>
                 {{ task.due_date|date:"m/d/Y" }}
               </span>
             </td>
