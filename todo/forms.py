@@ -29,7 +29,26 @@ class AddEditTaskForm(ModelForm):
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        task_list = kwargs.get("initial").get("task_list")
+        task_list = kwargs.get("initial", {}).get("task_list")
+        available_task_lists = TaskList.objects.all()
+        if not user.is_superuser:
+            available_task_lists = available_task_lists.filter(group__user=user)
+        self.fields["task_list"].queryset = available_task_lists.distinct()
+        self.fields["task_list"].widget.attrs = {
+            "id": "id_task_list",
+            "class": "form-select",
+            "name": "task_list",
+        }
+
+        # A submitted task may be moving to another list. In that case, validate
+        # assignees against the destination list rather than the original one.
+        if self.is_bound:
+            task_list_id = self.data.get(self.add_prefix("task_list"))
+            try:
+                task_list = self.fields["task_list"].queryset.get(pk=task_list_id)
+            except (TaskList.DoesNotExist, TypeError, ValueError):
+                pass
+
         members = task_list.group.user_set.all()
         self.fields["assigned_to"].queryset = members
         self.fields["assigned_to"].label_from_instance = lambda obj: "%s (%s)" % (
