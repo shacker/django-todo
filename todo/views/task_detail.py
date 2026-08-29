@@ -101,7 +101,7 @@ def task_detail(request, task_id: int) -> HttpResponse:
             form.save_m2m()
             messages.success(request, "The task has been edited.")
             return redirect(
-                "todo:list_detail", list_id=task.task_list.id, list_slug=task.task_list.slug
+                "todo:list_detail", list_id=item.task_list.id, list_slug=item.task_list.slug
             )
 
     # Mark complete

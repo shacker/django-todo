@@ -75,6 +75,53 @@ def test_view_task_detail(todo_setup, admin_client):
     assert response.status_code == 200
 
 
+@pytest.mark.django_db
+def test_move_task_to_another_list_in_users_group(todo_setup, client):
+    task = Task.objects.get(title="Task 1", task_list__slug="zip")
+    destination = TaskList.objects.create(group=task.task_list.group, name="Later", slug="later")
+    client.login(username="u1", password="password")
+
+    response = client.post(
+        reverse("todo:task_detail", kwargs={"task_id": task.id}),
+        {
+            "task_list": destination.id,
+            "title": task.title,
+            "note": task.note or "",
+            "priority": task.priority,
+            "add_edit_task": "Submit",
+        },
+    )
+
+    task.refresh_from_db()
+    assert response.status_code == 302
+    assert response.url == reverse(
+        "todo:list_detail", kwargs={"list_id": destination.id, "list_slug": destination.slug}
+    )
+    assert task.task_list == destination
+
+
+@pytest.mark.django_db
+def test_cannot_move_task_to_list_outside_users_groups(todo_setup, client):
+    task = Task.objects.get(title="Task 1", task_list__slug="zip")
+    inaccessible_list = TaskList.objects.get(slug="zap")
+    client.login(username="u1", password="password")
+
+    response = client.post(
+        reverse("todo:task_detail", kwargs={"task_id": task.id}),
+        {
+            "task_list": inaccessible_list.id,
+            "title": task.title,
+            "note": task.note or "",
+            "priority": task.priority,
+            "add_edit_task": "Submit",
+        },
+    )
+
+    task.refresh_from_db()
+    assert response.status_code == 200
+    assert task.task_list.slug == "zip"
+
+
 def test_del_task(todo_setup, admin_user, client):
     task = Task.objects.first()
     url = reverse("todo:delete_task", kwargs={"task_id": task.id})
