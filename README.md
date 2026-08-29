@@ -375,6 +375,8 @@ Commit the updated `uv.lock` along with any `pyproject.toml` change.
 
 ## Version History
 
+**2.7.0** Show overdue status, use browser-native tooltips on hover. Sanitize task title/note in forms; drop |safe from templates (XSS). Allow moving tasks between lists.
+
 **2.6.2** Bump bleach to 6.4.0; document installing bleeding-edge/unreleased versions via git
 
 **2.6.1** Clarify mail notification / push docs.
