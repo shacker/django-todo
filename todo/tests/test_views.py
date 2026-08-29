@@ -133,6 +133,48 @@ def test_no_javascript_in_task_note(todo_setup, client):
     assert task.note == bleach.clean(note, strip=True)
 
 
+def test_no_javascript_in_task_title(todo_setup, client):
+    """Markup in a title submitted to the internal add form must be stripped on save."""
+    task_list = TaskList.objects.first()
+    user = get_user_model().objects.get(username="u2")
+    title = "foo <script>alert('oh noez');</script> bar"
+    data = {
+        "task_list": task_list.id,
+        "created_by": user.id,
+        "priority": 10,
+        "title": title,
+        "note": "Some note",
+        "add_edit_task": "Submit",
+    }
+
+    client.login(username="u2", password="password")
+    url = reverse("todo:list_detail", kwargs={"list_id": task_list.id, "list_slug": task_list.slug})
+
+    response = client.post(url, data)
+    assert response.status_code == 302
+
+    task = Task.objects.get(title=bleach.clean(title, strip=True))
+    assert task.title != title  # Should have been modified by bleach
+    assert "<script>" not in task.title
+
+
+def test_no_javascript_in_external_task(todo_setup, client, settings):
+    """Tickets filed through the external form are sanitized like internal tasks."""
+    default_list = TaskList.objects.first()
+    settings.TODO_DEFAULT_LIST_SLUG = default_list.slug
+    title = "foo <script>alert('oh noez');</script> bar"
+    note = "baz <script>alert('and again');</script> qux"
+    data = {"title": title, "note": note, "priority": 10}
+
+    client.login(username="u2", password="password")
+    response = client.post(reverse("todo:external_add"), data)
+    assert response.status_code == 302
+
+    task = Task.objects.get(title=bleach.clean(title, strip=True))
+    assert "<script>" not in task.title
+    assert "<script>" not in task.note
+
+
 @pytest.mark.django_db
 def test_created_by_unchanged(todo_setup, client):
 

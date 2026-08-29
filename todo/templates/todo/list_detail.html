@@ -42,10 +42,10 @@
                 {% with note_preview=task.note|striptags|truncatewords:30 %}
                   <a href="{% url 'todo:task_detail' task.id %}"
                      title="Due {{ task.due_date|date:'m/d/Y'|default:'not set' }} - {{ note_preview }}"
-                  >{{ task.title|safe|truncatewords:10 }}⁺</a>
+                  >{{ task.title|truncatewords:10 }}⁺</a>
                 {% endwith %}
               {% else %}
-                <a href="{% url 'todo:task_detail' task.id %}">{{ task.title|safe|truncatewords:10 }}</a>
+                <a href="{% url 'todo:task_detail' task.id %}">{{ task.title|truncatewords:10 }}</a>
               {% endif %}
             </td>
             <td>

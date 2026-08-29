@@ -1,3 +1,5 @@
+import bleach
+
 from django import forms
 from django.contrib.auth.models import Group
 from django.forms import ModelForm
@@ -23,7 +25,23 @@ class AddTaskListForm(ModelForm):
         exclude = ["created_date", "slug"]
 
 
-class AddEditTaskForm(ModelForm):
+class SanitizedTaskFieldsMixin:
+    """Strip markup from user-supplied task text on every form that writes a Task.
+
+    Sanitizing here rather than in each view means all task entry points - internal add,
+    internal edit, and external ticket filing - are covered by construction.
+    """
+
+    def clean_title(self) -> str:
+        """Remove any markup from the submitted task title."""
+        return bleach.clean(self.cleaned_data["title"], strip=True)
+
+    def clean_note(self) -> str:
+        """Remove any markup from the submitted task note."""
+        return bleach.clean(self.cleaned_data.get("note") or "", strip=True)
+
+
+class AddEditTaskForm(SanitizedTaskFieldsMixin, ModelForm):
     """The picklist showing the users to which a new task can be assigned
     must find other members of the group this TaskList is attached to."""
 
@@ -61,7 +79,7 @@ class AddEditTaskForm(ModelForm):
         exclude = []
 
 
-class AddExternalTaskForm(ModelForm):
+class AddExternalTaskForm(SanitizedTaskFieldsMixin, ModelForm):
     """Form to allow users who are not part of the GTD system to file a ticket."""
 
     title = forms.CharField(widget=forms.widgets.TextInput(attrs={"size": 35}), label="Summary")

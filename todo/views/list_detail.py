@@ -1,4 +1,3 @@
-import bleach
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
@@ -52,7 +51,6 @@ def list_detail(request, list_id=None, list_slug=None, view_completed=False) -> 
         if form.is_valid():
             new_task = form.save(commit=False)
             new_task.created_by = request.user
-            new_task.note = bleach.clean(form.cleaned_data["note"], strip=True)
             form.save()
 
             # Send email alert only if Notify checked AND at least one assignee is not the submitter

@@ -97,8 +97,6 @@ def task_detail(request, task_id: int) -> HttpResponse:
 
         if form.is_valid():
             item = form.save(commit=False)
-            item.note = bleach.clean(form.cleaned_data["note"], strip=True)
-            item.title = bleach.clean(form.cleaned_data["title"], strip=True)
             item.save()
             form.save_m2m()
             messages.success(request, "The task has been edited.")
