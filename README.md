@@ -57,8 +57,6 @@ django-todo is a Django app, not a project site. It needs a site to live in. You
 
 If using your own site, be sure you have jQuery and Bootstrap v5 wired up and working.
 
-If you like tooltips on task links to be shown, include popper. Refer to the [bs5 description](https://getbootstrap.com/docs/5.0/components/popovers/) on how to do it.
-
 django-todo views that require it will insert additional CSS/JavaScript into page heads, so your project's base templates must include:
 
 ```jinja
