@@ -37,7 +37,14 @@
         {% for task in tasks %}
           <tr id="{{ task.id }} {% if task.overdue_status %}class="table-danger"{% endif %}">
             <td>
+              {% if task.note %}
+                <a href="{% url 'todo:task_detail' task.id %}" data-bs-toggle="tooltip"
+                  data-bs-html="true" title="<b>{{ task.due_date }}</b><hr>
+                  {{ task.note|safe }}">{{ task.title|safe|truncatewords:10 }}⁺
+                </a>
+              {% else %}
                 <a href="{% url 'todo:task_detail' task.id %}">{{ task.title|safe|truncatewords:10 }}</a>
+              {% endif %}
             </td>
             <td>
               {{ task.created_date|date:"m/d/Y" }}
@@ -81,6 +88,11 @@
   <script src="{% static 'todo/js/jquery.tablednd_0_5.js' %}" type="text/javascript"></script>
 
   <script type="text/javascript">
+    
+    //bs5 tooltip init variables
+    var tooltipTriggerList = null;
+    var tooltipList = null;
+    
     function order_tasks(data) {
       // The JQuery plugin tableDnD provides a serialize() function which provides the re-ordered
       // data in a list. We pass that list as an object ("data") to a Django view
@@ -104,6 +116,12 @@
         console.log(e.target.innerHTML);
         e.target.innerHTML = (e.target.innerHTML == 'Add Task' ? 'Cancel' : 'Add Task');
        });
+
+      //init bs5 tooltips
+      tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl =>
+        new bootstrap.Tooltip(tooltipTriggerEl));
+      
      });
     
   </script>
