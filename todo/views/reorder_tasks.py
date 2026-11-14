@@ -22,13 +22,23 @@ def reorder_tasks(request) -> HttpResponse:
         for id in newtasklist:
             try:
                 task = Task.objects.get(pk=id)
-                task.priority = i
-                task.save()
-                i += 1
             except Task.DoesNotExist:
                 # Can occur if task is deleted behind the scenes during re-ordering.
                 # Not easy to remove it from the UI without page refresh, but prevent crash.
-                pass
+                continue
+
+            # Only reorder tasks belonging to a list in one of the user's groups.
+            # Without this check any logged-in user could change the priority of
+            # tasks in other groups' lists by posting arbitrary task ids.
+            if not (
+                request.user.is_superuser
+                or task.task_list.group in request.user.groups.all()
+            ):
+                continue
+
+            task.priority = i
+            task.save()
+            i += 1
 
     # All views must return an httpresponse of some kind ... without this we get
     # error 500s in the log even though things look peachy in the browser.
